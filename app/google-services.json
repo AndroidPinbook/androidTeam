@@ -93,6 +93,50 @@
           "status": 2
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:645040303215:android:e77f50983708f0c0",
+        "android_client_info": {
+          "package_name": "uur.com.pinbook"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "645040303215-81l6mqj0eogs2d8qgnucv74sdhduljfm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "uur.com.pinbook",
+            "certificate_hash": "835135492279180c8c9d6517641665756f89cf21"
+          }
+        },
+        {
+          "client_id": "645040303215-8s1ae5ul0mr2lrmamqvbticua6ffrr7p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdUgcLl-C3yyeaNZE6Oab6UclSA9GBNqw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "645040303215-8s1ae5ul0mr2lrmamqvbticua6ffrr7p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
     }
   ],
   "configuration_version": "1"
