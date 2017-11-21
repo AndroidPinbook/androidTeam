@@ -10,6 +10,6 @@ public class EnterPageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_page);
 
-        String a;
+        String a, b;
     }
 }
