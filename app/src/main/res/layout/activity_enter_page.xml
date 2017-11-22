@@ -8,8 +8,8 @@
 
     <android.support.v4.view.ViewPager
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="100dp"
+        android:layout_height="@dimen/view_pager_height"
+        android:layout_marginTop="@dimen/view_pager_marginTop"
         android:id="@+id/enterViewPager">
     </android.support.v4.view.ViewPager>
 
@@ -17,7 +17,6 @@
         android:id="@+id/layoutDots"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dots_height"
-
         android:layout_marginBottom="@dimen/dots_margin_bottom"
         android:layout_below="@+id/enterViewPager"
         android:gravity="center"
@@ -31,5 +30,39 @@
         android:layout_above="@id/layoutDots"
         android:background="@android:color/white" />
 
+    <LinearLayout
+        android:id="@+id/faceLayout"
+        android:layout_width="@dimen/buttons_width"
+        android:layout_height="@dimen/buttons_height"
+        android:layout_below="@+id/layoutDots"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        android:gravity="center">
+
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/facebookLoginButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp" />
+    </LinearLayout>
+
+    <!--<LinearLayout
+        android:id="@+id/twitterLayout"
+        android:layout_width="@dimen/buttons_width"
+        android:layout_height="@dimen/buttons_height"
+        android:layout_below="@+id/faceLayout"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        android:layout_alignStart="@+id/faceLayout">
+
+        <com.twitter.sdk.android.core.identity.TwitterLoginButton
+            android:id="@+id/twitterLoginButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"/>
+
+    </LinearLayout>-->
 
 </RelativeLayout>

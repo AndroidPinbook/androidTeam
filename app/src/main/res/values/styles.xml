@@ -13,4 +13,10 @@
     <style name="WelcomePageTheme" parent="Theme.AppCompat.NoActionBar" />
 
 
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
 </resources>

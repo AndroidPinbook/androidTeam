@@ -1,13 +1,31 @@
 package uur.com.pinbook.Activities;
 
+import android.content.Intent;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
 
 import uur.com.pinbook.JavaFiles.CustomPagerAdapter;
 import uur.com.pinbook.JavaFiles.EnterPageDataModel;
@@ -19,6 +37,9 @@ public class EnterPageActivity extends AppCompatActivity {
     private TextView[] dots;
 
     CustomPagerAdapter adapter;
+    private CallbackManager mCallbackManager;
+
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,18 +50,55 @@ public class EnterPageActivity extends AppCompatActivity {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
 
+        FacebookSdk.sdkInitialize(getApplicationContext());
+
         setContentView(R.layout.activity_enter_page);
 
-        ViewPager enterViewPager = (ViewPager)findViewById(R.id.enterViewPager);
-        dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
+        try {
 
-        adapter = new CustomPagerAdapter(this, EnterPageDataModel.getDataList());
+            mAuth = FirebaseAuth.getInstance();
 
-        enterViewPager.setAdapter(adapter);
+            ViewPager enterViewPager = (ViewPager) findViewById(R.id.enterViewPager);
+            dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
 
-        addBottomDots(0);
+            // Initialize Facebook Login button
+            mCallbackManager = CallbackManager.Factory.create();
 
-        enterViewPager.addOnPageChangeListener(viewPagerPageChangeListener);
+            LoginButton loginButton = findViewById(R.id.facebookLoginButton);
+
+            loginButton.setReadPermissions("email", "public_profile");
+
+            loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+                @Override
+                public void onSuccess(LoginResult loginResult) {
+
+                    Log.i("Info", "facebook:onSucces:" + loginResult);
+
+                    handleFacebookAccessToken(loginResult.getAccessToken());
+                }
+
+                @Override
+                public void onCancel() {
+                    Log.i("Info", "facebook:onCancel");
+                }
+
+                @Override
+                public void onError(FacebookException error) {
+
+                    Log.i("Info", "facebook:onError:" + error);
+                }
+            });
+
+            adapter = new CustomPagerAdapter(this, EnterPageDataModel.getDataList());
+
+            enterViewPager.setAdapter(adapter);
+
+            addBottomDots(0);
+
+            enterViewPager.addOnPageChangeListener(viewPagerPageChangeListener);
+        }catch (Exception e){
+            Log.i("Info", "On create error:" + e.toString());
+        }
     }
 
 
@@ -85,11 +143,58 @@ public class EnterPageActivity extends AppCompatActivity {
         @Override
         public void onPageScrolled(int arg0, float arg1, int arg2) {
 
+            Log.i("Info", "page scrolled");
         }
 
         @Override
         public void onPageScrollStateChanged(int arg0) {
 
+            Log.i("Info", "page scroll state changed");
         }
     };
+
+    private void handleFacebookAccessToken(AccessToken token) {
+
+        Log.i("Info","handleFacebookAccessToken:" + token);
+
+        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+
+                            Log.i("Info","signInWithCredential:success" );
+
+                            Intent intent = new Intent(getApplicationContext(), LoginPageActivity.class);
+                            startActivity(intent);
+
+                        } else {
+                            // If sign in fails, display a message to the user.
+
+                            Log.i("Info","signInWithCredential:failure:" + task.getException());
+
+                            Toast.makeText(EnterPageActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        try {
+
+            // Pass the activity result to the Twitter login button.
+            //mLoginButton.onActivityResult(requestCode, resultCode, data);
+
+            // Pass the activity result back to the Facebook SDK
+            mCallbackManager.onActivityResult(requestCode, resultCode, data);
+        }catch (Exception e){
+            Log.i("Info", "onActivityResult error:" + e.toString());
+        }
+    }
 }

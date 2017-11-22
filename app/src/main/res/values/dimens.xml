@@ -10,5 +10,11 @@
     <dimen name="slide_title">30dp</dimen>
     <dimen name="slide_desc">16dp</dimen>
     <dimen name="desc_padding">40dp</dimen>
-    <dimen name="welcome_page_text_size">70sp</dimen>
+
+    <dimen name="view_pager_height">200dp</dimen>
+    <dimen name="view_pager_marginTop">80dp</dimen>
+
+    <dimen name="buttons_width">300dp</dimen>
+    <dimen name="buttons_height">40dp</dimen>
+
 </resources>
