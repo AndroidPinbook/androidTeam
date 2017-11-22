@@ -17,4 +17,7 @@
     <dimen name="buttons_width">300dp</dimen>
     <dimen name="buttons_height">40dp</dimen>
 
+    <dimen name="welcome_page_text_size">70sp</dimen>
+    <dimen name="ddd">59dp</dimen>
+
 </resources>
