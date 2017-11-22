@@ -167,7 +167,7 @@ public class EnterPageActivity extends AppCompatActivity {
 
                             Log.i("Info","signInWithCredential:success" );
 
-                            Intent intent = new Intent(getApplicationContext(), LoginPageActivity.class);
+                            Intent intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
                             startActivity(intent);
 
                         } else {
