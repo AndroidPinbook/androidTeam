@@ -20,5 +20,10 @@
 
 
 
+    
+    <dimen name="ddd">59dp</dimen>
+    <dimen name="abc">15dp</dimen>
+    <dimen name="deneme">40dp</dimen>
+    <dimen name="xxxx">20dp</dimen>
 
 </resources>
