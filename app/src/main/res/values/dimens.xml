@@ -22,5 +22,6 @@
 
 
     <dimen name="ddd">59dp</dimen>
+    <dimen name="abc">15dp</dimen>
 
 </resources>
