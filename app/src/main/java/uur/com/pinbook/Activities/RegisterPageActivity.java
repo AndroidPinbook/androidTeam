@@ -1,7 +1,9 @@
-package uur.com.pinbook;
+package uur.com.pinbook.Activities;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import uur.com.pinbook.R;
 
 public class RegisterPageActivity extends AppCompatActivity {
 
