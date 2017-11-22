@@ -18,7 +18,10 @@ android {
         }
     }
     sourceSets {
-        main { java.srcDirs = ['src/main/java', 'src/main/java/2', 'src/main/java/JavaClasses'] }
+        main {
+            java.srcDirs = ['src/main/java', 'src/main/java/2', 'src/main/java/JavaClasses']
+            assets.srcDirs = ['src/main/assets', 'src/main/assets/fonts']
+        }
     }
 }
 
@@ -50,5 +53,8 @@ dependencies {
         transitive = true
     }
 }
+
+
+
 
 apply plugin: 'com.google.gms.google-services'

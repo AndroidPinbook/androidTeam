@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="uur.com.pinbook">
 
+    <uses-permission android:name="androdi.permission.INERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
@@ -13,14 +14,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".EnterPageActivity">
+        <activity android:name=".Activities.WelcomePageActivity" android:theme="@style/WelcomePageTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginPageActivity"></activity>
+        <activity android:name=".Activities.LoginPageActivity" />
+        <activity android:name=".Activities.EnterPageActivity" />
+        <activity android:name=".Activities.ProfilePageActivity"></activity>
     </application>
 
 </manifest>
