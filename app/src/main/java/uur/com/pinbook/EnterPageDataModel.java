@@ -18,6 +18,7 @@ public class EnterPageDataModel {
         setTitle(title);
     }
 
+
     public int getImageID() {
         return imageID;
     }
