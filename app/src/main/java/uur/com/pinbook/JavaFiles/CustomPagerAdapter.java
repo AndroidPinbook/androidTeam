@@ -1,4 +1,4 @@
-package uur.com.pinbook;
+package uur.com.pinbook.JavaFiles;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
+
+import uur.com.pinbook.R;
 
 /**
  * Created by mac on 21.11.2017.
