@@ -1,7 +1,9 @@
-package uur.com.pinbook;
+package uur.com.pinbook.JavaFiles;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import uur.com.pinbook.R;
 
 /**
  * Created by mac on 21.11.2017.
