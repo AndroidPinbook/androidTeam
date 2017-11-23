@@ -38,7 +38,7 @@ public class WelcomePageActivity extends AppCompatActivity {
                 intent.setClass(getApplicationContext(), LoginPageActivity.class);
             }
         } else {
-            intent.setClass(getApplicationContext(), EnterPageActivity.class);
+            intent.setClass(getApplicationContext(), LoginPageActivity.class);
         }
 
         // Pass to the next page.
