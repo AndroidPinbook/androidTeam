@@ -15,6 +15,7 @@ public class WelcomePageActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
     String y;
+    String z;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
