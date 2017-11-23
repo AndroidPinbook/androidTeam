@@ -17,6 +17,7 @@ public class WelcomePageActivity extends AppCompatActivity {
     String x;
     String y;
     String f;
+    String a;
 
 
     @Override
