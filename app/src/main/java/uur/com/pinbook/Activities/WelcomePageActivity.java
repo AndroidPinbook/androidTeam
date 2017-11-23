@@ -14,6 +14,7 @@ import uur.com.pinbook.R;
 public class WelcomePageActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
+    String x;
     String y;
     String z;
 
