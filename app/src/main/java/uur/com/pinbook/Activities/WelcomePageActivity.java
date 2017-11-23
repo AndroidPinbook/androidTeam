@@ -17,6 +17,9 @@ public class WelcomePageActivity extends AppCompatActivity {
     String x;
     String y;
     String z;
+    String f;
+    String a;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
