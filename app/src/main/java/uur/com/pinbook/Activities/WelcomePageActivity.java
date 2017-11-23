@@ -14,7 +14,6 @@ import uur.com.pinbook.R;
 public class WelcomePageActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
-    String b;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
