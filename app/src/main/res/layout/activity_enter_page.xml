@@ -4,7 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="uur.com.pinbook.Activities.EnterPageActivity">
+    tools:context="uur.com.pinbook.Activities.EnterPageActivity"
+    android:background="@color/background">
+
+    <TextView
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/pacifico"
+        android:text="PinBook"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/enter_page_text_size"
+        android:gravity="center"/>
 
     <android.support.v4.view.ViewPager
         android:layout_width="match_parent"
@@ -47,7 +58,7 @@
             android:paddingTop="15dp" />
     </LinearLayout>
 
-    <!--<LinearLayout
+    <LinearLayout
         android:id="@+id/twitterLayout"
         android:layout_width="@dimen/buttons_width"
         android:layout_height="@dimen/buttons_height"
@@ -63,6 +74,29 @@
             android:paddingBottom="15dp"
             android:paddingTop="15dp"/>
 
-    </LinearLayout>-->
+    </LinearLayout>
+
+
+    <Button
+        android:id="@+id/logInButton"
+        android:layout_width="@dimen/buttons_width"
+        android:layout_height="@dimen/buttons_height"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/twitterLayout"
+        android:background="#0489B1"
+        android:layout_marginTop="40dp"
+        android:textColor="@color/cardview_light_background"
+        android:text="Log In" />
+
+    <Button
+        android:id="@+id/registerButton"
+        android:layout_width="@dimen/buttons_width"
+        android:layout_height="@dimen/buttons_height"
+        android:layout_alignStart="@+id/logInButton"
+        android:layout_below="@+id/logInButton"
+        android:background="#0489B1"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/cardview_light_background"
+        android:text="Register" />
 
 </RelativeLayout>
