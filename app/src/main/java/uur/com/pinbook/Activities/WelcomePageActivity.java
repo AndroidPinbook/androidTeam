@@ -32,6 +32,7 @@ public class WelcomePageActivity extends AppCompatActivity {
         if (firebaseAuth.getCurrentUser() != null) {
 
             FirebaseUser user = firebaseAuth.getCurrentUser();
+
             if (user.isEmailVerified()) {
                 intent.setClass(getApplicationContext(), ProfilePageActivity.class);
             } else {
