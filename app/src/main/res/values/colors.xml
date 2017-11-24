@@ -10,6 +10,7 @@
     <!-- dots active colors -->
     <color name="dot_light_screen3">#93c6fd</color>
 
-    <color name="background">#E70F6F</color>
+    <color name="background">#1998A9</color>
+    <color name="button_color">#E88135</color>
 
 </resources>
