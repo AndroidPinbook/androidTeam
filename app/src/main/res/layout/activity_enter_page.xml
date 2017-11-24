@@ -34,12 +34,12 @@
         android:orientation="horizontal">
     </LinearLayout>
 
-    <View
+    <!--<View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:alpha=".5"
         android:layout_above="@id/layoutDots"
-        android:background="@android:color/white" />
+        android:background="@android:color/white" />-->
 
     <LinearLayout
         android:id="@+id/faceLayout"
@@ -51,11 +51,13 @@
         android:gravity="center">
 
         <com.facebook.login.widget.LoginButton
+            xmlns:facebook="http://schemas.android.com/apk/res-auto"
             android:id="@+id/facebookLoginButton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingBottom="15dp"
-            android:paddingTop="15dp" />
+            android:paddingTop="15dp"
+            facebook:com_facebook_login_text="Facebook"/>
     </LinearLayout>
 
     <LinearLayout
@@ -83,10 +85,10 @@
         android:layout_height="@dimen/buttons_height"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/twitterLayout"
-        android:background="#0489B1"
+        android:background="@color/button_color"
         android:layout_marginTop="40dp"
         android:textColor="@color/cardview_light_background"
-        android:text="Log In" />
+        android:text="LOG IN" />
 
     <Button
         android:id="@+id/registerButton"
@@ -94,9 +96,9 @@
         android:layout_height="@dimen/buttons_height"
         android:layout_alignStart="@+id/logInButton"
         android:layout_below="@+id/logInButton"
-        android:background="#0489B1"
+        android:background="@color/button_color"
         android:layout_marginTop="10dp"
         android:textColor="@color/cardview_light_background"
-        android:text="Register" />
+        android:text="REGISTER" />
 
 </RelativeLayout>
