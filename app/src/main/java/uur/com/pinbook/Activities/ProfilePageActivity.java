@@ -22,7 +22,7 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_page);
 
-
+        firebaseAuth = FirebaseAuth.getInstance();
 
         if(firebaseAuth.getCurrentUser() == null){
             finish();
