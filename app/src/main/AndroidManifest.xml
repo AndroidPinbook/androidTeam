@@ -39,6 +39,18 @@
 
         </activity>
 
+        <activity
+            android:name="uur.com.pinbook.Activities.RegisterPageActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
+
+        <activity
+            android:name="uur.com.pinbook.Activities.ProfilePageActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
+
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
