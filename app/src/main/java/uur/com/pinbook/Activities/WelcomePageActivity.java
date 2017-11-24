@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,16 +30,27 @@ public class WelcomePageActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         Intent intent = new Intent();
 
+        firebaseAuth.signOut();
+
+
+
+
         if (firebaseAuth.getCurrentUser() != null) {
 
             FirebaseUser user = firebaseAuth.getCurrentUser();
 
+            Log.i("Info","User check");
+            Log.i("Info","User mail:" + user.getEmail());
+
             if (user.isEmailVerified()) {
+                Log.i("Info","ProfilePageActivity starts");
                 intent.setClass(getApplicationContext(), ProfilePageActivity.class);
             } else {
+                Log.i("Info","LoginPageActivity starts");
                 intent.setClass(getApplicationContext(), LoginPageActivity.class);
             }
         } else {
+            Log.i("Info","EnterPageActivity starts");
             intent.setClass(getApplicationContext(), EnterPageActivity.class);
         }
 
