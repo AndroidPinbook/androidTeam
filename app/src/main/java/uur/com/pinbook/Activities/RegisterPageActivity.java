@@ -352,7 +352,7 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         } else {
             phoneEditText.setText(PhoneNumberUtils.formatNumber(phoneEditText.getText().toString())); //Deprecated method
         }
-        
+
         return valid;
     }
 
