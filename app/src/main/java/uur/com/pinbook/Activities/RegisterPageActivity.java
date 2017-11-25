@@ -352,65 +352,7 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         } else {
             phoneEditText.setText(PhoneNumberUtils.formatNumber(phoneEditText.getText().toString())); //Deprecated method
         }
-
-        /*String numberStr = "8885551234"
-        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-        try {
-            Phonenumber.PhoneNumber numberProto = phoneUtil.parse(numberStr, PhoneNumberUtil.PhoneNumberFormat.E164);
-            //Since you know the country you can format it as follows:
-            System.out.println(phoneUtil.format(numberProto, PhoneNumberUtil.PhoneNumberFormat.NATIONAL));
-        } catch (NumberParseException e) {
-            System.err.println("NumberParseException was thrown: " + e.toString());
-        }*/
-
-
-
-
-        /*String username = usernameEditText.getText().toString();
-
-        if (TextUtils.isEmpty(username)) {
-            usernameEditText.setError("Required.");
-            valid = false;
-        } else {
-            usernameEditText.setError(null);
-        }
-
-        String name = nameEditText.getText().toString();
-
-        if (TextUtils.isEmpty(name)) {
-            nameEditText.setError("Required.");
-            valid = false;
-        } else {
-            nameEditText.setError(null);
-        }
-
-        String surname = surnameEditText.getText().toString();
-
-        if (TextUtils.isEmpty(surname)) {
-            surnameEditText.setError("Required.");
-            valid = false;
-        } else {
-            surnameEditText.setError(null);
-        }
-
-        String phoneText = phoneEditText.getText().toString();
-
-        if (TextUtils.isEmpty(phoneText)) {
-            phoneEditText.setError("Required.");
-            valid = false;
-        } else {
-            phoneEditText.setError(null);
-        }
-
-        String birthdateText = birthdateEditText.getText().toString();
-
-        if (TextUtils.isEmpty(birthdateText)) {
-            birthdateEditText.setError("Required.");
-            valid = false;
-        } else {
-            birthdateEditText.setError(null);
-        }*/
-
+        
         return valid;
     }
 
