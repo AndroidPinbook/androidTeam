@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "uur.com.pinbook"
-        minSdkVersion 24
+        minSdkVersion 23
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -44,6 +44,7 @@ dependencies {
     compile "com.android.support:customtabs:26.1.0"
     compile "com.android.support:cardview-v7:26.1.0"
     compile 'com.firebase:geofire-android:2.1.2'
+    compile 'com.googlecode.libphonenumber:libphonenumber:7.2.2'
 
     // Twitter Android SDK (only required for Twitter Login)
     compile('com.twitter.sdk.android:twitter-core:2.3.0@aar') {
