@@ -24,12 +24,21 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import uur.com.pinbook.R;
 
@@ -42,9 +51,16 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
     RelativeLayout galleryOrPhotoLayout;
     RelativeLayout profilePhotoRelLayout;
 
+    private FirebaseAuth mAuth;
+    private DatabaseReference mDbref;
+    private Uri downloadUrl;
+
     private StorageReference mStorageRef;
 
     ProgressDialog mProgressDialog;
+
+    public String tag_users = "users";
+    String FBuserId;
 
     private static final int  MY_PERMISSION_CAMERA = 1;
     private static final int  MY_PERMISSION_WRITE_EXTERNAL_STORAGE = 2;
@@ -54,6 +70,8 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_photo);
+
+        mAuth = FirebaseAuth.getInstance();
 
         photoImgView = (ImageView) findViewById(R.id.photoImageView);
         galleryImgView = (ImageView) findViewById(R.id.galleryImageView);
@@ -172,7 +190,10 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
                 Log.i("Info","  >>finalFile:" + finalFile);
 
-                StorageReference riversRef = mStorageRef.child("images/prof.jpg");
+                FirebaseUser user = mAuth.getCurrentUser();
+                FBuserId = user.getUid();
+
+                StorageReference riversRef = mStorageRef.child("Users/profilePics").child(FBuserId + ".jpg");
 
                 mProgressDialog.setMessage("Uploading.....");
                 mProgressDialog.show();
@@ -182,7 +203,9 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                 // Get a URL to the uploaded content
-                                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                                downloadUrl = taskSnapshot.getDownloadUrl();
+
+                                saveUserInfo(FBuserId);
 
                                 Log.i("Info", "downloadUrl:" + downloadUrl);
                                 mProgressDialog.dismiss();
@@ -201,6 +224,34 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
                 Log.i("Info", "put file exception:" + e.toString());
             }
         }
+    }
+
+    public void saveUserInfo(String userId){
+
+        Log.i("Info","userId:" + userId);
+
+        mDbref = FirebaseDatabase.getInstance().getReference().child(tag_users);
+
+        mDbref.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                 @Override
+                 public void onDataChange(DataSnapshot dataSnapshot) {
+                     Map<String, Object> postValues = new HashMap<String,Object>();
+
+                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+
+                         postValues.put(snapshot.getKey(),snapshot.getValue());
+                     }
+
+                     Map<String, String> values = new HashMap<>();
+                     values.put("profImageSrc", downloadUrl.toString());
+                     mDbref.child(tag_users).child(FBuserId).updateChildren(postValues);
+                 }
+
+                 @Override
+                 public void onCancelled(DatabaseError databaseError) {
+
+                 }
+        });
     }
 
     public Uri getImageUri(Context inContext, Bitmap inImage) {
