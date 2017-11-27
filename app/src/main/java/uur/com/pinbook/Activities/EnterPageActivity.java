@@ -212,6 +212,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         Log.i("Info","handleFacebookAccessToken:" + token);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -221,8 +222,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
                             Log.i("Info","signInWithCredential:success" );
 
-                            Intent intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
-                            startActivity(intent);
+                            startProfilePage();
 
                         } else {
                             // If sign in fails, display a message to the user.
@@ -236,7 +236,6 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                 });
     }
 
-    // [START auth_with_twitter]
     private void handleTwitterSession(TwitterSession session) {
 
         Log.i("Info","handleTwitterSession:" + session);
@@ -254,8 +253,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
                             Log.i("Info","signInWithCredential:success");
 
-                            Intent intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
-                            startActivity(intent);
+                            startProfilePage();
 
                         } else {
                             // If sign in fails, display a message to the user.
@@ -267,6 +265,8 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                         }
                     }
                 });
+
+
     }
 
     @Override
@@ -308,5 +308,11 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                 Toast.makeText(this, "Error occured!!", Toast.LENGTH_SHORT).show();
                 break;
         }
+    }
+
+    public void startProfilePage(){
+
+        Intent intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
+        startActivity(intent);
     }
 }

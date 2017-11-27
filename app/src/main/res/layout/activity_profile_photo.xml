@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="uur.com.pinbook.Activities.ProfilePhotoActivity"
+    android:background="@color/background">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/galleryOrPhotoLayout">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="150dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:text="    Do you want to add an image?"
+                android:gravity="center"
+                android:textSize="20dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="200dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/photoImageView"
+                    android:src="@drawable/open_photo"
+                    android:paddingLeft="50dp"/>
+
+
+                <ImageView
+                    android:layout_width="200dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/galleryImageView"
+                    android:src="@drawable/open_gallery"
+                    android:paddingRight="50dp"/>
+
+            </LinearLayout>
+
+            <Button
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="20dp"
+                android:id="@+id/skipButton"
+                android:text="SKIP"
+                android:textColor="@color/cardview_light_background"
+                android:background = "@drawable/roundedbutton"
+                android:layout_gravity="center"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/profilePhotoRelLayout"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:id="@+id/profilePhotoLayout"
+            android:layout_centerVertical="true">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                android:id="@+id/profilePhotoImgView"
+                android:background="@drawable/roundedbutton"
+                android:layout_marginTop="40dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"/>
+
+            <Button
+                android:layout_width="@dimen/buttons_width"
+                android:layout_height="@dimen/buttons_height"
+                android:id="@+id/nextButton"
+                android:layout_below="@+id/profilePhotoLayout"
+                android:background="@drawable/roundedbutton"
+                android:text="NEXT"
+                android:layout_marginTop="5dp"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/cardview_light_background"/>
+
+        </LinearLayout>
+
+
+
+
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -23,4 +23,7 @@
     <string name="facebook_app_id">165627764176787</string>
     <string name="fb_login_protocol_scheme">fb165627764176787</string>
 
+    <string name="male_text">male</string>
+    <string name="female_text">female</string>
+
 </resources>

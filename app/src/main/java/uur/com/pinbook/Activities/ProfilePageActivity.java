@@ -7,6 +7,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.facebook.login.widget.LoginButton;
 import com.google.firebase.auth.FirebaseAuth;
 
 import uur.com.pinbook.R;
@@ -16,10 +20,15 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
     private FirebaseAuth firebaseAuth;
     private Button buttonLogout;
 
+    private CallbackManager mCallbackManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        FacebookSdk.sdkInitialize(getApplicationContext());
+
         setContentView(R.layout.activity_profile_page);
 
         firebaseAuth = FirebaseAuth.getInstance();
@@ -40,6 +49,8 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
 
         if(v == buttonLogout){
             firebaseAuth.signOut();
+
+            LoginManager.getInstance().logOut();
             finish();
             startActivity(new Intent(this, EnterPageActivity.class));
         }
