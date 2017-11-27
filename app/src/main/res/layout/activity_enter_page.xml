@@ -34,28 +34,12 @@
         android:orientation="horizontal">
     </LinearLayout>
 
-    <!--<View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:alpha=".5"
-        android:layout_above="@id/layoutDots"
-        android:background="@android:color/white" />-->
-
-    <LinearLayout
-        android:layout_width="@dimen/buttons_width"
-        android:layout_height="60dp"
-        android:layout_below="@+id/layoutDots"
-        android:layout_marginTop="10dp"
-        android:layout_centerInParent="true"
-        android:orientation="horizontal"
-        android:id="@+id/xxx"
-        android:gravity="center">
-
         <LinearLayout
             android:id="@+id/faceLayout"
             android:layout_width="@dimen/buttons_width"
             android:layout_height="@dimen/buttons_height"
             android:layout_centerInParent="true"
+            android:layout_below="@+id/layoutDots"
             android:layout_marginTop="10dp"
             android:gravity="center">
 
@@ -66,9 +50,8 @@
                 android:layout_height="match_parent"
                 android:paddingBottom="15dp"
                 android:paddingTop="15dp"
-                facebook:com_facebook_login_text="Facebook"
-                android:background = "@drawable/rounded_special_login_btn"
-                android:gravity="right"/>
+                facebook:com_facebook_login_text="Log in with Facebook"
+                android:background = "@drawable/rounded_special_login_btn"/>
         </LinearLayout>
 
         <LinearLayout
@@ -77,7 +60,8 @@
             android:layout_height="@dimen/buttons_height"
             android:layout_centerInParent="true"
             android:layout_marginTop="10dp"
-            android:layout_alignStart="@+id/faceLayout">
+            android:layout_alignStart="@+id/faceLayout"
+            android:layout_below="@+id/faceLayout">
 
             <com.twitter.sdk.android.core.identity.TwitterLoginButton
                 android:id="@+id/twitterLoginButton"
@@ -89,55 +73,12 @@
 
         </LinearLayout>
 
-
-    </LinearLayout>
-
-    <!--<LinearLayout
-        android:id="@+id/faceLayout"
-        android:layout_width="@dimen/buttons_width"
-        android:layout_height="@dimen/buttons_height"
-        android:layout_below="@+id/layoutDots"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="10dp"
-        android:gravity="center">
-
-        <com.facebook.login.widget.LoginButton
-            xmlns:facebook="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/facebookLoginButton"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            facebook:com_facebook_login_text="Log in with Facebook"
-            android:background = "@drawable/rounded_special_login_btn"/>
-    </LinearLayout>-->
-
-    <!--<LinearLayout
-        android:id="@+id/twitterLayout"
-        android:layout_width="@dimen/buttons_width"
-        android:layout_height="@dimen/buttons_height"
-        android:layout_below="@+id/faceLayout"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="10dp"
-        android:layout_alignStart="@+id/faceLayout">
-
-        <com.twitter.sdk.android.core.identity.TwitterLoginButton
-            android:id="@+id/twitterLoginButton"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="15dp"
-            android:paddingTop="15dp"
-            android:background = "@drawable/rounded_special_login_btn"/>
-
-    </LinearLayout>-->
-
-
     <Button
         android:id="@+id/logInButton"
         android:layout_width="@dimen/buttons_width"
         android:layout_height="@dimen/buttons_height"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/xxx"
+        android:layout_below="@+id/twitterLayout"
         android:layout_marginTop="40dp"
         android:textColor="@color/cardview_light_background"
         android:text="LOG IN"

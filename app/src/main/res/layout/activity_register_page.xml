@@ -9,195 +9,208 @@
     android:background="@color/background"
     android:id="@+id/registerLayout">
 
-    <TextView
 
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/pacifico"
-        android:text="PinBook"
-        android:id="@+id/pinbookTextView"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/enter_page_text_size"
-        android:gravity="center"/>
+        android:layout_height="match_parent"
+        android:id="@+id/userInfoLayout">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:id="@+id/genderLayout"
-        android:orientation="horizontal"
-        android:layout_below="@+id/pinbookTextView">
+        <TextView
 
-        <ImageView
-            android:layout_width="200dp"
-            android:layout_height="match_parent"
-            android:id="@+id/maleImageView"
-            android:src="@drawable/batman_icon"
-            android:paddingLeft="80dp"/>
-
-
-        <ImageView
-            android:layout_width="200dp"
-            android:layout_height="match_parent"
-            android:id="@+id/femaleImageView"
-            android:src="@drawable/wonder_woman_icon"
-            android:paddingRight="80dp"/>
-    </LinearLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="306dp"
-        android:layout_height="50dp"
-        android:layout_below="@+id/genderLayout"
-        android:id="@+id/emailLayout"
-        android:layout_centerHorizontal="true"
-        app:hintTextAppearance="@style/WhiteTextInputLayout">
-
-        <EditText
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:inputType="textPersonName"
-            android:hint="Email"
-            android:ems="10"
-            android:textColor="#0A0B12"
-            android:id="@+id/emailEditText"/>
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="306dp"
-        android:layout_height="50dp"
-        app:passwordToggleEnabled="true"
-        app:passwordToggleTint="@android:color/white"
-        android:layout_below="@+id/emailLayout"
-        android:id="@+id/passwordLayout"
-        android:layout_centerHorizontal="true"
-        app:hintTextAppearance="@style/WhiteTextInputLayout">
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:inputType="textPassword"
-            android:hint="Password"
-            android:ems="10"
-            android:textColor="#0A0B12"
-            android:id="@+id/passwordEditText"/>
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="306dp"
-        android:layout_height="50dp"
-        android:id="@+id/usernameLayout"
-        android:layout_below="@+id/passwordLayout"
-        android:layout_centerHorizontal="true"
-        app:hintTextAppearance="@style/WhiteTextInputLayout">
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:inputType="textPersonName"
-            android:hint="Username"
-            android:textColor="#0A0B12"
-            android:id="@+id/usernameEditText"/>
-    </android.support.design.widget.TextInputLayout>
-
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="306dp"
-        android:layout_height="50dp"
-        android:id="@+id/nameLayout"
-        android:layout_below="@+id/usernameLayout"
-        android:layout_centerHorizontal="true"
-        app:hintTextAppearance="@style/WhiteTextInputLayout">
-
-        <EditText
-            android:id="@+id/nameEditText"
-            android:layout_width="126dp"
-            android:layout_height="match_parent"
-            android:hint="Name"
-            android:inputType="textPersonName"
-            android:textColor="#0A0B12" />
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="180dp"
-        android:layout_height="50dp"
-        android:id="@+id/surnameLayout"
-        android:layout_below="@+id/usernameLayout"
-        android:layout_alignEnd="@id/usernameLayout"
-        android:layout_centerHorizontal="true"
-        app:hintTextAppearance="@style/WhiteTextInputLayout">
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:inputType="textPersonName"
-            android:hint="Surname"
-            android:textColor="#0A0B12"
-            android:id="@+id/surnameEditText"/>
-    </android.support.design.widget.TextInputLayout>
-
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="306dp"
-        android:layout_height="50dp"
-        android:id="@+id/phoneLayout"
-        android:layout_below="@+id/surnameLayout"
-        android:layout_centerHorizontal="true"
-        app:hintTextAppearance="@style/WhiteTextInputLayout">
-
-        <EditText
-            android:id="@+id/phoneEditText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:digits="0123456789+"
-            android:hint="Phone"
-            android:inputType="phone"
-            android:textColor="#0A0B12"/>
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="306dp"
-        android:layout_height="50dp"
-        android:id="@+id/birthdateLayout"
-        android:layout_below="@+id/phoneLayout"
-        android:layout_centerHorizontal="true"
-        app:hintTextAppearance="@style/WhiteTextInputLayout">
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:inputType="date"
-            android:hint="Birth Date"
-            android:textColor="#0A0B12"
-            android:id="@+id/birthdateEditText"
-            android:clickable="true"
-            android:focusableInTouchMode="false"
-            />
-    </android.support.design.widget.TextInputLayout>
-
-    <LinearLayout
-        android:layout_width="306dp"
-        android:layout_height="50dp"
-        android:orientation="horizontal"
-        android:layout_below="@+id/birthdateLayout"
-        android:layout_marginTop="30dp"
-        android:layout_centerHorizontal="true">
-
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pacifico"
+            android:text="PinBook"
+            android:id="@+id/pinbookTextView"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/enter_page_text_size"
+            android:gravity="center"/>
 
         <LinearLayout
-            android:layout_width="153dp"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:id="@+id/genderLayout"
             android:orientation="horizontal"
-            android:layout_gravity="center_vertical">
+            android:layout_below="@+id/pinbookTextView">
 
-            <Button
-                android:id="@+id/registerButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="REGISTER"
-                android:textColor="@color/cardview_light_background"
-                android:background = "@drawable/roundedbutton"/>
+            <ImageView
+                android:layout_width="200dp"
+                android:layout_height="match_parent"
+                android:id="@+id/maleImageView"
+                android:src="@drawable/batman_icon"
+                android:paddingLeft="80dp"/>
 
+
+            <ImageView
+                android:layout_width="200dp"
+                android:layout_height="match_parent"
+                android:id="@+id/femaleImageView"
+                android:src="@drawable/wonder_woman_icon"
+                android:paddingRight="80dp"/>
         </LinearLayout>
-    </LinearLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="306dp"
+            android:layout_height="50dp"
+            android:layout_below="@+id/genderLayout"
+            android:id="@+id/emailLayout"
+            android:layout_centerHorizontal="true"
+            app:hintTextAppearance="@style/WhiteTextInputLayout">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:inputType="textPersonName"
+                android:hint="Email"
+                android:ems="10"
+                android:textColor="#0A0B12"
+                android:id="@+id/emailEditText"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="306dp"
+            android:layout_height="50dp"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@android:color/white"
+            android:layout_below="@+id/emailLayout"
+            android:id="@+id/passwordLayout"
+            android:layout_centerHorizontal="true"
+            app:hintTextAppearance="@style/WhiteTextInputLayout">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:inputType="textPassword"
+                android:hint="Password"
+                android:ems="10"
+                android:textColor="#0A0B12"
+                android:id="@+id/passwordEditText"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="306dp"
+            android:layout_height="50dp"
+            android:id="@+id/usernameLayout"
+            android:layout_below="@+id/passwordLayout"
+            android:layout_centerHorizontal="true"
+            app:hintTextAppearance="@style/WhiteTextInputLayout">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:inputType="textPersonName"
+                android:hint="Username"
+                android:textColor="#0A0B12"
+                android:id="@+id/usernameEditText"/>
+        </android.support.design.widget.TextInputLayout>
+
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="306dp"
+            android:layout_height="50dp"
+            android:id="@+id/nameLayout"
+            android:layout_below="@+id/usernameLayout"
+            android:layout_centerHorizontal="true"
+            app:hintTextAppearance="@style/WhiteTextInputLayout">
+
+            <EditText
+                android:id="@+id/nameEditText"
+                android:layout_width="126dp"
+                android:layout_height="match_parent"
+                android:hint="Name"
+                android:inputType="textPersonName"
+                android:textColor="#0A0B12" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="180dp"
+            android:layout_height="50dp"
+            android:id="@+id/surnameLayout"
+            android:layout_below="@+id/usernameLayout"
+            android:layout_alignEnd="@id/usernameLayout"
+            android:layout_centerHorizontal="true"
+            app:hintTextAppearance="@style/WhiteTextInputLayout">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:inputType="textPersonName"
+                android:hint="Surname"
+                android:textColor="#0A0B12"
+                android:id="@+id/surnameEditText"/>
+        </android.support.design.widget.TextInputLayout>
+
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="306dp"
+            android:layout_height="50dp"
+            android:id="@+id/phoneLayout"
+            android:layout_below="@+id/surnameLayout"
+            android:layout_centerHorizontal="true"
+            app:hintTextAppearance="@style/WhiteTextInputLayout">
+
+            <EditText
+                android:id="@+id/phoneEditText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:digits="0123456789+"
+                android:hint="Phone"
+                android:inputType="phone"
+                android:textColor="#0A0B12"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="306dp"
+            android:layout_height="50dp"
+            android:id="@+id/birthdateLayout"
+            android:layout_below="@+id/phoneLayout"
+            android:layout_centerHorizontal="true"
+            app:hintTextAppearance="@style/WhiteTextInputLayout">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:inputType="date"
+                android:hint="Birth Date"
+                android:textColor="#0A0B12"
+                android:id="@+id/birthdateEditText"
+                android:clickable="true"
+                android:focusableInTouchMode="false"
+                />
+        </android.support.design.widget.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="306dp"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:layout_below="@+id/birthdateLayout"
+            android:layout_marginTop="30dp"
+            android:layout_centerHorizontal="true">
+
+
+            <LinearLayout
+                android:layout_width="153dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center_vertical">
+
+                <Button
+                    android:id="@+id/registerButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="REGISTER"
+                    android:textColor="@color/cardview_light_background"
+                    android:background = "@drawable/roundedbutton"/>
+
+            </LinearLayout>
+        </LinearLayout>
+
+
+    </RelativeLayout>
 
 </RelativeLayout>
+
+
+
+
