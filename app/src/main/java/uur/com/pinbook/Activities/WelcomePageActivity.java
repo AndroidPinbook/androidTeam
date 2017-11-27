@@ -28,34 +28,43 @@ public class WelcomePageActivity extends AppCompatActivity {
 
         // User authorization and verification controls.
         firebaseAuth = FirebaseAuth.getInstance();
-        Intent intent = new Intent();
-
-        firebaseAuth.signOut();
-
-
-
 
         if (firebaseAuth.getCurrentUser() != null) {
 
             FirebaseUser user = firebaseAuth.getCurrentUser();
+            user.reload();
+
+            boolean a = user.isEmailVerified();
+            boolean b = user.isEmailVerified();
+            user.reload();
+            boolean c = user.isEmailVerified();
+            user.reload();
+            boolean d = user.isEmailVerified();
+
 
             Log.i("Info","User check");
             Log.i("Info","User mail:" + user.getEmail());
+            //if(a) Log.i("User verified", "yes");
+            //else Log.i("User verified", "no");
 
             if (user.isEmailVerified()) {
                 Log.i("Info","ProfilePageActivity starts");
-                intent.setClass(getApplicationContext(), ProfilePageActivity.class);
+                finish();
+                startActivity(new Intent(getApplicationContext(), ProfilePageActivity.class));
             } else {
                 Log.i("Info","LoginPageActivity starts");
-                intent.setClass(getApplicationContext(), LoginPageActivity.class);
+                finish();
+                startActivity(new Intent(getApplicationContext(), LoginPageActivity.class));
+
             }
         } else {
             Log.i("Info","EnterPageActivity starts");
-            intent.setClass(getApplicationContext(), EnterPageActivity.class);
+            finish();
+            startActivity(new Intent(getApplicationContext(), EnterPageActivity.class));
         }
 
         // Pass to the next page.
-        passToNextActivity(intent);
+        //passToNextActivity(intent);
 
     }
 

@@ -65,7 +65,22 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.EmailVerifyPageActivity"></activity>
+        <activity
+            android:name=".Activities.EmailVerifyPageActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+
+            <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+
+            <data
+                android:host="firebaseapp.com"
+                android:scheme="https" />
+        </intent-filter>
+
+        </activity>
     </application>
 
 </manifest>

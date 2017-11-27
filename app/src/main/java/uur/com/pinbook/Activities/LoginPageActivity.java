@@ -99,6 +99,7 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         //if validations ok
         progressDialog.setMessage("Registering User..");
         progressDialog.show();
+        Intent intent = new Intent();
 
         firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -118,14 +119,24 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
                             if(user.isEmailVerified()){
                                 Log.i("verified :", "yes");
                                 finish();
+//                                Intent intent = new Intent(getBaseContext(), ProfilePageActivity.class);
+//                                intent.putExtra("user_email", user.getEmail().toString());
+//                                startActivity(intent);
+
                                 startActivity(new Intent(getApplicationContext(), ProfilePageActivity.class));
+
+
                             }else{
                                 Log.i("verified :", "no!");
                                 displayResult();
+                                finish();
+//                                Intent intent = new Intent(getBaseContext(), EmailVerifyPageActivity.class);
+//                                intent.putExtra("user_email", user.getEmail().toString());
+//                                startActivity(intent);
+
+                                startActivity(new Intent(getApplicationContext(), EmailVerifyPageActivity.class));
                             }
-
                             Log.i("sonuç :", "cikis..");
-
                         }else{
                             //
                             Log.i("info:", "sign in fail..");
