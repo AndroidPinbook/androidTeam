@@ -1,16 +1,15 @@
 package uur.com.pinbook.Activities;
 
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.Animator;
-import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
@@ -46,15 +45,13 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import android.Manifest;
 import uur.com.pinbook.R;
 
 public class RegisterPageActivity extends AppCompatActivity implements View.OnClickListener, FirebaseAuth.AuthStateListener{
 
     //Set the radius of the Blur. Supported range 0 < radius <= 25
     private static final float BLUR_RADIUS = 10f;
-
-    private String emailText;
-    private String passwordText;
 
     private Button registerButton;
 
@@ -63,7 +60,6 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
     private EditText surnameEditText;
     private EditText phoneEditText;
     private EditText birthdateEditText;
-    private TextView genderTextView;
     private EditText passwordEditText;
     private EditText emailEditText;
 
@@ -87,12 +83,14 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
 
     public Calendar myCalendar;
 
+    RelativeLayout backGrounRelLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_page);
 
-        RelativeLayout backGrounRelLayout = (RelativeLayout) findViewById(R.id.registerLayout);
+        backGrounRelLayout = (RelativeLayout) findViewById(R.id.registerLayout);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -112,6 +110,7 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         findViewById(R.id.birthdateEditText).setOnClickListener(this);
         findViewById(R.id.maleImageView).setOnClickListener(this);
         findViewById(R.id.femaleImageView).setOnClickListener(this);
+
 
         backGrounRelLayout.setOnClickListener(this);
 
@@ -203,7 +202,6 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
 
         Log.i("Info","createAccount method=====");
 
-        // [START create_user_with_email]
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -219,6 +217,8 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
 
                             saveUserInfo(user);
 
+                            startProfilePhotoPage();
+
                             onCreateOk = true;
 
                         } else {
@@ -230,6 +230,12 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                         }
                     }
                 });
+    }
+
+    public void startProfilePhotoPage(){
+
+        Intent intent = new Intent(getApplicationContext(), ProfilePhotoActivity.class);
+        startActivity(intent);
     }
 
     public void saveUserInfo(FirebaseUser currentUser){
@@ -274,6 +280,8 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         });
     }
 
+
+
     @Override
     public void onClick(View v) {
 
@@ -314,6 +322,8 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                 break;
         }
     }
+
+
 
     public void hideKeyBoard(){
 
@@ -423,6 +433,27 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         }
 
         genderSelected = true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if(requestCode == 1){
+
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+
+                if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED){
+
+                    try {
+                        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+                        startActivity(intent);
+                    }catch (Exception e){
+                        Log.i("Info","Camera open err:" + e.toString());
+                    }
+                }
+            }
+        }
     }
 
     @Override
