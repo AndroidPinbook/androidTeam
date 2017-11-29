@@ -294,11 +294,13 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
                 break;
 
             case R.id.skipButton:
-                startProfileActivity();
+                //startProfileActivity();
+                startEmailVerifyPage();
                 break;
 
             case R.id.nextButton:
-                startProfileActivity();
+                //startProfileActivity();
+                startEmailVerifyPage();
                 break;
 
             default:
@@ -310,6 +312,12 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
     public void startProfileActivity(){
 
         Intent intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
+        startActivity(intent);
+    }
+
+    public void startEmailVerifyPage(){
+
+        Intent intent = new Intent(getApplicationContext(), EmailVerifyPageActivity.class);
         startActivity(intent);
     }
 }

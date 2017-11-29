@@ -41,7 +41,6 @@ public class WelcomePageActivity extends AppCompatActivity {
             user.reload();
             boolean d = user.isEmailVerified();
 
-
             Log.i("Info","User check");
             Log.i("Info","User mail:" + user.getEmail());
             //if(a) Log.i("User verified", "yes");
@@ -49,35 +48,31 @@ public class WelcomePageActivity extends AppCompatActivity {
 
             if (user.isEmailVerified()) {
                 Log.i("Info","ProfilePageActivity starts");
+                delay();
                 finish();
-                startActivity(new Intent(getApplicationContext(), ProfilePageActivity.class));
+                startActivity(new Intent(WelcomePageActivity.this, ProfilePageActivity.class));
             } else {
                 Log.i("Info","LoginPageActivity starts");
+                delay();
                 finish();
-                startActivity(new Intent(getApplicationContext(), LoginPageActivity.class));
-
+                startActivity(new Intent(WelcomePageActivity.this, LoginPageActivity.class));
             }
         } else {
             Log.i("Info","EnterPageActivity starts");
+            delay();
             finish();
-            startActivity(new Intent(getApplicationContext(), EnterPageActivity.class));
+            startActivity(new Intent(WelcomePageActivity.this, EnterPageActivity.class));
         }
-
-        // Pass to the next page.
-        //passToNextActivity(intent);
 
     }
 
-    private void passToNextActivity(final Intent intent) {
+    private void delay() {
 
         Handler handler = new Handler();
         handler.postDelayed(new Runnable(){
-            private Intent i = intent;
             @Override
             public void run(){
                 // do something
-                finish();
-                startActivity(i);
             }
         }, 1000);
 
