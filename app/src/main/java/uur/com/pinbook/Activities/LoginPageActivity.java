@@ -41,8 +41,8 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
         editTextEmail = (EditText) findViewById(R.id.editTextEmail);
         editTextPassword = (EditText) findViewById(R.id.editTextPassword);
-        setTextViewDrawableColor(editTextEmail, R.color.background);
-        setTextViewDrawableColor(editTextPassword, R.color.background);
+        setTextViewDrawableColor(editTextEmail, R.color.button_color);
+        setTextViewDrawableColor(editTextPassword, R.color.button_color);
 
 
         buttonSignIn = (Button) findViewById(R.id.buttonSignIn);
@@ -57,6 +57,8 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
             firebaseAuth.signOut();
         }
 
+
+
     }
 
     public void onClick(View view) {
@@ -66,6 +68,7 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
         if(view == textViewFogetPassword){
             // Go to reset password..
+            Log.i("İnfo : ", "forget password clicked");
         }
     }
 
