@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     tools:context="uur.com.pinbook.Activities.EmailVerifyPageActivity"
     android:orientation="vertical"
-    android:weightSum="10">
+    android:weightSum="10"
+    android:id="@+id/layoutEmailVerify">
 
 
 

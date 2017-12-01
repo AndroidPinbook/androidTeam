@@ -1,23 +1,31 @@
 package uur.com.pinbook.Activities;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -33,11 +41,18 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     private ProgressDialog progressDialog;
     private FirebaseAuth firebaseAuth;
 
+    RelativeLayout backGroundLayout;
+    LinearLayout inputLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
+
+        backGroundLayout = (RelativeLayout) findViewById(R.id.layoutLogIn);
+        inputLayout = (LinearLayout) findViewById(R.id.inputLayout);
+
 
         editTextEmail = (EditText) findViewById(R.id.editTextEmail);
         editTextPassword = (EditText) findViewById(R.id.editTextPassword);
@@ -47,16 +62,17 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
         buttonSignIn = (Button) findViewById(R.id.buttonSignIn);
         textViewFogetPassword = (TextView) findViewById(R.id.textViewForgetPassword);
+        textViewFogetPassword.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
         progressDialog = new ProgressDialog(this);
 
         buttonSignIn.setOnClickListener(this);
         textViewFogetPassword.setOnClickListener(this);
+        backGroundLayout.setOnClickListener(this);
 
         firebaseAuth = FirebaseAuth.getInstance();
         if(firebaseAuth.getCurrentUser() != null){
             firebaseAuth.signOut();
         }
-
 
 
     }
@@ -69,6 +85,68 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         if(view == textViewFogetPassword){
             // Go to reset password..
             Log.i("İnfo : ", "forget password clicked");
+            AlertDialog.Builder mBuilder = new AlertDialog.Builder(LoginPageActivity.this);
+            View mView = getLayoutInflater().inflate(R.layout.layout_forget_password, null);
+            final EditText mEmail = (EditText) mView.findViewById(R.id.etEmail);
+            Button mReset = (Button) mView.findViewById(R.id.buttonReset);
+
+            mEmail.setText("");
+            mEmail.append(editTextEmail.getText().toString());
+
+            mBuilder.setView(mView);
+            final AlertDialog dialog = mBuilder.create();
+            dialog.show();
+            mReset.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(!mEmail.getText().toString().isEmpty()){
+
+                        FirebaseAuth auth = FirebaseAuth.getInstance();
+                        String emailAddress = mEmail.getText().toString();
+/*
+                        auth.sendPasswordResetEmail(emailAddress)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Log.i("i :", "Email sent.");
+                                        }
+                                    }
+                                });
+*/
+                        ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
+                                .setAndroidPackageName("uur.com.pinbook", true, null)
+                                .setHandleCodeInApp(false)
+                                .setIOSBundleId(null)
+                                .setUrl("https://androidteam-f4c25.firebaseapp.com")
+                                .build();
+
+                        auth.sendPasswordResetEmail(emailAddress, actionCodeSettings)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Log.i("reset Email status :", "Email sent.");
+
+                                        }
+                                    }
+                                });
+
+
+                        dialog.dismiss();
+                    }else{
+                        Toast.makeText(LoginPageActivity.this,
+                                "Please enter your email address",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+        }
+
+        if(view == backGroundLayout){
+            inputLayout.clearFocus();
+            hideKeyBoard();
         }
     }
 
@@ -155,6 +233,13 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         Toast.makeText(this, "Please verify your email..", Toast.LENGTH_SHORT).show();
     }
 
+    public void hideKeyBoard(){
+
+        Log.i("Info", "hideKeyBoard");
+
+        InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+    }
 
 
 

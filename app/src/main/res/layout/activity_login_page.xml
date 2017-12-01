@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="uur.com.pinbook.Activities.LoginPageActivity">
+    tools:context="uur.com.pinbook.Activities.LoginPageActivity"
+    android:id="@+id/layoutLogIn">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -67,7 +68,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:focusableInTouchMode="true"
+                android:id="@+id/inputLayout">
 
 
 
@@ -76,7 +79,8 @@
                     android:id="@+id/email_text_input_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:hintTextAppearance="@style/ButtonColor">
+                    app:hintTextAppearance="@style/ButtonColor"
+                    >
 
                     <EditText
                         android:id="@+id/editTextEmail"
@@ -132,9 +136,9 @@
                     android:background = "@drawable/roundedbutton"/>
 
 
-                <com.luseen.autolinklibrary.AutoLinkTextView
+                <TextView
                     android:id="@+id/textViewForgetPassword"
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="24dp"
                     android:gravity="center"
@@ -145,8 +149,6 @@
             </LinearLayout>
 
 
-
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -155,29 +157,9 @@
 
             </LinearLayout>
 
-
-
         </LinearLayout>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     </LinearLayout>
-
-
-
-
-
 
 
 </RelativeLayout>
