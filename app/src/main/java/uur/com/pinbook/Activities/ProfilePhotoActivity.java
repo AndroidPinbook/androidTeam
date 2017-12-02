@@ -40,12 +40,12 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
 
 public class ProfilePhotoActivity extends AppCompatActivity implements View.OnClickListener{
 
     ImageView photoImgView;
-    ImageView galleryImgView;
     ImageView profilePhotoImgView;
 
     RelativeLayout galleryOrPhotoLayout;
@@ -62,9 +62,13 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
     public String tag_users = "users";
     String FBuserId;
 
+    public User user;
+
     private static final int  MY_PERMISSION_CAMERA = 1;
     private static final int  MY_PERMISSION_WRITE_EXTERNAL_STORAGE = 2;
     private static final int  MY_PERMISSION_READ_EXTERNAL_STORAGE = 3;
+    private static final int  MY_PERMISSION_ACTION_GET_CONTENT = 4;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +78,6 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         mAuth = FirebaseAuth.getInstance();
 
         photoImgView = (ImageView) findViewById(R.id.photoImageView);
-        galleryImgView = (ImageView) findViewById(R.id.galleryImageView);
         profilePhotoImgView = (ImageView) findViewById(R.id.profilePhotoImgView);
 
         galleryOrPhotoLayout = (RelativeLayout) findViewById(R.id.galleryOrPhotoLayout);
@@ -82,13 +85,19 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
-
         findViewById(R.id.photoImageView).setOnClickListener(this);
-        findViewById(R.id.galleryImageView).setOnClickListener(this);
-        findViewById(R.id.skipButton).setOnClickListener(this);
+        findViewById(R.id.continueWithEmailVerifButton).setOnClickListener(this);
         findViewById(R.id.nextButton).setOnClickListener(this);
 
         mProgressDialog = new ProgressDialog(this);
+
+        getUserInfo();
+    }
+
+    private void getUserInfo() {
+
+        Intent i = getIntent();
+        user = (User) i.getSerializableExtra("User");
     }
 
     public void startCameraProcess(){
@@ -172,57 +181,61 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         if (requestCode == MY_PERMISSION_CAMERA && resultCode == Activity.RESULT_OK) {
 
             Log.i("Info", "  >>onActivityResult");
+            saveProfilePicToFB(data);
+        }
+    }
 
-            galleryOrPhotoLayout.setVisibility(View.GONE);
-            profilePhotoRelLayout.setVisibility(View.VISIBLE);
+    private void saveProfilePicToFB(Intent data) {
 
-            ImageView photoImageView = (ImageView) findViewById(R.id.photoImageView);
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            profilePhotoImgView.setImageBitmap(photo);
+        galleryOrPhotoLayout.setVisibility(View.GONE);
+        profilePhotoRelLayout.setVisibility(View.VISIBLE);
 
-            try {
+        ImageView photoImageView = (ImageView) findViewById(R.id.photoImageView);
+        Bitmap photo = (Bitmap) data.getExtras().get("data");
+        profilePhotoImgView.setImageBitmap(photo);
 
-                Uri tempUri = getImageUri(getApplicationContext(), photo);
+        try {
 
-                Log.i("Info","  >>tempUri:" + tempUri);
+            Uri tempUri = getImageUri(getApplicationContext(), photo);
 
-                File finalFile = new File(getRealPathFromURI(tempUri));
+            Log.i("Info","  >>tempUri:" + tempUri);
 
-                Log.i("Info","  >>finalFile:" + finalFile);
+            File finalFile = new File(getRealPathFromURI(tempUri));
 
-                FirebaseUser user = mAuth.getCurrentUser();
-                FBuserId = user.getUid();
+            Log.i("Info","  >>finalFile:" + finalFile);
 
-                StorageReference riversRef = mStorageRef.child("Users/profilePics").child(FBuserId + ".jpg");
+            FirebaseUser user = mAuth.getCurrentUser();
+            FBuserId = user.getUid();
 
-                mProgressDialog.setMessage("Uploading.....");
-                mProgressDialog.show();
+            StorageReference riversRef = mStorageRef.child("Users/profilePics").child(FBuserId + ".jpg");
 
-                riversRef.putFile(tempUri)
-                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                // Get a URL to the uploaded content
-                                downloadUrl = taskSnapshot.getDownloadUrl();
+            mProgressDialog.setMessage("Uploading.....");
+            mProgressDialog.show();
 
-                                saveUserInfo(FBuserId);
+            riversRef.putFile(tempUri)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            // Get a URL to the uploaded content
+                            downloadUrl = taskSnapshot.getDownloadUrl();
 
-                                Log.i("Info", "downloadUrl:" + downloadUrl);
-                                mProgressDialog.dismiss();
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception exception) {
-                                // Handle unsuccessful uploads
+                            saveUserInfo(FBuserId);
 
-                                Log.i("Info", "put file err:" + exception.toString());
-                                mProgressDialog.dismiss();
-                            }
-                        });
-            }catch (Exception e){
-                Log.i("Info", "put file exception:" + e.toString());
-            }
+                            Log.i("Info", "downloadUrl:" + downloadUrl);
+                            mProgressDialog.dismiss();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle unsuccessful uploads
+
+                            Log.i("Info", "put file err:" + exception.toString());
+                            mProgressDialog.dismiss();
+                        }
+                    });
+        }catch (Exception e){
+            Log.i("Info", "put file exception:" + e.toString());
         }
     }
 
@@ -293,7 +306,7 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
                 startCameraProcess();
                 break;
 
-            case R.id.skipButton:
+            case R.id.continueWithEmailVerifButton:
                 startProfileActivity();
                 break;
 
@@ -305,6 +318,15 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
                 Toast.makeText(this, "Error occured!!", Toast.LENGTH_SHORT).show();
                 break;
         }
+    }
+
+    private void startGalleryProcess() {
+
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"),MY_PERMISSION_ACTION_GET_CONTENT);
+
     }
 
     public void startProfileActivity(){
