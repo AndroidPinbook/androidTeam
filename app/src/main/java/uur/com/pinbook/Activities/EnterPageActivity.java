@@ -20,6 +20,8 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -37,6 +39,10 @@ import com.twitter.sdk.android.core.TwitterConfig;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
+
+import org.json.JSONObject;
+
+import java.util.Arrays;
 
 import uur.com.pinbook.Controller.CustomPagerAdapter;
 import uur.com.pinbook.Controller.EnterPageDataModel;
@@ -113,13 +119,24 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
             LoginButton loginButton = findViewById(R.id.facebookLoginButton);
 
-            loginButton.setReadPermissions("email", "public_profile");
+            loginButton.setReadPermissions(Arrays.asList(
+                    "public_profile", "email", "user_birthday", "user_friends"));
+
+            //loginButton.setReadPermissions("email", "public_profile");
 
             loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
                 @Override
                 public void onSuccess(LoginResult loginResult) {
 
                     Log.i("Info", "facebook:onSucces:" + loginResult);
+
+                    GraphRequest graphRequest = GraphRequest.newMeRequest(loginResult.getAccessToken(),
+                            new GraphRequest.GraphJSONObjectCallback() {
+                                @Override
+                                public void onCompleted(JSONObject object, GraphResponse response) {
+
+                                }
+                            });
 
                     handleFacebookAccessToken(loginResult.getAccessToken());
                 }
@@ -197,13 +214,11 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         @Override
         public void onPageScrolled(int arg0, float arg1, int arg2) {
 
-            Log.i("Info", "page scrolled");
         }
 
         @Override
         public void onPageScrollStateChanged(int arg0) {
 
-            Log.i("Info", "page scroll state changed");
         }
     };
 
