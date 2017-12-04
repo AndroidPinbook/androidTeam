@@ -3,7 +3,9 @@ package uur.com.pinbook.Activities;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -17,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -44,6 +47,11 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     RelativeLayout backGroundLayout;
     LinearLayout inputLayout;
 
+    private CheckBox rememberMeCheckBox;
+    private SharedPreferences loginPreferences;
+    private SharedPreferences.Editor loginPrefsEditor;
+    private Boolean saveLogin;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +60,7 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
         backGroundLayout = (RelativeLayout) findViewById(R.id.layoutLogIn);
         inputLayout = (LinearLayout) findViewById(R.id.inputLayout);
+        rememberMeCheckBox = findViewById(R.id.rememberMeCb);
 
 
         editTextEmail = (EditText) findViewById(R.id.editTextEmail);
@@ -68,13 +77,22 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         buttonSignIn.setOnClickListener(this);
         textViewFogetPassword.setOnClickListener(this);
         backGroundLayout.setOnClickListener(this);
+        rememberMeCheckBox.setOnClickListener(this);
+
+        loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        loginPrefsEditor = loginPreferences.edit();
+
+        saveLogin = loginPreferences.getBoolean("saveLogin", false);
+        if (saveLogin == true) {
+            editTextEmail.setText(loginPreferences.getString("email", editTextEmail.getText().toString()));
+            editTextPassword.setText(loginPreferences.getString("password", editTextPassword.getText().toString()));
+            rememberMeCheckBox.setChecked(true);
+        }
 
         firebaseAuth = FirebaseAuth.getInstance();
         if(firebaseAuth.getCurrentUser() != null){
             firebaseAuth.signOut();
         }
-
-
     }
 
     public void onClick(View view) {
@@ -82,27 +100,42 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
             userLogin();
         }
 
+        if (view == rememberMeCheckBox){
+            saveLoginInformation();
+        }
+
         if(view == textViewFogetPassword){
-            // Go to reset password..
-            Log.i("İnfo : ", "forget password clicked");
-            AlertDialog.Builder mBuilder = new AlertDialog.Builder(LoginPageActivity.this);
-            View mView = getLayoutInflater().inflate(R.layout.layout_forget_password, null);
-            final EditText mEmail = (EditText) mView.findViewById(R.id.etEmail);
-            Button mReset = (Button) mView.findViewById(R.id.buttonReset);
+            startForgetPassFunc();
+        }
 
-            mEmail.setText("");
-            mEmail.append(editTextEmail.getText().toString());
+        if(view == backGroundLayout){
+            inputLayout.clearFocus();
+            hideKeyBoard();
+        }
+    }
 
-            mBuilder.setView(mView);
-            final AlertDialog dialog = mBuilder.create();
-            dialog.show();
-            mReset.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(!mEmail.getText().toString().isEmpty()){
+    private void startForgetPassFunc() {
 
-                        FirebaseAuth auth = FirebaseAuth.getInstance();
-                        String emailAddress = mEmail.getText().toString();
+        // Go to reset password..
+        Log.i("İnfo : ", "forget password clicked");
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(LoginPageActivity.this);
+        View mView = getLayoutInflater().inflate(R.layout.layout_forget_password, null);
+        final EditText mEmail = (EditText) mView.findViewById(R.id.etEmail);
+        Button mReset = (Button) mView.findViewById(R.id.buttonReset);
+
+        mEmail.setText("");
+        mEmail.append(editTextEmail.getText().toString());
+
+        mBuilder.setView(mView);
+        final AlertDialog dialog = mBuilder.create();
+        dialog.show();
+        mReset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(!mEmail.getText().toString().isEmpty()){
+
+                    FirebaseAuth auth = FirebaseAuth.getInstance();
+                    String emailAddress = mEmail.getText().toString();
 /*
                         auth.sendPasswordResetEmail(emailAddress)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -114,40 +147,34 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
                                     }
                                 });
 */
-                        ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
-                                .setAndroidPackageName("uur.com.pinbook", true, null)
-                                .setHandleCodeInApp(false)
-                                .setIOSBundleId(null)
-                                .setUrl("https://androidteam-f4c25.firebaseapp.com")
-                                .build();
+                    ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
+                            .setAndroidPackageName("uur.com.pinbook", true, null)
+                            .setHandleCodeInApp(false)
+                            .setIOSBundleId(null)
+                            .setUrl("https://androidteam-f4c25.firebaseapp.com")
+                            .build();
 
-                        auth.sendPasswordResetEmail(emailAddress, actionCodeSettings)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Log.i("reset Email status :", "Email sent.");
+                    auth.sendPasswordResetEmail(emailAddress, actionCodeSettings)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Log.i("reset Email status :", "Email sent.");
 
-                                        }
                                     }
-                                });
+                                }
+                            });
 
 
-                        dialog.dismiss();
-                    }else{
-                        Toast.makeText(LoginPageActivity.this,
-                                "Please enter your email address",
-                                Toast.LENGTH_SHORT).show();
-                    }
+                    dialog.dismiss();
+                }else{
+                    Toast.makeText(LoginPageActivity.this,
+                            "Please enter your email address",
+                            Toast.LENGTH_SHORT).show();
                 }
-            });
+            }
+        });
 
-        }
-
-        if(view == backGroundLayout){
-            inputLayout.clearFocus();
-            hideKeyBoard();
-        }
     }
 
     private void setTextViewDrawableColor(EditText textView, int color) {
@@ -242,6 +269,26 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     }
 
 
+    private void saveLoginInformation() {
+
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(editTextEmail.getWindowToken(), 0);
+
+        String username = editTextEmail.getText().toString();
+        String password = editTextPassword.getText().toString();
+
+        if (rememberMeCheckBox.isChecked()) {
+            loginPrefsEditor.putBoolean("saveLogin", true);
+            loginPrefsEditor.putString("email", username);
+            loginPrefsEditor.putString("password", password);
+            loginPrefsEditor.commit();
+        } else {
+            loginPrefsEditor.clear();
+            loginPrefsEditor.commit();
+        }
+
+
+    }
 
 
 }

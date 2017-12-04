@@ -53,6 +53,7 @@ import java.util.Map;
 
 import android.Manifest;
 
+import uur.com.pinbook.Controller.CustomDialogAdapter;
 import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
 
@@ -152,28 +153,6 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void afterTextChanged(Editable s) {
 
-              /*  Log.i("Info","afterTextChanged");
-
-                phoneNumber = phoneEditText.getText().toString();
-
-                Log.i("Info","beforePhoneNum:" + beforePhoneNum);
-                Log.i("Info","phoneNumber   :" + phoneNumber);
-
-                int a = phoneNumber.trim().length();
-
-                if(!beforePhoneNum.equals(phoneNumber) &&
-                        a >= 10) {
-
-                    Log.i("Info","         >>ICERDEYIM");
-
-                    beforePhoneNum = phoneNumber;
-
-                    phoneNumber = formatE164Number(Locale.getDefault().getCountry(), phoneEditText.getText().toString());
-                    phoneEditText.setText(phoneNumber);
-
-
-                    Log.i("Info","beforePhoneNum_2:" + beforePhoneNum);
-                }*/
             }
         });
     }
@@ -218,29 +197,9 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                             onCreateOk = true;
 
                         } else {
-                            // If sign in fails, display a message to the user.
                             Log.i("Info","CreateUserEmail:Failed:" + task.getException());
 
-                            //Toast.makeText(RegisterPageActivity.this, "Authentication failed." + task.getException(),
-                            //        Toast.LENGTH_SHORT).show();
-
-                            /*Toast toast = Toast.makeText(RegisterPageActivity.this, "Authentication failed:" + task.getException(),
-                                    Toast.LENGTH_SHORT);
-                            TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
-                            if( v != null) v.setGravity(Gravity.CENTER);
-
-                            toast.show();*/
-
-
-                            LayoutInflater inflater = getLayoutInflater();
-                            View view = inflater.inflate(R.layout.cust_toast_layout,
-                                    (ViewGroup) findViewById(R.id.relativeLayout1));
-
-
-                            Toast toast = new Toast(RegisterPageActivity.this);
-                            toast.setGravity(Gravity.CENTER_VERTICAL,0,0);
-                            toast.setView(view);
-                            toast.show();
+                            CustomDialogAdapter.showErrorDialog(RegisterPageActivity.this, task.getException().toString());
                         }
                     }
                 });
@@ -416,27 +375,6 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         }
 
         genderSelected = true;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if(requestCode == 1){
-
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-
-                if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED){
-
-                    try {
-                        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-                        startActivity(intent);
-                    }catch (Exception e){
-                        Log.i("Info","Camera open err:" + e.toString());
-                    }
-                }
-            }
-        }
     }
 
     @Override

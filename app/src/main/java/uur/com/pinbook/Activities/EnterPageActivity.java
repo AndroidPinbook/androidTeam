@@ -38,8 +38,8 @@ import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
-import uur.com.pinbook.JavaFiles.CustomPagerAdapter;
-import uur.com.pinbook.JavaFiles.EnterPageDataModel;
+import uur.com.pinbook.Controller.CustomPagerAdapter;
+import uur.com.pinbook.Controller.EnterPageDataModel;
 import uur.com.pinbook.R;
 
 public class EnterPageActivity extends AppCompatActivity implements View.OnClickListener{

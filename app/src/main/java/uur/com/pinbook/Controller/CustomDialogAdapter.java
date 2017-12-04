@@ -1,4 +1,4 @@
-package uur.com.pinbook.JavaFiles;
+package uur.com.pinbook.Controller;
 
 import android.app.AlertDialog;
 import android.app.DialogFragment;
