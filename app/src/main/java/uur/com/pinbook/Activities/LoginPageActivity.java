@@ -286,9 +286,5 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
             loginPrefsEditor.clear();
             loginPrefsEditor.commit();
         }
-
-
     }
-
-
 }
