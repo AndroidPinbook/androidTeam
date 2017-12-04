@@ -1,5 +1,6 @@
 package uur.com.pinbook.Activities;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import uur.com.pinbook.R;
 
 public class EmailVerifyPageActivity extends AppCompatActivity implements View.OnClickListener{
 
+    private Button buttonActivated;
     private TextView textVerifyAgain;
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
@@ -43,7 +45,10 @@ public class EmailVerifyPageActivity extends AppCompatActivity implements View.O
         textEmail.setText(s);
 
         textVerifyAgain = (TextView) findViewById(R.id.textVerifyAgain);
+        buttonActivated = (Button) findViewById(R.id.buttonActivated);
+
         textVerifyAgain.setOnClickListener(this);
+        buttonActivated.setOnClickListener(this);
 
     }
 
@@ -52,6 +57,26 @@ public class EmailVerifyPageActivity extends AppCompatActivity implements View.O
         if(v == textVerifyAgain){
             sendVerificationMail();
         }
+        if(v == buttonActivated){
+            buttonActivatedFunc();
+        }
+    }
+
+    private void buttonActivatedFunc() {
+
+        user.reload();
+
+        if(user.isEmailVerified()){
+            Log.i("verified: ", "yes");
+            finish();
+            startActivity(new Intent(EmailVerifyPageActivity.this, ProfilePageActivity.class));
+        }else{
+            Log.i("!verified: ", "no");
+            Toast.makeText(getApplicationContext(),
+                    "Please verify your email.. " + user.getEmail(),
+                    Toast.LENGTH_SHORT).show();
+        }
+
     }
 
 

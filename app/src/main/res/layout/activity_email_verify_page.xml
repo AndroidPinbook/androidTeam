@@ -9,6 +9,27 @@
     android:weightSum="10"
     android:id="@+id/layoutEmailVerify">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background"
+        android:gravity="center"
+        android:minHeight="?attr/actionBarSize">
+
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/pacifico"
+            android:text="PinBook"
+            android:textColor="@android:color/white"
+            android:textSize="30sp" />
+
+
+    </android.support.v7.widget.Toolbar>
 
 
     <TextView
@@ -59,6 +80,22 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/buttonActivated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pacifico"
+            android:text="Aktifleştir"
+            android:textColor="@color/cardview_light_background"
+            android:background = "@drawable/roundedbutton"/>
+
+    </LinearLayout>
 
 
     <TextView
