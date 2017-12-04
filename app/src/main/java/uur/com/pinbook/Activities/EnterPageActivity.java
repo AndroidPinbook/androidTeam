@@ -2,6 +2,7 @@ package uur.com.pinbook.Activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
@@ -22,6 +23,7 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -40,6 +42,7 @@ import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
@@ -135,8 +138,38 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                                 @Override
                                 public void onCompleted(JSONObject object, GraphResponse response) {
 
+                                    Log.i("Info", "Facebook response:" + response.toString());
+
+                                    try {
+                                        String email = object.getString("email");
+                                        String birthday = object.getString("birthday");
+                                        String gender = object.getString("gender");
+
+                                        Profile profile = Profile.getCurrentProfile();
+                                        String name = profile.getFirstName();
+                                        String surname = profile.getLastName();
+
+                                        Uri picUrl = profile.getProfilePictureUri(150,50);
+
+
+                                        Log.i("Info", "  >>email   :" + email);
+                                        Log.i("Info", "  >>birthday:" + birthday);
+                                        Log.i("Info", "  >>gender  :" + gender);
+                                        Log.i("Info", "  >>name    :" + name);
+                                        Log.i("Info", "  >>surname :" + surname);
+                                        Log.i("Info", "  >>Url     :" + picUrl.toString());
+
+                                    } catch (JSONException e) {
+                                        Log.i("Info", "JSONException error:" + e.toString());
+                                    }
+
                                 }
                             });
+
+                    Bundle parameters = new Bundle();
+                    parameters.putString("fields", "id,name,email,gender,birthday");
+                    graphRequest.setParameters(parameters);
+                    graphRequest.executeAsync();
 
                     handleFacebookAccessToken(loginResult.getAccessToken());
                 }

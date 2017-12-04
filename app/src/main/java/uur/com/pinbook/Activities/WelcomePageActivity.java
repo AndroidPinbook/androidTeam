@@ -7,8 +7,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import com.facebook.AccessToken;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.TwitterAuthCredential;
+import com.google.firebase.auth.TwitterAuthProvider;
+import com.twitter.sdk.android.core.AuthToken;
+import com.twitter.sdk.android.core.AuthTokenAdapter;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import com.twitter.sdk.android.core.TwitterAuthToken;
+import com.twitter.sdk.android.core.TwitterCore;
+import com.twitter.sdk.android.core.TwitterSession;
+import com.twitter.sdk.android.core.identity.TwitterAuthClient;
 
 import uur.com.pinbook.R;
 
@@ -46,6 +57,23 @@ public class WelcomePageActivity extends AppCompatActivity {
             //if(a) Log.i("User verified", "yes");
             //else Log.i("User verified", "no");
 
+
+            if(isFacebookLoggedIn()){
+
+                Log.i("Info","isFacebookLoggedIn - ProfilePageActivity starts");
+                delay();
+                finish();
+                startActivity(new Intent(WelcomePageActivity.this, ProfilePageActivity.class));
+            }
+
+            if(isTwitterLoggedIn()) {
+
+                Log.i("Info","isTwitterLoggedIn - ProfilePageActivity starts");
+                delay();
+                finish();
+                startActivity(new Intent(WelcomePageActivity.this, ProfilePageActivity.class));
+            }
+
             if (user.isEmailVerified()) {
                 Log.i("Info","ProfilePageActivity starts");
                 delay();
@@ -64,6 +92,27 @@ public class WelcomePageActivity extends AppCompatActivity {
             startActivity(new Intent(WelcomePageActivity.this, EnterPageActivity.class));
         }
 
+    }
+
+    private boolean isFacebookLoggedIn() {
+
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+
+        if(accessToken != null)
+            return true;
+        else
+            return false;
+    }
+
+    private boolean isTwitterLoggedIn(){
+
+        TwitterSession session = TwitterCore.getInstance().getSessionManager().getActiveSession();
+        TwitterAuthToken authToken = session.getAuthToken();
+
+        if(authToken != null)
+            return true;
+        else
+            return false;
     }
 
     private void delay() {
