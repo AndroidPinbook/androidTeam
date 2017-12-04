@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="uur.com.pinbook.Activities.RegisterPageActivity"
-    android:background="@color/background"
+    android:background="@color/background_white"
     android:id="@+id/registerLayout">
 
 
@@ -16,13 +16,12 @@
         android:id="@+id/userInfoLayout">
 
         <TextView
-
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/pacifico"
             android:text="PinBook"
             android:id="@+id/pinbookTextView"
-            android:textColor="@android:color/white"
+            android:textColor="@color/button_color"
             android:textSize="@dimen/enter_page_text_size"
             android:gravity="center"/>
 
@@ -55,7 +54,7 @@
             android:layout_below="@+id/genderLayout"
             android:id="@+id/emailLayout"
             android:layout_centerHorizontal="true"
-            app:hintTextAppearance="@style/WhiteTextInputLayout">
+            app:hintTextAppearance="@style/YellowTextInputLayout">
 
             <EditText
                 android:layout_width="match_parent"
@@ -71,11 +70,11 @@
             android:layout_width="306dp"
             android:layout_height="50dp"
             app:passwordToggleEnabled="true"
-            app:passwordToggleTint="@android:color/white"
+            app:passwordToggleTint="@android:color/darker_gray"
             android:layout_below="@+id/emailLayout"
             android:id="@+id/passwordLayout"
             android:layout_centerHorizontal="true"
-            app:hintTextAppearance="@style/WhiteTextInputLayout">
+            app:hintTextAppearance="@style/YellowTextInputLayout">
 
             <EditText
                 android:layout_width="match_parent"
@@ -93,7 +92,7 @@
             android:id="@+id/usernameLayout"
             android:layout_below="@+id/passwordLayout"
             android:layout_centerHorizontal="true"
-            app:hintTextAppearance="@style/WhiteTextInputLayout">
+            app:hintTextAppearance="@style/YellowTextInputLayout">
 
             <EditText
                 android:layout_width="match_parent"
@@ -111,7 +110,7 @@
             android:id="@+id/nameLayout"
             android:layout_below="@+id/usernameLayout"
             android:layout_centerHorizontal="true"
-            app:hintTextAppearance="@style/WhiteTextInputLayout">
+            app:hintTextAppearance="@style/YellowTextInputLayout">
 
             <EditText
                 android:id="@+id/nameEditText"
@@ -129,7 +128,7 @@
             android:layout_below="@+id/usernameLayout"
             android:layout_alignEnd="@id/usernameLayout"
             android:layout_centerHorizontal="true"
-            app:hintTextAppearance="@style/WhiteTextInputLayout">
+            app:hintTextAppearance="@style/YellowTextInputLayout">
 
             <EditText
                 android:layout_width="match_parent"
@@ -147,7 +146,7 @@
             android:id="@+id/phoneLayout"
             android:layout_below="@+id/surnameLayout"
             android:layout_centerHorizontal="true"
-            app:hintTextAppearance="@style/WhiteTextInputLayout">
+            app:hintTextAppearance="@style/YellowTextInputLayout">
 
             <EditText
                 android:id="@+id/phoneEditText"
@@ -165,7 +164,7 @@
             android:id="@+id/birthdateLayout"
             android:layout_below="@+id/phoneLayout"
             android:layout_centerHorizontal="true"
-            app:hintTextAppearance="@style/WhiteTextInputLayout">
+            app:hintTextAppearance="@style/YellowTextInputLayout">
 
             <EditText
                 android:layout_width="match_parent"
@@ -201,7 +200,7 @@
                     android:layout_weight="1"
                     android:text="REGISTER"
                     android:textColor="@color/cardview_light_background"
-                    android:background = "@drawable/roundedbutton"/>
+                    android:background = "@drawable/ripple" />
 
             </LinearLayout>
         </LinearLayout>

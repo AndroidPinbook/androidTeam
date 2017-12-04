@@ -82,7 +82,7 @@
         android:layout_marginTop="40dp"
         android:textColor="@color/cardview_light_background"
         android:text="LOG IN"
-        android:background = "@drawable/roundedbutton"/>
+        android:background = "@drawable/ripple"/>
 
     <Button
         android:id="@+id/registerButton"
@@ -93,6 +93,6 @@
         android:layout_marginTop="10dp"
         android:textColor="@color/cardview_light_background"
         android:text="REGISTER"
-        android:background = "@drawable/roundedbutton"/>
+        android:background = "@drawable/ripple"/>
 
 </RelativeLayout>

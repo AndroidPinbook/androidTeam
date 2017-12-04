@@ -6,6 +6,8 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -17,7 +19,10 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -39,6 +44,7 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -46,9 +52,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import android.Manifest;
+
+import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
 
-public class RegisterPageActivity extends AppCompatActivity implements View.OnClickListener, FirebaseAuth.AuthStateListener{
+public class RegisterPageActivity extends AppCompatActivity implements View.OnClickListener,
+        FirebaseAuth.AuthStateListener{
 
     //Set the radius of the Blur. Supported range 0 < radius <= 25
     private static final float BLUR_RADIUS = 10f;
@@ -85,12 +94,18 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
 
     RelativeLayout backGrounRelLayout;
 
+    public User user;
+
+    private DatePickerDialog.OnDateSetListener mDateSetListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_page);
 
         backGrounRelLayout = (RelativeLayout) findViewById(R.id.registerLayout);
+
+        user = new User();
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -111,8 +126,17 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         findViewById(R.id.maleImageView).setOnClickListener(this);
         findViewById(R.id.femaleImageView).setOnClickListener(this);
 
-
         backGrounRelLayout.setOnClickListener(this);
+
+        mDateSetListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+
+                month = month + 1;
+                String date =  dayOfMonth + "/"  + month + "/" + year;
+                birthdateEditText.setText(date);
+            }
+        };
 
         phoneEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -151,51 +175,23 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                     Log.i("Info","beforePhoneNum_2:" + beforePhoneNum);
                 }*/
             }
-
         });
     }
-
 
     public void getCalender(){
 
-        Log.i("Info", "getCalender");
+        Calendar cal = Calendar.getInstance();
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH);
+        int day = cal.get(Calendar.DAY_OF_MONTH);
 
-        myCalendar = Calendar.getInstance();
-        final DatePickerDialog.OnDateSetListener date;
+        DatePickerDialog dialog = new DatePickerDialog(RegisterPageActivity.this,
+                android.R.style.Theme_Holo_Light_Dialog_MinWidth,
+                mDateSetListener,
+                year, month, day);
 
-        date = new DatePickerDialog.OnDateSetListener() {
-
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear,
-                                  int dayOfMonth) {
-                // TODO Auto-generated method stub
-                myCalendar.set(Calendar.YEAR, year);
-                myCalendar.set(Calendar.MONTH, monthOfYear);
-                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                updateLabel();
-            }
-
-        };
-
-        birthdateEditText.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                new DatePickerDialog(RegisterPageActivity.this, date, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-            }
-        });
-    }
-
-    private void updateLabel() {
-
-        Log.i("Info", "  >>updateLabel");
-        String myFormat = "MM/dd/yy"; //In which you need put here
-        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-
-        birthdateEditText.setText(sdf.format(myCalendar.getTime()));
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
     }
 
     private void createAccount(String email, String password){
@@ -225,8 +221,26 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                             // If sign in fails, display a message to the user.
                             Log.i("Info","CreateUserEmail:Failed:" + task.getException());
 
-                            Toast.makeText(RegisterPageActivity.this, "Authentication failed." + task.getException(),
-                                    Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(RegisterPageActivity.this, "Authentication failed." + task.getException(),
+                            //        Toast.LENGTH_SHORT).show();
+
+                            /*Toast toast = Toast.makeText(RegisterPageActivity.this, "Authentication failed:" + task.getException(),
+                                    Toast.LENGTH_SHORT);
+                            TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+                            if( v != null) v.setGravity(Gravity.CENTER);
+
+                            toast.show();*/
+
+
+                            LayoutInflater inflater = getLayoutInflater();
+                            View view = inflater.inflate(R.layout.cust_toast_layout,
+                                    (ViewGroup) findViewById(R.id.relativeLayout1));
+
+
+                            Toast toast = new Toast(RegisterPageActivity.this);
+                            toast.setGravity(Gravity.CENTER_VERTICAL,0,0);
+                            toast.setView(view);
+                            toast.show();
                         }
                     }
                 });
@@ -235,52 +249,21 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
     public void startProfilePhotoPage(){
 
         Intent intent = new Intent(getApplicationContext(), ProfilePhotoActivity.class);
+        intent.putExtra("User", user);
         startActivity(intent);
     }
 
     public void saveUserInfo(FirebaseUser currentUser){
 
-        String userId = currentUser.getUid();
-
-        Map<String, String> values = new HashMap<>();
-
-        Log.i("Info","userId:" + userId);
-
-        mDbref = FirebaseDatabase.getInstance().getReference().child(tag_users);
-
-        values.put("email", currentUser.getEmail());
-        setValuesToCloud(userId, values);
-
-        values.put("gender", gender);
-        setValuesToCloud(userId, values);
-
-        values.put("username", usernameEditText.getText().toString());
-        setValuesToCloud(userId, values);
-
-        values.put("name", nameEditText.getText().toString());
-        setValuesToCloud(userId, values);
-
-        values.put("surname", surnameEditText.getText().toString());
-        setValuesToCloud(userId, values);
-
-        values.put("phone", phoneEditText.getText().toString());
-        setValuesToCloud(userId, values);
-
-        values.put("birthdate", birthdateEditText.getText().toString());
-        setValuesToCloud(userId, values);
+        user.setUserId(currentUser.getUid());
+        user.setEmail(currentUser.getEmail());
+        user.setUsername(usernameEditText.getText().toString());
+        user.setName(nameEditText.getText().toString());
+        user.setSurname(surnameEditText.getText().toString());
+        user.setGender(gender);
+        user.setBirthdate(birthdateEditText.getText().toString());
+        user.setPhoneNum(phoneEditText.getText().toString());
     }
-
-    public void setValuesToCloud(String userId, Map<String, String> values){
-
-        mDbref.child(userId).setValue(values, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                Log.i("Info","databaseError:" + databaseError);
-            }
-        });
-    }
-
-
 
     @Override
     public void onClick(View v) {

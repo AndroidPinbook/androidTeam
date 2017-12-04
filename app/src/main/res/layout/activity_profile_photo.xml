@@ -6,100 +6,77 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="uur.com.pinbook.Activities.ProfilePhotoActivity"
-    android:background="@color/background">
+    android:background="@color/background_white">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/galleryOrPhotoLayout">
 
+        <TextView
+            android:id="@+id/pinbookTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pacifico"
+            android:gravity="center"
+            android:text="PinBook"
+            android:textColor="@color/button_color"
+            android:textSize="@dimen/enter_page_text_size" />
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginTop="150dp"
-            android:orientation="vertical">
+            android:layout_height="400dp"
+            android:layout_marginTop="100dp"
+            android:orientation="vertical"
+            android:gravity="center">
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="25dp"
-                android:text="    Do you want to add an image?"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/oldenburg"
                 android:gravity="center"
-                android:textSize="20dp"/>
+                android:text="Do you want to add a profile picture?"
+                android:textSize="18dp"
+                android:layout_marginTop="50dp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:orientation="horizontal">
+                android:layout_marginTop="25dp"
+                android:orientation="horizontal"
+                android:gravity="center">
+
 
                 <ImageView
                     android:layout_width="200dp"
                     android:layout_height="match_parent"
                     android:id="@+id/photoImageView"
-                    android:src="@drawable/open_photo"
-                    android:paddingLeft="50dp"/>
-
-
-                <ImageView
-                    android:layout_width="200dp"
-                    android:layout_height="match_parent"
-                    android:id="@+id/galleryImageView"
-                    android:src="@drawable/open_gallery"
-                    android:paddingRight="50dp"/>
+                    android:src="@drawable/open_photo"/>
 
             </LinearLayout>
 
-            <Button
-                android:layout_width="150dp"
-                android:layout_height="50dp"
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:id="@+id/chooseProfilePicTextView"
+                android:text="@string/choseProfilePictureText"
+                android:gravity="center"
                 android:layout_marginTop="20dp"
-                android:id="@+id/skipButton"
-                android:text="SKIP"
+                android:textSize="15dp"/>
+
+            <Button
+                android:layout_width="230dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:id="@+id/continueWithEmailVerifButton"
+                android:text="Continue Email Verification"
+                android:textAllCaps="false"
                 android:textColor="@color/cardview_light_background"
-                android:background = "@drawable/roundedbutton"
+                android:background = "@drawable/ripple"
                 android:layout_gravity="center"/>
 
         </LinearLayout>
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/profilePhotoRelLayout"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:id="@+id/profilePhotoLayout"
-            android:layout_centerVertical="true">
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="400dp"
-                android:id="@+id/profilePhotoImgView"
-                android:background="@drawable/roundedbutton"
-                android:layout_marginTop="40dp"
-                android:layout_marginLeft="40dp"
-                android:layout_marginRight="40dp"/>
-
-            <Button
-                android:layout_width="@dimen/buttons_width"
-                android:layout_height="@dimen/buttons_height"
-                android:id="@+id/nextButton"
-                android:layout_below="@+id/profilePhotoLayout"
-                android:background="@drawable/roundedbutton"
-                android:text="NEXT"
-                android:layout_marginTop="5dp"
-                android:layout_gravity="center_horizontal"
-                android:textColor="@color/cardview_light_background"/>
-
-        </LinearLayout>
-
-
-
 
     </RelativeLayout>
 
