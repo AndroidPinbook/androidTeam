@@ -1,4 +1,4 @@
-package uur.com.pinbook.JavaFiles;
+package uur.com.pinbook.Controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,15 +42,15 @@ public class EnterPageDataModel {
         List<EnterPageDataModel> itemList = new ArrayList<>();
 
         int[] imagesIDs = new int[]{
-                R.drawable.batman_icon,
-                R.drawable.wonder_woman_icon,
-                R.drawable.location_icon
+                R.drawable.around_world,
+                R.drawable.enjoy,
+                R.drawable.everest
         };
 
         String[] titles = new String[]{
-                "Batman",
-                "Wonder Woman",
-                "Location"
+                "Throw a pin all around the world",
+                "Contact with your friends and enjoy",
+                "Set up mysterious games"
         };
 
         for(int i =0; i<imagesIDs.length; i++){

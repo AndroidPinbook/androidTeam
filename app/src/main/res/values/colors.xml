@@ -4,13 +4,14 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
-    <!-- dots inactive colors -->
-    <color name="dot_dark_screen3">#2278d4</color>
-
-    <!-- dots active colors -->
-    <color name="dot_light_screen3">#93c6fd</color>
+    <color name="dot_dark_screen3">#cc6600</color>
+    <color name="dot_light_screen3">#ff8c1a</color>
 
     <color name="button_color">#E88135</color>
-    <color name="background">#6DD3CD</color>
+    <color name="background">#F9BF3A</color>
+    <color name="hint_color">#ffffff</color>
+    <color name="background_white">#FFFFFF</color>
+    <color name="toastBackground">#E1E7EA</color>
+    <color name="drawable_left_color">#ffffff</color>
 
 </resources>
