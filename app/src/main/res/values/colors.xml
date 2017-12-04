@@ -10,6 +10,8 @@
     <color name="button_color">#E88135</color>
     <color name="background">#F9BF3A</color>
     <color name="hint_color">#ffffff</color>
+    <color name="background_white">#FFFFFF</color>
+    <color name="toastBackground">#E1E7EA</color>
     <color name="drawable_left_color">#ffffff</color>
 
 </resources>

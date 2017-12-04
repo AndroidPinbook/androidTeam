@@ -26,4 +26,9 @@
     <string name="male_text">male</string>
     <string name="female_text">female</string>
 
+    <string name="camera">camera</string>
+    <string name="gallery">gallery</string>
+
+    <string name="choseProfilePictureText"><u>Choose a profile picture</u></string>
+
 </resources>

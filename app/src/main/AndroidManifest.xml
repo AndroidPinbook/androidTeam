@@ -40,8 +40,7 @@
             -->
         </activity>
         <activity
-            android:name=".Activities.LoginPageActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:name=".Activities.LoginPageActivity"></activity>
         <activity
             android:name=".Activities.RegisterPageActivity"
             android:exported="true"
@@ -53,6 +52,9 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
 
         <activity
             android:name="com.facebook.FacebookActivity"

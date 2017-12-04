@@ -30,6 +30,14 @@
         <item name="android:textSize">10sp</item>
     </style>
 
+    <style name="YellowTextInputLayout" parent="@android:style/TextAppearance">
+        <item name="android:textColor">#E88135</item>
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <style name="ToastMessageBackground" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+
+    </style>
     <style name="ButtonColor" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/button_color</item>
     </style>
