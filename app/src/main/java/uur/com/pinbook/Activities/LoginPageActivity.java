@@ -15,6 +15,7 @@ import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -50,6 +51,8 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
 
+
+
         backGroundLayout = (RelativeLayout) findViewById(R.id.layoutLogIn);
         inputLayout = (LinearLayout) findViewById(R.id.inputLayout);
 
@@ -73,8 +76,6 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         if(firebaseAuth.getCurrentUser() != null){
             firebaseAuth.signOut();
         }
-
-
     }
 
     public void onClick(View view) {
