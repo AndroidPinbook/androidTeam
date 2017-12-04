@@ -17,6 +17,7 @@ import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -57,6 +58,8 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
+
+
 
         backGroundLayout = (RelativeLayout) findViewById(R.id.layoutLogIn);
         inputLayout = (LinearLayout) findViewById(R.id.inputLayout);

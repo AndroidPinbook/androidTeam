@@ -14,7 +14,7 @@ import uur.com.pinbook.R;
 
 public class WelcomePageActivity extends AppCompatActivity {
 
-    private FirebaseAuth firebaseAuth;
+    FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +26,19 @@ public class WelcomePageActivity extends AppCompatActivity {
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
 
+        //Perform next page..
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //do your work here after 60 second
+                performNextPage();
+            }
+        },1500);
+
+    }
+
+    protected void performNextPage(){
+
         // User authorization and verification controls.
         firebaseAuth = FirebaseAuth.getInstance();
 
@@ -34,51 +47,27 @@ public class WelcomePageActivity extends AppCompatActivity {
             FirebaseUser user = firebaseAuth.getCurrentUser();
             user.reload();
 
-            boolean a = user.isEmailVerified();
-            boolean b = user.isEmailVerified();
-            user.reload();
-            boolean c = user.isEmailVerified();
-            user.reload();
-            boolean d = user.isEmailVerified();
-
             Log.i("Info","User check");
-            Log.i("Info","User mail:" + user.getEmail());
+            Log.i("Info","User mail:" + firebaseAuth.getCurrentUser().getEmail());
             //if(a) Log.i("User verified", "yes");
             //else Log.i("User verified", "no");
 
             if (user.isEmailVerified()) {
                 Log.i("Info","ProfilePageActivity starts");
-                delay();
                 finish();
                 startActivity(new Intent(WelcomePageActivity.this, ProfilePageActivity.class));
             } else {
                 Log.i("Info","LoginPageActivity starts");
-                delay();
                 finish();
                 startActivity(new Intent(WelcomePageActivity.this, LoginPageActivity.class));
             }
         } else {
             Log.i("Info","EnterPageActivity starts");
-            delay();
             finish();
             startActivity(new Intent(WelcomePageActivity.this, EnterPageActivity.class));
         }
 
     }
-
-    private void delay() {
-
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable(){
-            @Override
-            public void run(){
-                // do something
-            }
-        }, 1000);
-
-
-    }
-
 
 
 }
