@@ -67,7 +67,6 @@ public class WelcomePageActivity extends AppCompatActivity {
             if(isFacebookLoggedIn()){
 
                 Log.i("Info","isFacebookLoggedIn - ProfilePageActivity starts");
-                delay();
                 finish();
                 startActivity(new Intent(WelcomePageActivity.this, ProfilePageActivity.class));
             }
@@ -75,7 +74,6 @@ public class WelcomePageActivity extends AppCompatActivity {
             if(isTwitterLoggedIn()) {
 
                 Log.i("Info","isTwitterLoggedIn - ProfilePageActivity starts");
-                delay();
                 finish();
                 startActivity(new Intent(WelcomePageActivity.this, ProfilePageActivity.class));
             }
@@ -94,7 +92,6 @@ public class WelcomePageActivity extends AppCompatActivity {
             finish();
             startActivity(new Intent(WelcomePageActivity.this, EnterPageActivity.class));
         }
-
     }
 
     private boolean isFacebookLoggedIn() {
@@ -117,20 +114,4 @@ public class WelcomePageActivity extends AppCompatActivity {
         else
             return false;
     }
-
-    private void delay() {
-
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable(){
-            @Override
-            public void run(){
-                // do something
-            }
-        }, 1000);
-
-
-    }
-
-
-
 }
