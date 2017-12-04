@@ -122,6 +122,11 @@
                 </android.support.design.widget.TextInputLayout>
 
 
+                <CheckBox
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Remember me"
+                    android:id="@+id/rememberMeCb"/>
 
                 <Button
                     android:id="@+id/buttonSignIn"
