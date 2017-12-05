@@ -31,4 +31,10 @@
 
     <string name="choseProfilePictureText"><u>Choose a profile picture</u></string>
 
+    <string name="fbLoginType">facebookLoginType</string>
+    <string name="twLoginType">twitterLoginType</string>
+    <string name="mailLoginType">mailLoginType</string>
+
+    <string name="EntryType">EntryType</string>
+    <string name="User">User</string>
 </resources>

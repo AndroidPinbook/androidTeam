@@ -15,8 +15,10 @@ import com.google.firebase.auth.TwitterAuthCredential;
 import com.google.firebase.auth.TwitterAuthProvider;
 import com.twitter.sdk.android.core.AuthToken;
 import com.twitter.sdk.android.core.AuthTokenAdapter;
+import com.twitter.sdk.android.core.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterAuthToken;
+import com.twitter.sdk.android.core.TwitterConfig;
 import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterAuthClient;
@@ -30,6 +32,18 @@ public class WelcomePageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Configure Twitter SDK
+        TwitterAuthConfig authConfig =  new TwitterAuthConfig(
+                getString(R.string.twitter_consumer_key),
+                getString(R.string.twitter_consumer_secret));
+
+        TwitterConfig twitterConfig = new TwitterConfig.Builder(this)
+                .twitterAuthConfig(authConfig)
+                .build();
+
+        Twitter.initialize(twitterConfig);
+
         setContentView(R.layout.activity_welcome_page);
 
         // Hide the status bar.
@@ -53,6 +67,8 @@ public class WelcomePageActivity extends AppCompatActivity {
         // User authorization and verification controls.
         firebaseAuth = FirebaseAuth.getInstance();
 
+
+
         if (firebaseAuth.getCurrentUser() != null) {
 
             FirebaseUser user = firebaseAuth.getCurrentUser();
@@ -60,6 +76,9 @@ public class WelcomePageActivity extends AppCompatActivity {
 
             Log.i("Info","User check");
             Log.i("Info","User mail:" + firebaseAuth.getCurrentUser().getEmail());
+
+            Log.i("Info", "Userid:" + user.getUid());
+
             //if(a) Log.i("User verified", "yes");
             //else Log.i("User verified", "no");
 
@@ -69,20 +88,21 @@ public class WelcomePageActivity extends AppCompatActivity {
                 Log.i("Info","isFacebookLoggedIn - ProfilePageActivity starts");
                 finish();
                 startActivity(new Intent(WelcomePageActivity.this, ProfilePageActivity.class));
-            }
 
-            if(isTwitterLoggedIn()) {
+            }else if(isTwitterLoggedIn()) {
 
                 Log.i("Info","isTwitterLoggedIn - ProfilePageActivity starts");
                 finish();
                 startActivity(new Intent(WelcomePageActivity.this, ProfilePageActivity.class));
-            }
 
-            if (user.isEmailVerified()) {
+            }else if (user.isEmailVerified()) {
+
                 Log.i("Info","ProfilePageActivity starts");
                 finish();
                 startActivity(new Intent(WelcomePageActivity.this, ProfilePageActivity.class));
+
             } else {
+
                 Log.i("Info","LoginPageActivity starts");
                 finish();
                 startActivity(new Intent(WelcomePageActivity.this, LoginPageActivity.class));
@@ -107,9 +127,8 @@ public class WelcomePageActivity extends AppCompatActivity {
     private boolean isTwitterLoggedIn(){
 
         TwitterSession session = TwitterCore.getInstance().getSessionManager().getActiveSession();
-        TwitterAuthToken authToken = session.getAuthToken();
 
-        if(authToken != null)
+        if(session != null)
             return true;
         else
             return false;

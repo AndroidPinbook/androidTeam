@@ -32,6 +32,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.TwitterAuthProvider;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
@@ -49,6 +50,7 @@ import java.util.Arrays;
 
 import uur.com.pinbook.Controller.CustomPagerAdapter;
 import uur.com.pinbook.Controller.EnterPageDataModel;
+import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
 
 public class EnterPageActivity extends AppCompatActivity implements View.OnClickListener{
@@ -62,9 +64,15 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
     private FirebaseAuth mAuth;
 
     private TwitterLoginButton mLoginButton;
+    private boolean fbLogin = false;
+    private boolean twLogin = false;
 
     private Button registerButton;
     private Button loginBtn;
+
+
+
+    public User user;
 
     @SuppressLint("WrongViewCast")
     @Override
@@ -90,6 +98,8 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         Twitter.initialize(twitterConfig);
 
         setContentView(R.layout.activity_enter_page);
+
+        user = new User();
 
         try {
 
@@ -123,9 +133,10 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
             LoginButton loginButton = findViewById(R.id.facebookLoginButton);
 
             loginButton.setReadPermissions(Arrays.asList(
-                    "public_profile", "email", "user_birthday", "user_friends"));
-
-            //loginButton.setReadPermissions("email", "public_profile");
+                    "public_profile",
+                         "email",
+                         "user_birthday",
+                         "user_friends"));
 
             loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
                 @Override
@@ -133,43 +144,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
                     Log.i("Info", "facebook:onSucces:" + loginResult);
 
-                    GraphRequest graphRequest = GraphRequest.newMeRequest(loginResult.getAccessToken(),
-                            new GraphRequest.GraphJSONObjectCallback() {
-                                @Override
-                                public void onCompleted(JSONObject object, GraphResponse response) {
-
-                                    Log.i("Info", "Facebook response:" + response.toString());
-
-                                    try {
-                                        String email = object.getString("email");
-                                        String birthday = object.getString("birthday");
-                                        String gender = object.getString("gender");
-
-                                        Profile profile = Profile.getCurrentProfile();
-                                        String name = profile.getFirstName();
-                                        String surname = profile.getLastName();
-
-                                        Uri picUrl = profile.getProfilePictureUri(150,50);
-
-
-                                        Log.i("Info", "  >>email   :" + email);
-                                        Log.i("Info", "  >>birthday:" + birthday);
-                                        Log.i("Info", "  >>gender  :" + gender);
-                                        Log.i("Info", "  >>name    :" + name);
-                                        Log.i("Info", "  >>surname :" + surname);
-                                        Log.i("Info", "  >>Url     :" + picUrl.toString());
-
-                                    } catch (JSONException e) {
-                                        Log.i("Info", "JSONException error:" + e.toString());
-                                    }
-
-                                }
-                            });
-
-                    Bundle parameters = new Bundle();
-                    parameters.putString("fields", "id,name,email,gender,birthday");
-                    graphRequest.setParameters(parameters);
-                    graphRequest.executeAsync();
+                    getFacebookuserInfo(loginResult);
 
                     handleFacebookAccessToken(loginResult.getAccessToken());
                 }
@@ -191,7 +166,6 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
             findViewById(R.id.registerButton).setOnClickListener(this);
             findViewById(R.id.logInButton).setOnClickListener(this);
-
 
             adapter = new CustomPagerAdapter(this, EnterPageDataModel.getDataList());
 
@@ -239,7 +213,6 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                 // last page. make button text to GOT IT
 
             } else {
-                // still pages are left
 
             }
         }
@@ -270,7 +243,12 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
                             Log.i("Info","signInWithCredential:success" );
 
-                            startProfilePage();
+                            fbLogin = true;
+
+                            FirebaseUser currentUser = mAuth.getCurrentUser();
+                            user.setUserId(currentUser.getUid());
+
+                            startNextPage();
 
                         } else {
                             // If sign in fails, display a message to the user.
@@ -282,6 +260,65 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                         }
                     }
                 });
+    }
+
+    public void getFacebookuserInfo(LoginResult loginResult){
+
+        GraphRequest graphRequest = GraphRequest.newMeRequest(loginResult.getAccessToken(),
+                new GraphRequest.GraphJSONObjectCallback() {
+                    @Override
+                    public void onCompleted(JSONObject object, GraphResponse response) {
+
+                        Log.i("Info", "Facebook response:" + response.toString());
+
+                        try {
+                            user.setEmail(object.getString("email"));
+                            user.setBirthdate(object.getString("birthday"));
+                            user.setGender(object.getString("gender"));
+                            user.setUsername(" ");
+                            user.setPhoneNum(" ");
+
+
+                            String[] elements = object.getString("name").split(" ");
+                            user.setName(elements[0]);
+
+                            String[] lastname = Arrays.copyOfRange(elements,1,elements.length);
+
+                            StringBuilder builder = new StringBuilder();
+                            for(String s : lastname) {
+                                builder.append(s);
+                                builder.append(" ");
+                            }
+                            String surname = builder.toString().trim();
+                            user.setSurname(surname);
+
+                            Log.i("FBLogin", "  >>email     :" + user.getEmail());
+                            Log.i("FBLogin", "  >>birthday  :" + user.getBirthdate());
+                            Log.i("FBLogin", "  >>gender    :" + user.getGender());
+                            Log.i("FBLogin", "  >>name      :" + user.getName());
+                            Log.i("FBLogin", "  >>surname   :" + user.getSurname());
+
+                            Profile profile = Profile.getCurrentProfile();
+
+                            Uri picUrl = profile.getProfilePictureUri(50, 50);
+
+                            user.setProfilePicSrc(picUrl.toString());
+
+
+                            Log.i("FBLogin", "  >>uri       :" + picUrl.toString());
+
+                        } catch (JSONException e) {
+                            Log.i("Info", "  >>JSONException error:" + e.toString());
+                        } catch (Exception e){
+                            Log.i("Info", "  >>Profile error:" + e.toString());
+                        }
+                    }
+                });
+
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "id,name,email,gender,birthday");
+        graphRequest.setParameters(parameters);
+        graphRequest.executeAsync();
     }
 
     private void handleTwitterSession(TwitterSession session) {
@@ -301,7 +338,9 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
                             Log.i("Info","signInWithCredential:success");
 
-                            startProfilePage();
+                            twLogin = true;
+
+                            startNextPage();
 
                         } else {
                             // If sign in fails, display a message to the user.
@@ -313,8 +352,6 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                         }
                     }
                 });
-
-
     }
 
     @Override
@@ -358,9 +395,48 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
-    public void startProfilePage(){
+    public void startNextPage(){
 
-        Intent intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
-        startActivity(intent);
+        try {
+
+            Log.i("Info", "startNextPage starts");
+
+            Intent intent = null;
+
+            Log.i("UserInfo", "  >>mail     :" + user.getEmail());
+            Log.i("UserInfo", "  >>name     :" + user.getName());
+            Log.i("UserInfo", "  >>surname  :" + user.getSurname());
+            Log.i("UserInfo", "  >>userid   :" + user.getUserId());
+            Log.i("UserInfo", "  >>username :" + user.getUsername());
+            Log.i("UserInfo", "  >>gender   :" + user.getGender());
+            Log.i("UserInfo", "  >>src      :" + user.getProfilePicSrc());
+            Log.i("UserInfo", "  >>birthdate:" + user.getBirthdate());
+            Log.i("UserInfo", "  >>phone    :" + user.getPhoneNum());
+            Log.i("UserInfo", "  >>src      :" + user.getProfilePicSrc());
+
+            if (fbLogin) {
+
+                intent = new Intent(getApplicationContext(), ProfilePhotoActivity.class);
+                intent.putExtra("EntryType", getResources().getString(R.string.fbLoginType));
+
+            } else if (twLogin) {
+
+                intent = new Intent(getApplicationContext(), ProfilePhotoActivity.class);
+                intent.putExtra("EntryType", getResources().getString(R.string.twLoginType));
+
+            } else {
+
+                intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
+                intent.putExtra("EntryType", getResources().getString(R.string.mailLoginType));
+            }
+
+
+            intent.putExtra("User", user);
+            Log.i("UserInfo", "  >>Info buradayim");
+            startActivity(intent);
+
+        }catch (Exception e){
+            Log.i("Info", "  >>startNextPage exception:" + e.toString());
+        }
     }
 }

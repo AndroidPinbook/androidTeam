@@ -95,7 +95,7 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
 
     RelativeLayout backGrounRelLayout;
 
-    public User user;
+    public User user = null;
 
     private DatePickerDialog.OnDateSetListener mDateSetListener;
 

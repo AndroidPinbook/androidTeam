@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import uur.com.pinbook.Controller.BitmapConversion;
+import uur.com.pinbook.Controller.FirebaseUserAdapter;
 import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
 
@@ -58,6 +60,14 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
     public User user;
     public String photoChoosenType = "";
+
+    String loginType = "";
+
+    private Button continueButton;
+    private Button continueWithEmailVerifButton;
+    private ImageView photoImageView;
+
+    private boolean socialAppLoginInd = false;
 
     private static final int  MY_PERMISSION_CAMERA = 1;
     private static final int  MY_PERMISSION_WRITE_EXTERNAL_STORAGE = 2;
@@ -78,19 +88,47 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
+        continueButton = findViewById(R.id.continueButton);
+        continueWithEmailVerifButton = findViewById(R.id.continueWithEmailVerifButton);
+        photoImageView = (ImageView) findViewById(R.id.photoImageView);
+
         findViewById(R.id.photoImageView).setOnClickListener(this);
-        findViewById(R.id.continueWithEmailVerifButton).setOnClickListener(this);
+        continueWithEmailVerifButton.setOnClickListener(this);
+        continueButton.setOnClickListener(this);
         findViewById(R.id.chooseProfilePicTextView).setOnClickListener(this);
 
         mProgressDialog = new ProgressDialog(this);
 
-        getUserInfo();
+        getUserAndLoginInfo();
     }
 
-    private void getUserInfo() {
+    private void getUserAndLoginInfo() {
+
+        Log.i("Info", "getUserAndLoginInfo starts");
 
         Intent i = getIntent();
-        user = (User) i.getSerializableExtra("User");
+        user = (User) i.getSerializableExtra(getResources().getString(R.string.User));
+        loginType = (String) i.getSerializableExtra(getResources().getString(R.string.EntryType));
+
+        Log.i("Info", "  >>loginType   :" + loginType);
+        Log.i("Info", "  >>user pic src:" + user.getProfilePicSrc());
+
+        manageLoginType();
+    }
+
+    private void manageLoginType() {
+
+        if(loginType.equals(getResources().getString(R.string.fbLoginType) ) ||
+                loginType.equals(getResources().getString(R.string.twLoginType))){
+
+            Log.i("Info", "  >>inside manageLoginType function");
+            continueButton.setVisibility(View.VISIBLE);
+            continueButton.setEnabled(true);
+            continueWithEmailVerifButton.setVisibility(View.GONE);
+            continueWithEmailVerifButton.setEnabled(false);
+            socialAppLoginInd = true;
+            saveProfilePicToFB(null);
+        }
     }
 
     public void startCameraProcess(){
@@ -191,12 +229,14 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
     private void saveProfilePicToFB(Intent data) {
 
+        Log.i("Info", "saveProfilePicToFB starts");
+        Log.i("Info", "  >>socialAppLoginInd    :" + socialAppLoginInd);
+        Log.i("Info", "  >>user.getProfilePicSrc:" + user.getProfilePicSrc());
+
         try {
 
             Bitmap photo = null;
             Uri tempUri = null;
-
-            ImageView photoImageView = (ImageView) findViewById(R.id.photoImageView);
 
             if(photoChoosenType == getResources().getString(R.string.camera)){
 
@@ -210,12 +250,24 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
                 InputStream imageStream = getContentResolver().openInputStream(tempUri);
                 photo = BitmapFactory.decodeStream(imageStream);
                 photo = BitmapConversion.getRoundedShape(photo, 250, 250);
+
+            }else if(socialAppLoginInd){
+
+                tempUri = Uri.parse(user.getProfilePicSrc());
+                Log.i("Info", "  --1--");
+                InputStream imageStream = getContentResolver().openInputStream(tempUri);
+                Log.i("Info", "  --2--");
+                photo = BitmapFactory.decodeStream(imageStream);
+                Log.i("Info", "  --3--");
+                photo = BitmapConversion.getRoundedShape(photo, 250, 250);
+                Log.i("Info", "  --4--");
+                socialAppLoginInd = false;
             }
 
             photoImageView.setImageBitmap(photo);
 
-            FirebaseUser user = mAuth.getCurrentUser();
-            FBuserId = user.getUid();
+            FirebaseUser currentUser = mAuth.getCurrentUser();
+            FBuserId = currentUser.getUid();
 
             StorageReference riversRef = mStorageRef.child("Users/profilePics").child(FBuserId + ".jpg");
 
@@ -228,6 +280,7 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             // Get a URL to the uploaded content
                             downloadUrl = taskSnapshot.getDownloadUrl();
+                            user.setProfilePicSrc(downloadUrl.toString());
 
                             Log.i("Info", "downloadUrl:" + downloadUrl);
                             mProgressDialog.dismiss();
@@ -243,53 +296,8 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
                         }
                     });
         }catch (Exception e){
-            Log.i("Info", "put file exception:" + e.toString());
+            Log.i("Info", "  >>put file exception:" + e.toString());
         }
-    }
-
-    public void saveUserInfo(){
-
-        Map<String, String> values = new HashMap<>();
-
-        String userId = user.getUserId();
-
-        mDbref = FirebaseDatabase.getInstance().getReference().child(tag_users);
-
-        values.put("email", user.getEmail());
-        setValuesToCloud(userId, values);
-
-        values.put("gender", user.getGender());
-        setValuesToCloud(userId, values);
-
-        values.put("username", user.getUsername());
-        setValuesToCloud(userId, values);
-
-        values.put("name", user.getName());
-        setValuesToCloud(userId, values);
-
-        values.put("surname", user.getSurname());
-        setValuesToCloud(userId, values);
-
-        values.put("phone", user.getPhoneNum());
-        setValuesToCloud(userId, values);
-
-        values.put("birthdate", user.getBirthdate());
-        setValuesToCloud(userId, values);
-
-        if(downloadUrl != null) {
-            values.put("profImageSrc", downloadUrl.toString());
-            setValuesToCloud(userId, values);
-        }
-    }
-
-    public void setValuesToCloud(String userId, Map<String, String> values){
-
-        mDbref.child(userId).setValue(values, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                Log.i("Info","databaseError:" + databaseError);
-            }
-        });
     }
 
     public Uri getImageUri(Context inContext, Bitmap inImage) {
@@ -306,19 +314,6 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    /*public String getRealPathFromURI(Uri uri) {
-        try {
-            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-            cursor.moveToFirst();
-            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-            return cursor.getString(idx);
-        }catch (Exception e){
-
-            Log.i("Info", "getRealPathFromURI exception:" + e.toString());
-            return null;
-        }
-    }*/
-
     @Override
     public void onClick(View v) {
 
@@ -329,6 +324,10 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         switch (i){
             case R.id.continueWithEmailVerifButton:
                 startEmailVerifyActivity();
+                break;
+
+            case R.id.continueButton:
+                startProfilePageActivity();
                 break;
 
             case R.id.chooseProfilePicTextView:
@@ -379,8 +378,6 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
         AlertDialog alert = builder.create();
         alert.show();
-
-
     }
 
     private void startGalleryProcess() {
@@ -395,9 +392,17 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
     public void startEmailVerifyActivity(){
 
-        saveUserInfo();
+        FirebaseUserAdapter.saveUserInfo(user);
 
         Intent intent = new Intent(getApplicationContext(), EmailVerifyPageActivity.class);
+        startActivity(intent);
+    }
+
+    private void startProfilePageActivity() {
+
+        FirebaseUserAdapter.saveUserInfo(user);
+
+        Intent intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
         startActivity(intent);
     }
 
