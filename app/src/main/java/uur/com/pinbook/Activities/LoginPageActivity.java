@@ -34,6 +34,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import uur.com.pinbook.Controller.CustomDialogAdapter;
 import uur.com.pinbook.R;
 
 public class LoginPageActivity extends AppCompatActivity implements View.OnClickListener {
@@ -171,9 +172,11 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
                     dialog.dismiss();
                 }else{
-                    Toast.makeText(LoginPageActivity.this,
+                    /*Toast.makeText(LoginPageActivity.this,
                             "Please enter your email address",
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();*/
+                    String s = "Please enter your email address";
+                    CustomDialogAdapter.showErrorDialog(LoginPageActivity.this, s);
                 }
             }
         });

@@ -59,7 +59,7 @@ public class WelcomePageActivity extends AppCompatActivity {
             } else {
                 Log.i("Info","LoginPageActivity starts");
                 finish();
-                startActivity(new Intent(WelcomePageActivity.this, LoginPageActivity.class));
+                startActivity(new Intent(WelcomePageActivity.this, EnterPageActivity.class));
             }
         } else {
             Log.i("Info","EnterPageActivity starts");

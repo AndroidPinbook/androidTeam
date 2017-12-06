@@ -74,7 +74,8 @@
                         android:inputType="textEmailAddress"
                         android:drawablePadding="8dp"
                         android:drawableLeft="@drawable/email"
-                        android:layout_margin="3dp" />
+                        android:layout_margin="3dp"
+                        android:importantForAutofill="noExcludeDescendants"/>
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -97,16 +98,19 @@
                         android:inputType="textPassword"
                         android:drawablePadding="8dp"
                         android:drawableLeft="@drawable/password"
-                        android:layout_margin="3dp" />
+                        android:layout_margin="3dp"
+                        android:importantForAutofill="noExcludeDescendants"/>
+
+                    <CheckBox
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Remember me"
+                        android:id="@+id/rememberMeCb"/>
 
                 </android.support.design.widget.TextInputLayout>
 
 
-                <CheckBox
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Remember me"
-                    android:id="@+id/rememberMeCb"/>
+
 
                 <Button
                     android:id="@+id/buttonSignIn"
