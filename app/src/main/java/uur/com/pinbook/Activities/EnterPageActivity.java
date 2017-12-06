@@ -2,7 +2,11 @@ package uur.com.pinbook.Activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
@@ -27,6 +31,8 @@ import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -34,6 +40,12 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.TwitterAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.Twitter;
@@ -46,14 +58,21 @@ import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 
+import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.Controller.CustomPagerAdapter;
 import uur.com.pinbook.Controller.EnterPageDataModel;
+import uur.com.pinbook.Controller.FirebaseUserAdapter;
 import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
 
-public class EnterPageActivity extends AppCompatActivity implements View.OnClickListener{
+public class EnterPageActivity extends AppCompatActivity implements View.OnClickListener {
 
     private LinearLayout dotsLayout;
     private TextView[] dots;
@@ -70,9 +89,18 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
     private Button registerButton;
     private Button loginBtn;
 
+    private InputStream profileImageStream;
+    private StorageReference riversRef;
+    private StorageReference mStorageRef;
 
+    private boolean userIsDetected = false;
+    private String FBuserId;
 
     public User user;
+
+    private Bitmap photo = null;
+    private Uri tempUri = null;
+    private Uri downloadUrl = null;
 
     @SuppressLint("WrongViewCast")
     @Override
@@ -87,7 +115,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         FacebookSdk.sdkInitialize(getApplicationContext());
 
         // Configure Twitter SDK
-        TwitterAuthConfig authConfig =  new TwitterAuthConfig(
+        TwitterAuthConfig authConfig = new TwitterAuthConfig(
                 getString(R.string.twitter_consumer_key),
                 getString(R.string.twitter_consumer_secret));
 
@@ -100,6 +128,9 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         setContentView(R.layout.activity_enter_page);
 
         user = new User();
+        mStorageRef = FirebaseStorage.getInstance().getReference();
+
+        Log.i("Info", "EnterPageActivity========================================================");
 
         try {
 
@@ -115,7 +146,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                 @Override
                 public void success(Result<TwitterSession> result) {
 
-                    Log.i("Info","twitterLogin:success" + result);
+                    Log.i("Info", "twitterLogin:success" + result);
 
                     handleTwitterSession(result.data);
                 }
@@ -123,7 +154,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                 @Override
                 public void failure(TwitterException exception) {
 
-                    Log.i("Info","twitterLogin:failure:" + exception);
+                    Log.i("Info", "twitterLogin:failure:" + exception);
                 }
             });
 
@@ -134,9 +165,9 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
             loginButton.setReadPermissions(Arrays.asList(
                     "public_profile",
-                         "email",
-                         "user_birthday",
-                         "user_friends"));
+                    "email",
+                    "user_birthday",
+                    "user_friends"));
 
             loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
                 @Override
@@ -174,7 +205,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
             addBottomDots(0);
 
             enterViewPager.addOnPageChangeListener(viewPagerPageChangeListener);
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.i("Info", "On create error:" + e.toString());
         }
     }
@@ -230,39 +261,64 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
     private void handleFacebookAccessToken(AccessToken token) {
 
-        Log.i("Info","handleFacebookAccessToken:" + token);
+        Log.i("Info", "handleFacebookAccessToken starts:" + token);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
 
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
+        try {
+            mAuth.signInWithCredential(credential)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
 
-                            Log.i("Info","signInWithCredential:success" );
+                            if (task.isSuccessful()) {
+                                // Sign in success, update UI with the signed-in user's information
 
-                            fbLogin = true;
+                                Log.i("Info", "  >>signInWithCredential:success");
 
-                            FirebaseUser currentUser = mAuth.getCurrentUser();
-                            user.setUserId(currentUser.getUid());
+                                fbLogin = true;
 
-                            startNextPage();
+                                FirebaseUser currentUser = mAuth.getCurrentUser();
+                                user.setUserId(currentUser.getUid());
 
-                        } else {
-                            // If sign in fails, display a message to the user.
+                                Log.i("Info", "  >>userIsDetected:" + userIsDetected);
 
-                            Log.i("Info","signInWithCredential:failure:" + task.getException());
+                                if (user.getProfilePicSrc() != null) {
 
-                            Toast.makeText(EnterPageActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                                    tempUri = Uri.parse(user.getProfilePicSrc());
+                                    Log.i("Info", "  tempUri:" + tempUri);
+
+                                    try {
+                                        DownloadTask taskManager = new DownloadTask();
+                                        taskManager.execute(user.getProfilePicSrc()).get();
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    } catch (ExecutionException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                saveProfPicViaSocialApp();
+                                FirebaseUserAdapter.saveUserInfo(user);
+
+                                startNextPage();
+
+                            } else {
+                                // If sign in fails, display a message to the user.
+
+                                Log.i("Info", "  >>signInWithCredential:failure:" + task.getException());
+
+                                Toast.makeText(EnterPageActivity.this, "Authentication failed.",
+                                        Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
+                    });
+        } catch (Exception e) {
+            Log.i("Info", "  >>handleFacebookAccessToken error:" + e.toString());
+        }
     }
 
-    public void getFacebookuserInfo(LoginResult loginResult){
+    public void getFacebookuserInfo(LoginResult loginResult) {
 
         GraphRequest graphRequest = GraphRequest.newMeRequest(loginResult.getAccessToken(),
                 new GraphRequest.GraphJSONObjectCallback() {
@@ -278,19 +334,21 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                             user.setUsername(" ");
                             user.setPhoneNum(" ");
 
-
                             String[] elements = object.getString("name").split(" ");
                             user.setName(elements[0]);
 
-                            String[] lastname = Arrays.copyOfRange(elements,1,elements.length);
+                            String[] lastname = Arrays.copyOfRange(elements, 1, elements.length);
 
                             StringBuilder builder = new StringBuilder();
-                            for(String s : lastname) {
+                            for (String s : lastname) {
                                 builder.append(s);
                                 builder.append(" ");
                             }
                             String surname = builder.toString().trim();
                             user.setSurname(surname);
+
+                            String fbUserId = object.getString("id");
+                            setFacebookProfilePicture(fbUserId);
 
                             Log.i("FBLogin", "  >>email     :" + user.getEmail());
                             Log.i("FBLogin", "  >>birthday  :" + user.getBirthdate());
@@ -298,18 +356,9 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                             Log.i("FBLogin", "  >>name      :" + user.getName());
                             Log.i("FBLogin", "  >>surname   :" + user.getSurname());
 
-                            Profile profile = Profile.getCurrentProfile();
-
-                            Uri picUrl = profile.getProfilePictureUri(50, 50);
-
-                            user.setProfilePicSrc(picUrl.toString());
-
-
-                            Log.i("FBLogin", "  >>uri       :" + picUrl.toString());
-
                         } catch (JSONException e) {
                             Log.i("Info", "  >>JSONException error:" + e.toString());
-                        } catch (Exception e){
+                        } catch (Exception e) {
                             Log.i("Info", "  >>Profile error:" + e.toString());
                         }
                     }
@@ -321,9 +370,22 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         graphRequest.executeAsync();
     }
 
+
+    public void setFacebookProfilePicture(String userID) {
+
+        try {
+            String url = "https://graph.facebook.com/" + userID + "/picture?type=large";
+            user.setProfilePicSrc(url);
+
+        } catch (Exception e) {
+
+            Log.i("Info", "  >>setFacebookProfilePicture error:" + e.toString());
+        }
+    }
+
     private void handleTwitterSession(TwitterSession session) {
 
-        Log.i("Info","handleTwitterSession:" + session);
+        Log.i("Info", "handleTwitterSession:" + session);
 
         AuthCredential credential = TwitterAuthProvider.getCredential(
                 session.getAuthToken().token,
@@ -336,7 +398,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
 
-                            Log.i("Info","signInWithCredential:success");
+                            Log.i("Info", "signInWithCredential:success");
 
                             twLogin = true;
 
@@ -345,7 +407,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                         } else {
                             // If sign in fails, display a message to the user.
 
-                            Log.i("Info","signInWithCredential:failure:" + task.getException());
+                            Log.i("Info", "signInWithCredential:failure:" + task.getException());
 
                             Toast.makeText(EnterPageActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
@@ -365,7 +427,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
             // Pass the activity result back to the Facebook SDK
             mCallbackManager.onActivityResult(requestCode, resultCode, data);
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.i("Info", "onActivityResult error:" + e.toString());
         }
     }
@@ -377,15 +439,17 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
         Intent intent;
 
-        switch (i){
+        switch (i) {
             case R.id.registerButton:
 
                 intent = new Intent(getApplicationContext(), RegisterPageActivity.class);
+                finish();
                 startActivity(intent);
                 break;
 
             case R.id.logInButton:
                 intent = new Intent(getApplicationContext(), LoginPageActivity.class);
+                finish();
                 startActivity(intent);
                 break;
 
@@ -395,7 +459,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
-    public void startNextPage(){
+    public void startNextPage() {
 
         try {
 
@@ -414,29 +478,92 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
             Log.i("UserInfo", "  >>phone    :" + user.getPhoneNum());
             Log.i("UserInfo", "  >>src      :" + user.getProfilePicSrc());
 
-            if (fbLogin) {
+            if (fbLogin || twLogin) {
 
-                intent = new Intent(getApplicationContext(), ProfilePhotoActivity.class);
-                intent.putExtra("EntryType", getResources().getString(R.string.fbLoginType));
-
-            } else if (twLogin) {
-
-                intent = new Intent(getApplicationContext(), ProfilePhotoActivity.class);
-                intent.putExtra("EntryType", getResources().getString(R.string.twLoginType));
+                intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
 
             } else {
 
-                intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
-                intent.putExtra("EntryType", getResources().getString(R.string.mailLoginType));
+                intent = new Intent(getApplicationContext(), ProfilePhotoActivity.class);
+                intent.putExtra("User", user);
             }
 
-
-            intent.putExtra("User", user);
             Log.i("UserInfo", "  >>Info buradayim");
+            finish();
             startActivity(intent);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.i("Info", "  >>startNextPage exception:" + e.toString());
+        }
+    }
+
+    public void saveProfPicViaSocialApp() {
+
+        Log.i("Info", "saveProfPicViaSocialApp");
+
+        try {
+            //photoImageView.setDrawingCacheEnabled(true);
+            //photo = photoImageView.getDrawingCache();
+
+            FirebaseUser currentUser = mAuth.getCurrentUser();
+            FBuserId = currentUser.getUid();
+
+            riversRef = mStorageRef.child("Users/profilePics").child(FBuserId + ".jpg");
+
+            //photo = ((BitmapDrawable) photoImageView.getDrawable()).getBitmap();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            photo.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data = baos.toByteArray();
+
+            UploadTask uploadTask = riversRef.putBytes(data);
+
+            uploadTask = riversRef.putStream(profileImageStream);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+
+                    Log.i("Info", "put file err:" + exception.toString());
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    downloadUrl = taskSnapshot.getDownloadUrl();
+                    user.setProfilePicSrc(downloadUrl.toString());
+
+                    Log.i("Info", "downloadUrl:" + downloadUrl);
+                }
+            });
+        } catch (Exception e) {
+
+            Log.i("Info", "  >>saveProfPicViaSocialApp exception:" + e.toString());
+        }
+    }
+
+    public class DownloadTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            String result = "";
+            URL url;
+            HttpURLConnection urlConnection = null;
+
+            try {
+
+                url = new URL(urls[0]);
+                urlConnection = (HttpURLConnection) url.openConnection();
+
+                profileImageStream = urlConnection.getInputStream();
+                photo = BitmapFactory.decodeStream(profileImageStream);
+                photo = BitmapConversion.getRoundedShape(photo, 250, 250);
+
+                return result;
+
+            } catch (Exception e) {
+
+                Log.i("Info", "  >>DownloadTask error:" + e.toString());
+                return result;
+            }
         }
     }
 }

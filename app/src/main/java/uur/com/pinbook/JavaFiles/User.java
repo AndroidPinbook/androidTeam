@@ -1,5 +1,7 @@
 package uur.com.pinbook.JavaFiles;
 
+import android.graphics.Bitmap;
+
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.Serializable;

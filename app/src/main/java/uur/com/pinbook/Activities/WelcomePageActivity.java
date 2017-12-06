@@ -46,6 +46,8 @@ public class WelcomePageActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_welcome_page);
 
+        Log.i("Info","WelcomePageActivity========================================================");
+
         // Hide the status bar.
         View decorView = getWindow().getDecorView();
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -105,7 +107,7 @@ public class WelcomePageActivity extends AppCompatActivity {
 
                 Log.i("Info","LoginPageActivity starts");
                 finish();
-                startActivity(new Intent(WelcomePageActivity.this, LoginPageActivity.class));
+                startActivity(new Intent(WelcomePageActivity.this, EnterPageActivity.class));
             }
         } else {
             Log.i("Info","EnterPageActivity starts");

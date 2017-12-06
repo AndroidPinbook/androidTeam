@@ -10,7 +10,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -37,6 +39,9 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,13 +66,13 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
     public User user;
     public String photoChoosenType = "";
 
-    String loginType = "";
-
-    private Button continueButton;
     private Button continueWithEmailVerifButton;
     private ImageView photoImageView;
+    private InputStream profileImageStream;
+    private StorageReference riversRef;
 
-    private boolean socialAppLoginInd = false;
+    private Bitmap photo = null;
+    private Uri tempUri = null;
 
     private static final int  MY_PERMISSION_CAMERA = 1;
     private static final int  MY_PERMISSION_WRITE_EXTERNAL_STORAGE = 2;
@@ -88,16 +93,16 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
-        continueButton = findViewById(R.id.continueButton);
         continueWithEmailVerifButton = findViewById(R.id.continueWithEmailVerifButton);
         photoImageView = (ImageView) findViewById(R.id.photoImageView);
 
         findViewById(R.id.photoImageView).setOnClickListener(this);
         continueWithEmailVerifButton.setOnClickListener(this);
-        continueButton.setOnClickListener(this);
         findViewById(R.id.chooseProfilePicTextView).setOnClickListener(this);
 
         mProgressDialog = new ProgressDialog(this);
+
+        Log.i("Info","ProfilePhotoActivity========================================================");
 
         getUserAndLoginInfo();
     }
@@ -108,28 +113,10 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
         Intent i = getIntent();
         user = (User) i.getSerializableExtra(getResources().getString(R.string.User));
-        loginType = (String) i.getSerializableExtra(getResources().getString(R.string.EntryType));
 
-        Log.i("Info", "  >>loginType   :" + loginType);
         Log.i("Info", "  >>user pic src:" + user.getProfilePicSrc());
-
-        manageLoginType();
     }
 
-    private void manageLoginType() {
-
-        if(loginType.equals(getResources().getString(R.string.fbLoginType) ) ||
-                loginType.equals(getResources().getString(R.string.twLoginType))){
-
-            Log.i("Info", "  >>inside manageLoginType function");
-            continueButton.setVisibility(View.VISIBLE);
-            continueButton.setEnabled(true);
-            continueWithEmailVerifButton.setVisibility(View.GONE);
-            continueWithEmailVerifButton.setEnabled(false);
-            socialAppLoginInd = true;
-            saveProfilePicToFB(null);
-        }
-    }
 
     public void startCameraProcess(){
 
@@ -214,11 +201,11 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
             switch (requestCode){
 
                 case MY_PERMISSION_CAMERA:
-                    saveProfilePicToFB(data);
+                    manageProfilePicChoosen(data);
                     break;
 
                 case MY_PERMISSION_ACTION_GET_CONTENT:
-                    saveProfilePicToFB(data);
+                    manageProfilePicChoosen(data);
                     break;
 
                 default:
@@ -227,16 +214,12 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    private void saveProfilePicToFB(Intent data) {
+    private void manageProfilePicChoosen(Intent data) {
 
-        Log.i("Info", "saveProfilePicToFB starts");
-        Log.i("Info", "  >>socialAppLoginInd    :" + socialAppLoginInd);
+        Log.i("Info", "manageProfilePicChoosen starts");
         Log.i("Info", "  >>user.getProfilePicSrc:" + user.getProfilePicSrc());
 
         try {
-
-            Bitmap photo = null;
-            Uri tempUri = null;
 
             if(photoChoosenType == getResources().getString(R.string.camera)){
 
@@ -247,56 +230,74 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
             }else if(photoChoosenType == getResources().getString(R.string.gallery)){
 
                 tempUri = data.getData();
-                InputStream imageStream = getContentResolver().openInputStream(tempUri);
-                photo = BitmapFactory.decodeStream(imageStream);
+                profileImageStream = getContentResolver().openInputStream(tempUri);
+                photo = BitmapFactory.decodeStream(profileImageStream);
                 photo = BitmapConversion.getRoundedShape(photo, 250, 250);
 
-            }else if(socialAppLoginInd){
-
-                tempUri = Uri.parse(user.getProfilePicSrc());
-                Log.i("Info", "  --1--");
-                InputStream imageStream = getContentResolver().openInputStream(tempUri);
-                Log.i("Info", "  --2--");
-                photo = BitmapFactory.decodeStream(imageStream);
-                Log.i("Info", "  --3--");
-                photo = BitmapConversion.getRoundedShape(photo, 250, 250);
-                Log.i("Info", "  --4--");
-                socialAppLoginInd = false;
             }
 
             photoImageView.setImageBitmap(photo);
 
+            saveProfilePicToFirebase();
+
+        }catch (Exception e){
+            Log.i("Info", "  >>manageProfilePicChoosen exception:" + e.toString());
+        }
+    }
+
+    public void saveProfilePicToFirebase(){
+
+        Log.i("Info", "saveProfilePicToFirebase starts");
+
+        try {
+
             FirebaseUser currentUser = mAuth.getCurrentUser();
             FBuserId = currentUser.getUid();
 
-            StorageReference riversRef = mStorageRef.child("Users/profilePics").child(FBuserId + ".jpg");
+            riversRef = mStorageRef.child("Users/profilePics").child(FBuserId + ".jpg");
 
             mProgressDialog.setMessage("Uploading.....");
             mProgressDialog.show();
+
+            saveProfPicViaEmailVerify();
+
+            mProgressDialog.dismiss();
+
+        }catch (Exception e){
+
+            Log.i("Info", "  >>saveProfilePicToFirebase exception:" + e.toString());
+        }
+
+    }
+
+
+
+    public void saveProfPicViaEmailVerify(){
+
+        Log.i("Info", "saveProfPicViaEmailVerify");
+
+        try {
 
             riversRef.putFile(tempUri)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            // Get a URL to the uploaded content
+
                             downloadUrl = taskSnapshot.getDownloadUrl();
                             user.setProfilePicSrc(downloadUrl.toString());
 
                             Log.i("Info", "downloadUrl:" + downloadUrl);
-                            mProgressDialog.dismiss();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
-                            // Handle unsuccessful uploads
 
                             Log.i("Info", "put file err:" + exception.toString());
-                            mProgressDialog.dismiss();
                         }
                     });
         }catch (Exception e){
-            Log.i("Info", "  >>put file exception:" + e.toString());
+            Log.i("Info", "  >>saveProfPicViaEmailVerify exception:" + e.toString());
         }
     }
 
@@ -324,10 +325,6 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         switch (i){
             case R.id.continueWithEmailVerifButton:
                 startEmailVerifyActivity();
-                break;
-
-            case R.id.continueButton:
-                startProfilePageActivity();
                 break;
 
             case R.id.chooseProfilePicTextView:
@@ -397,14 +394,4 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         Intent intent = new Intent(getApplicationContext(), EmailVerifyPageActivity.class);
         startActivity(intent);
     }
-
-    private void startProfilePageActivity() {
-
-        FirebaseUserAdapter.saveUserInfo(user);
-
-        Intent intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
-        startActivity(intent);
-    }
-
-
 }
