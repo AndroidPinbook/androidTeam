@@ -212,7 +212,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
             FirebaseUser fbUser = mAuth.getCurrentUser();
 
-            if(fbUser == null)
+            if (fbUser == null)
                 Log.i("Info", "  >>fbUser is NULL");
             else
                 Log.i("Info", "  >>fbUser is NOT NULL");
@@ -522,7 +522,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
     }
 
 
-    public void saveTwitterInfo(String username){
+    public void saveTwitterInfo(String username) {
 
         try {
 
@@ -543,14 +543,12 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                 twUser = twitter.showUser(username);
 
                 String profImage = twUser.getBiggerProfileImageURL();
-                Log.i("Info", "RetrieveFeedTask starts4");
+                user.setProfilePicSrc(profImage);
 
                 String[] elements = twUser.getName().split(" ");
                 user.setName(elements[0]);
 
                 String[] lastname = Arrays.copyOfRange(elements, 1, elements.length);
-
-                Log.i("Info", "RetrieveFeedTask starts5");
 
                 StringBuilder builder = new StringBuilder();
                 for (String s : lastname) {
@@ -560,10 +558,8 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                 String surname = builder.toString().trim();
                 user.setSurname(surname);
 
-                Log.i("Info", "RetrieveFeedTask starts6");
-
                 user.setUsername(twUser.getScreenName());
-                user.setProfilePicSrc(profImage);
+
 
                 Log.i("Info", "  >>twitter profImage :" + profImage);
                 Log.i("Info", "  >>twitter name      :" + elements[0]);
@@ -572,8 +568,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
             } catch (twitter4j.TwitterException e) {
                 Log.i("Info", "  >>twitter try exception1:" + e.toString());
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.i("Info", "  >>twitter try exception2:" + e.toString());
             }
 
@@ -585,13 +580,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         }
 
     }
-
-
-
-
-
-
-
+    
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
