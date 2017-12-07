@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.StrictMode;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -48,7 +49,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.Session;
 import com.twitter.sdk.android.core.Twitter;
+import com.twitter.sdk.android.core.TwitterApiClient;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterConfig;
 import com.twitter.sdk.android.core.TwitterException;
@@ -59,18 +62,78 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import retrofit2.http.GET;
+import retrofit2.http.Query;
+import twitter4j.AccountSettings;
+import twitter4j.Category;
+import twitter4j.DirectMessage;
+import twitter4j.Friendship;
+import twitter4j.GeoLocation;
+import twitter4j.GeoQuery;
+import twitter4j.IDs;
+import twitter4j.Location;
+import twitter4j.OEmbed;
+import twitter4j.OEmbedRequest;
+import twitter4j.PagableResponseList;
+import twitter4j.Paging;
+import twitter4j.Place;
+import twitter4j.QueryResult;
+import twitter4j.RateLimitStatus;
+import twitter4j.RateLimitStatusEvent;
+import twitter4j.RateLimitStatusListener;
+import twitter4j.Relationship;
+import twitter4j.ResponseList;
+import twitter4j.SavedSearch;
+import twitter4j.Status;
+import twitter4j.StatusUpdate;
+import twitter4j.Trends;
+import twitter4j.TwitterAPIConfiguration;
+import twitter4j.UploadedMedia;
+import twitter4j.UserList;
+import twitter4j.api.DirectMessagesResources;
+import twitter4j.api.FavoritesResources;
+import twitter4j.api.FriendsFollowersResources;
+import twitter4j.api.HelpResources;
+import twitter4j.api.ListsResources;
+import twitter4j.api.PlacesGeoResources;
+import twitter4j.api.SavedSearchesResources;
+import twitter4j.api.SearchResource;
+import twitter4j.api.SpamReportingResource;
+import twitter4j.api.SuggestedUsersResources;
+import twitter4j.api.TimelinesResources;
+import twitter4j.api.TrendsResources;
+import twitter4j.api.TweetsResources;
+import twitter4j.api.UsersResources;
+import twitter4j.auth.Authorization;
+import twitter4j.auth.OAuth2Token;
+import twitter4j.auth.RequestToken;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.ConfigurationBuilder;
+import twitter4j.util.function.Consumer;
 import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.Controller.CustomPagerAdapter;
 import uur.com.pinbook.Controller.EnterPageDataModel;
 import uur.com.pinbook.Controller.FirebaseUserAdapter;
 import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
+
+//import oauth.signpost.OAuthProvider;
+//import oauth.signpost.basic.DefaultOAuthProvider;
+//import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
+//import oauth.signpost.exception.OAuthCommunicationException;
+//import oauth.signpost.exception.OAuthExpectationFailedException;
+//import oauth.signpost.exception.OAuthMessageSignerException;
+//import oauth.signpost.exception.OAuthNotAuthorizedException;
+import twitter4j.TwitterFactory;
+//import twitter4j.http.AccessToken;
 
 public class EnterPageActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -93,14 +156,20 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
     private StorageReference riversRef;
     private StorageReference mStorageRef;
 
+
     private boolean userIsDetected = false;
     private String FBuserId;
 
     public User user;
 
     private Bitmap photo = null;
-    private Uri tempUri = null;
     private Uri downloadUrl = null;
+
+    private static Twitter twitter;
+    private static RequestToken requestToken;
+    private static AccessToken accessToken;
+
+    private AccessToken mAccessToken;
 
     @SuppressLint("WrongViewCast")
     @Override
@@ -127,6 +196,11 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
         setContentView(R.layout.activity_enter_page);
 
+        if (android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
+
         user = new User();
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
@@ -135,6 +209,13 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         try {
 
             mAuth = FirebaseAuth.getInstance();
+
+            FirebaseUser fbUser = mAuth.getCurrentUser();
+
+            if(fbUser == null)
+                Log.i("Info", "  >>fbUser is NULL");
+            else
+                Log.i("Info", "  >>fbUser is NOT NULL");
 
             ViewPager enterViewPager = (ViewPager) findViewById(R.id.enterViewPager);
             dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
@@ -281,12 +362,11 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                                 FirebaseUser currentUser = mAuth.getCurrentUser();
                                 user.setUserId(currentUser.getUid());
 
+                                //userIsDetected = FirebaseUserAdapter.emailIsRegistered(currentUser.getEmail());
+
                                 Log.i("Info", "  >>userIsDetected:" + userIsDetected);
 
                                 if (user.getProfilePicSrc() != null) {
-
-                                    tempUri = Uri.parse(user.getProfilePicSrc());
-                                    Log.i("Info", "  tempUri:" + tempUri);
 
                                     try {
                                         DownloadTask taskManager = new DownloadTask();
@@ -328,6 +408,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                         Log.i("Info", "Facebook response:" + response.toString());
 
                         try {
+
                             user.setEmail(object.getString("email"));
                             user.setBirthdate(object.getString("birthday"));
                             user.setGender(object.getString("gender"));
@@ -383,9 +464,10 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
-    private void handleTwitterSession(TwitterSession session) {
+    private void handleTwitterSession(final TwitterSession session) {
 
         Log.i("Info", "handleTwitterSession:" + session);
+
 
         AuthCredential credential = TwitterAuthProvider.getCredential(
                 session.getAuthToken().token,
@@ -402,12 +484,35 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
                             twLogin = true;
 
+                            String username = session.getUserName();
+                            //new RetrieveFeedTask().execute(username);
+
+                            saveTwitterInfo(username);
+
+                            FirebaseUser currentUser = mAuth.getCurrentUser();
+                            user.setUserId(currentUser.getUid());
+
+                            Log.i("Info", "  >>userIsDetected:" + userIsDetected);
+
+                            if (user.getProfilePicSrc() != null) {
+
+                                try {
+                                    DownloadTask taskManager = new DownloadTask();
+                                    taskManager.execute(user.getProfilePicSrc()).get();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                } catch (ExecutionException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            saveProfPicViaSocialApp();
+                            FirebaseUserAdapter.saveUserInfo(user);
+
                             startNextPage();
 
                         } else {
-                            // If sign in fails, display a message to the user.
-
-                            Log.i("Info", "signInWithCredential:failure:" + task.getException());
+                            Log.i("Info", "  >>signInWithCredential:failure:" + task.getException());
 
                             Toast.makeText(EnterPageActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
@@ -415,6 +520,77 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                     }
                 });
     }
+
+
+    public void saveTwitterInfo(String username){
+
+        try {
+
+            Log.i("Info", "RetrieveFeedTask starts_xxxxx");
+
+            try {
+                Log.i("Info", "RetrieveFeedTask starts2");
+                ConfigurationBuilder cb = new ConfigurationBuilder();
+                cb.setOAuthConsumerKey(getResources().getString(R.string.twitter_consumer_key));
+                cb.setOAuthConsumerSecret(getResources().getString(R.string.twitter_consumer_secret));
+                cb.setOAuthAccessToken(getResources().getString(R.string.twitter_token));
+                cb.setOAuthAccessTokenSecret(getResources().getString(R.string.twitter_token_secret));
+                twitter4j.Twitter twitter = new TwitterFactory(cb.build()).getInstance();
+                Log.i("Info", "RetrieveFeedTask starts3");
+
+                twitter4j.User twUser = null;
+
+                twUser = twitter.showUser(username);
+
+                String profImage = twUser.getBiggerProfileImageURL();
+                Log.i("Info", "RetrieveFeedTask starts4");
+
+                String[] elements = twUser.getName().split(" ");
+                user.setName(elements[0]);
+
+                String[] lastname = Arrays.copyOfRange(elements, 1, elements.length);
+
+                Log.i("Info", "RetrieveFeedTask starts5");
+
+                StringBuilder builder = new StringBuilder();
+                for (String s : lastname) {
+                    builder.append(s);
+                    builder.append(" ");
+                }
+                String surname = builder.toString().trim();
+                user.setSurname(surname);
+
+                Log.i("Info", "RetrieveFeedTask starts6");
+
+                user.setUsername(twUser.getScreenName());
+                user.setProfilePicSrc(profImage);
+
+                Log.i("Info", "  >>twitter profImage :" + profImage);
+                Log.i("Info", "  >>twitter name      :" + elements[0]);
+                Log.i("Info", "  >>twitter surname   :" + surname);
+                Log.i("Info", "  >>twitter username  :" + twUser.getScreenName());
+
+            } catch (twitter4j.TwitterException e) {
+                Log.i("Info", "  >>twitter try exception1:" + e.toString());
+            }
+            catch (Exception e) {
+                Log.i("Info", "  >>twitter try exception2:" + e.toString());
+            }
+
+        } catch (Exception e) {
+            Log.i("Info", "  >>twitter try exception3:" + e.toString());
+
+        } finally {
+
+        }
+
+    }
+
+
+
+
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -549,7 +725,6 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
             HttpURLConnection urlConnection = null;
 
             try {
-
                 url = new URL(urls[0]);
                 urlConnection = (HttpURLConnection) url.openConnection();
 

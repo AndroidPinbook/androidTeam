@@ -1,9 +1,16 @@
 package uur.com.pinbook.Controller;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.firebase.client.Firebase;
 import com.firebase.client.Query;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.ProviderQueryResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -13,6 +20,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import uur.com.pinbook.Activities.RegisterPageActivity;
 import uur.com.pinbook.JavaFiles.User;
 
 /**
@@ -23,6 +31,10 @@ public class FirebaseUserAdapter {
 
     public static DatabaseReference mDbref;
     public static String tag_users = "users";
+
+    FirebaseAuth mAuth = null;
+
+    public static boolean userIsDetected = false;
 
     public static void saveUserInfo(User user){
 
@@ -71,31 +83,27 @@ public class FirebaseUserAdapter {
         }
     }
 
-    /*public boolean findFBUserWithUserId(final String userId){
+   /* public static boolean emailIsRegistered(String email) {
 
-        Log.i("Info", "findFBUserWithUserId starts");
+        userIsDetected = false;
 
-        mDbref = FirebaseDatabase.getInstance().getReference();
-        final DatabaseReference users = mDbref.child(tag_users).child(userId);
+        FirebaseAuth auth = FirebaseAuth.getInstance();
 
-        users.addValueEventListener(new ValueEventListener() {
+        auth.fetchProvidersForEmail(email).addOnCompleteListener(new OnCompleteListener<ProviderQueryResult>() {
+
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                Log.i("Info","  >>addValueEventListener onDataChange:" + snapshot.getValue());
+            public void onComplete(@NonNull Task<ProviderQueryResult> task) {
 
-                if(snapshot != null)
+                Log.i("Info","  >>emailIsRegistered task:" + task.getResult());
+                Log.i("Info","  >>emailIsRegistered task size:" + task.getResult().getProviders().size());
+
+                if (task.getResult().getProviders().size() > 0) {
+
                     userIsDetected = true;
-                else
-                    userIsDetected = false;
-
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+                }
             }
         });
 
         return userIsDetected;
     }*/
-
 }
