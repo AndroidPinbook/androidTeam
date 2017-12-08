@@ -48,9 +48,9 @@ public class EnterPageDataModel {
         };
 
         String[] titles = new String[]{
-                "Throw a pin all around the world",
-                "Contact with your friends and enjoy",
-                "Set up mysterious games"
+                "Unlimited pins all around the world",
+                "Contact with your friends and follow them",
+                "Throw a pin unreacable places"
         };
 
         for(int i =0; i<imagesIDs.length; i++){

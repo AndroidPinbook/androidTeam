@@ -10,8 +10,8 @@ import android.widget.TextView;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
-import com.facebook.login.widget.LoginButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.twitter.sdk.android.core.TwitterCore;
 
 import uur.com.pinbook.R;
 
@@ -51,6 +51,7 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
             firebaseAuth.signOut();
 
             LoginManager.getInstance().logOut();
+            TwitterCore.getInstance().getSessionManager().clearActiveSession();
             finish();
             startActivity(new Intent(this, EnterPageActivity.class));
         }

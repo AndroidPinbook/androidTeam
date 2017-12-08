@@ -27,6 +27,8 @@ public class EmailVerifyPageActivity extends AppCompatActivity implements View.O
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
 
+    private ActionCodeSettings actionCodeSettings;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,11 +64,18 @@ public class EmailVerifyPageActivity extends AppCompatActivity implements View.O
         }
     }
 
-    private void buttonActivatedFunc() {
+    public void buttonActivatedFunc() {
 
-        user.reload();
+        Log.i("Info", "buttonActivatedFunc starts======");
 
-        if(user.isEmailVerified()){
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+        //mAuth.applyActionCode(actionCodeSettings.getUrl());
+
+        FirebaseUser mUser = mAuth.getCurrentUser();
+        mUser.reload();
+
+        if(mUser.isEmailVerified()){
             Log.i("verified: ", "yes");
             finish();
             startActivity(new Intent(EmailVerifyPageActivity.this, ProfilePageActivity.class));
@@ -82,6 +91,7 @@ public class EmailVerifyPageActivity extends AppCompatActivity implements View.O
 
     private void sendVerificationMail(){
 
+
 /*
         ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
                 .setHandleCodeInApp(true)
@@ -92,7 +102,7 @@ public class EmailVerifyPageActivity extends AppCompatActivity implements View.O
 
         final FirebaseUser final_user = firebaseAuth.getCurrentUser();
 
-        ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
+        actionCodeSettings = ActionCodeSettings.newBuilder()
                 .setAndroidPackageName("uur.com.pinbook", true, null)
                 .setHandleCodeInApp(false)
                 .setIOSBundleId(null)

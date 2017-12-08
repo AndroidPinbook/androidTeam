@@ -1,5 +1,9 @@
 package uur.com.pinbook.JavaFiles;
 
+import android.graphics.Bitmap;
+
+import com.google.firebase.auth.FirebaseUser;
+
 import java.io.Serializable;
 
 /**
@@ -17,7 +21,6 @@ public class User implements Serializable{
     String profilePicSrc;
     String birthdate;
     String phoneNum;
-
 
     public String getUserId() {
         return userId;

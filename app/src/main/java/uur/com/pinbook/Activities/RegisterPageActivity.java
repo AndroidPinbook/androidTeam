@@ -95,7 +95,7 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
 
     RelativeLayout backGrounRelLayout;
 
-    public User user;
+    public User user = null;
 
     private DatePickerDialog.OnDateSetListener mDateSetListener;
 
@@ -380,5 +380,12 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
     @Override
     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
 
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        Intent intent = new Intent(getApplicationContext(), EnterPageActivity.class);
+        startActivity(intent);
     }
 }
