@@ -15,22 +15,39 @@
         android:layout_height="match_parent"
         android:id="@+id/userInfoLayout">
 
+
+
+        <!--TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pacifico"
+            android:text="PinBook"
+            android:textColor="@android:color/white"
+            android:textSize="30sp"
+            android:background="@color/background"
+            android:gravity="center"
+            android:minHeight="?attr/actionBarSize"/-->
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/pacifico"
             android:text="PinBook"
             android:id="@+id/pinbookTextView"
-            android:textColor="@color/button_color"
-            android:textSize="@dimen/enter_page_text_size"
-            android:gravity="center"/>
+            android:textColor="@android:color/white"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:background="@color/background"
+            android:minHeight="?attr/actionBarSize"/>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="75dp"
             android:id="@+id/genderLayout"
             android:orientation="horizontal"
-            android:layout_below="@+id/pinbookTextView">
+            android:layout_below="@+id/pinbookTextView"
+            android:paddingTop="15dp">
 
             <ImageView
                 android:layout_width="200dp"
@@ -188,16 +205,15 @@
 
 
             <LinearLayout
-                android:layout_width="153dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_gravity="center_vertical">
+                android:gravity="center">
 
                 <Button
                     android:id="@+id/registerButton"
-                    android:layout_width="wrap_content"
+                    android:layout_width="153dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:text="REGISTER"
                     android:textColor="@color/cardview_light_background"
                     android:background = "@drawable/ripple" />
