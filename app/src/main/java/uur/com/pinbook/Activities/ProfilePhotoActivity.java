@@ -328,7 +328,8 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
         switch (i){
             case R.id.continueWithEmailVerifButton:
-                startProfileActivity();
+                startEmailVerifyPage();
+                //startProfileActivity(); //for testing..
                 break;
 
             case R.id.chooseProfilePicTextView:
@@ -398,6 +399,14 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         saveUserInfo();
 
         Intent intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
+        startActivity(intent);
+    }
+
+    public void startEmailVerifyPage(){
+
+        saveUserInfo();
+
+        Intent intent = new Intent(getApplicationContext(), EmailVerifyPageActivity.class);
         startActivity(intent);
     }
 

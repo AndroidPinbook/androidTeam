@@ -105,7 +105,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Remember me"
-                        android:id="@+id/rememberMeCb"/>
+                        android:id="@+id/rememberMeCb"
+                        android:theme="@style/cbColor"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginLeft="5dp"/>
 
                 </android.support.design.widget.TextInputLayout>
 
