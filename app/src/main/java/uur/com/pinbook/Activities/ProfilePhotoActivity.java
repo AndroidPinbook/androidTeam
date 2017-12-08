@@ -102,6 +102,8 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
         mProgressDialog = new ProgressDialog(this);
 
+
+
         Log.i("Info","ProfilePhotoActivity========================================================");
 
         getUserAndLoginInfo();
@@ -393,5 +395,11 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
         Intent intent = new Intent(getApplicationContext(), EmailVerifyPageActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+
     }
 }

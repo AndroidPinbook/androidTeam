@@ -290,4 +290,11 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
             loginPrefsEditor.commit();
         }
     }
+
+    @Override
+    public void onBackPressed() {
+
+        Intent intent = new Intent(getApplicationContext(), EnterPageActivity.class);
+        startActivity(intent);
+    }
 }

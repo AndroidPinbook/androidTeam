@@ -381,4 +381,11 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
 
     }
+
+    @Override
+    public void onBackPressed() {
+
+        Intent intent = new Intent(getApplicationContext(), EnterPageActivity.class);
+        startActivity(intent);
+    }
 }
