@@ -1,130 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/registerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="uur.com.pinbook.Activities.RegisterPageActivity"
     android:background="@color/background_white"
-    android:id="@+id/registerLayout">
+    tools:context="uur.com.pinbook.Activities.RegisterPageActivity">
+
 
 
     <RelativeLayout
+        android:id="@+id/userInfoLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/userInfoLayout">
-
-
-
-        <!--TextView
-            android:id="@+id/toolbar_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/pacifico"
-            android:text="PinBook"
-            android:textColor="@android:color/white"
-            android:textSize="30sp"
-            android:background="@color/background"
-            android:gravity="center"
-            android:minHeight="?attr/actionBarSize"/-->
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/pacifico"
-            android:text="PinBook"
-            android:id="@+id/pinbookTextView"
-            android:textColor="@android:color/white"
-            android:textSize="30sp"
-            android:gravity="center"
-            android:background="@color/background"
-            android:minHeight="?attr/actionBarSize"/>
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="75dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/toolbarLayout">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar_top"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/background"
+                android:gravity="center"
+                android:minHeight="?attr/actionBarSize">
+
+                <TextView
+                    android:id="@+id/toolbar_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/pacifico"
+                    android:text="PinBook"
+                    android:textColor="@android:color/white"
+                    android:textSize="30sp" />
+
+            </android.support.v7.widget.Toolbar>
+        </LinearLayout>
+
+
+
+        <LinearLayout
             android:id="@+id/genderLayout"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_below="@+id/toolbarLayout"
             android:orientation="horizontal"
-            android:layout_below="@+id/pinbookTextView"
-            android:paddingTop="15dp">
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="15dp"
+            android:weightSum="6"
+            android:gravity="center">
 
-            <ImageView
-                android:layout_width="200dp"
+
+
+
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:id="@+id/maleImageView"
-                android:src="@drawable/batman_icon"
-                android:paddingLeft="80dp"/>
+                android:layout_weight="1">
 
+                <ImageView
+                    android:id="@+id/maleImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/batman_icon"/>
 
-            <ImageView
-                android:layout_width="200dp"
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:id="@+id/femaleImageView"
-                android:src="@drawable/wonder_woman_icon"
-                android:paddingRight="80dp"/>
+                android:layout_weight="0.7">
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/femaleImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/wonder_woman_icon"/>
+
+            </LinearLayout>
+
+
+
         </LinearLayout>
 
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/emailLayout"
             android:layout_width="306dp"
             android:layout_height="50dp"
             android:layout_below="@+id/genderLayout"
-            android:id="@+id/emailLayout"
             android:layout_centerHorizontal="true"
             app:hintTextAppearance="@style/YellowTextInputLayout">
 
             <EditText
+                android:id="@+id/emailEditText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:inputType="textPersonName"
+                android:ems="10"
                 android:hint="Email"
-                android:ems="10"
-                android:textColor="#0A0B12"
-                android:id="@+id/emailEditText"/>
+                android:inputType="textPersonName"
+                android:textColor="#0A0B12" />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/passwordLayout"
             android:layout_width="306dp"
             android:layout_height="50dp"
-            app:passwordToggleEnabled="true"
-            app:passwordToggleTint="@android:color/darker_gray"
             android:layout_below="@+id/emailLayout"
-            android:id="@+id/passwordLayout"
             android:layout_centerHorizontal="true"
-            app:hintTextAppearance="@style/YellowTextInputLayout">
+            app:hintTextAppearance="@style/YellowTextInputLayout"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@android:color/darker_gray">
 
             <EditText
+                android:id="@+id/passwordEditText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:inputType="textPassword"
-                android:hint="Password"
                 android:ems="10"
-                android:textColor="#0A0B12"
-                android:id="@+id/passwordEditText"/>
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:textColor="#0A0B12" />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/usernameLayout"
             android:layout_width="306dp"
             android:layout_height="50dp"
-            android:id="@+id/usernameLayout"
             android:layout_below="@+id/passwordLayout"
             android:layout_centerHorizontal="true"
             app:hintTextAppearance="@style/YellowTextInputLayout">
 
             <EditText
+                android:id="@+id/usernameEditText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:inputType="textPersonName"
                 android:hint="Username"
-                android:textColor="#0A0B12"
-                android:id="@+id/usernameEditText"/>
+                android:inputType="textPersonName"
+                android:textColor="#0A0B12" />
         </android.support.design.widget.TextInputLayout>
 
 
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/nameLayout"
             android:layout_width="306dp"
             android:layout_height="50dp"
-            android:id="@+id/nameLayout"
             android:layout_below="@+id/usernameLayout"
             android:layout_centerHorizontal="true"
             app:hintTextAppearance="@style/YellowTextInputLayout">
@@ -139,28 +169,28 @@
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/surnameLayout"
             android:layout_width="180dp"
             android:layout_height="50dp"
-            android:id="@+id/surnameLayout"
-            android:layout_below="@+id/usernameLayout"
             android:layout_alignEnd="@id/usernameLayout"
+            android:layout_below="@+id/usernameLayout"
             android:layout_centerHorizontal="true"
             app:hintTextAppearance="@style/YellowTextInputLayout">
 
             <EditText
+                android:id="@+id/surnameEditText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:inputType="textPersonName"
                 android:hint="Surname"
-                android:textColor="#0A0B12"
-                android:id="@+id/surnameEditText"/>
+                android:inputType="textPersonName"
+                android:textColor="#0A0B12" />
         </android.support.design.widget.TextInputLayout>
 
 
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/phoneLayout"
             android:layout_width="306dp"
             android:layout_height="50dp"
-            android:id="@+id/phoneLayout"
             android:layout_below="@+id/surnameLayout"
             android:layout_centerHorizontal="true"
             app:hintTextAppearance="@style/YellowTextInputLayout">
@@ -172,55 +202,47 @@
                 android:digits="0123456789+"
                 android:hint="Phone"
                 android:inputType="phone"
-                android:textColor="#0A0B12"/>
+                android:textColor="#0A0B12" />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/birthdateLayout"
             android:layout_width="306dp"
             android:layout_height="50dp"
-            android:id="@+id/birthdateLayout"
             android:layout_below="@+id/phoneLayout"
             android:layout_centerHorizontal="true"
             app:hintTextAppearance="@style/YellowTextInputLayout">
 
             <EditText
+                android:id="@+id/birthdateEditText"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:inputType="date"
-                android:hint="Birth Date"
-                android:textColor="#0A0B12"
-                android:id="@+id/birthdateEditText"
                 android:clickable="true"
                 android:focusableInTouchMode="false"
-                />
+                android:hint="Birth Date"
+                android:inputType="date"
+                android:textColor="#0A0B12" />
         </android.support.design.widget.TextInputLayout>
 
         <LinearLayout
             android:layout_width="306dp"
-            android:layout_height="50dp"
-            android:orientation="horizontal"
-            android:layout_below="@+id/birthdateLayout"
-            android:layout_marginTop="30dp"
-            android:layout_centerHorizontal="true">
+            android:layout_height="wrap_content"
+            android:layout_below="@id/birthdateLayout"
+            android:layout_gravity="center_vertical"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
 
-
-            <LinearLayout
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/registerButton"
+                android:layout_width="306dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
+                android:layout_weight="1"
+                android:background="@drawable/ripple"
+                android:text="REGISTER"
+                android:textColor="@color/cardview_light_background" />
 
-                <Button
-                    android:id="@+id/registerButton"
-                    android:layout_width="153dp"
-                    android:layout_height="wrap_content"
-                    android:text="REGISTER"
-                    android:textColor="@color/cardview_light_background"
-                    android:background = "@drawable/ripple" />
-
-            </LinearLayout>
         </LinearLayout>
-
 
     </RelativeLayout>
 
