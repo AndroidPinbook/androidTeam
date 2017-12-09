@@ -54,6 +54,7 @@ import java.util.Map;
 import android.Manifest;
 
 import uur.com.pinbook.Controller.CustomDialogAdapter;
+import uur.com.pinbook.Controller.ValidationAdapter;
 import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
 
@@ -138,23 +139,6 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                 birthdateEditText.setText(date);
             }
         };
-
-        phoneEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
     }
 
     public void getCalender(){
@@ -237,6 +221,11 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                     return;
                 }
 
+                if(!ValidationAdapter.isValidEmail(emailEditText.getText().toString())){
+                    CustomDialogAdapter.showErrorDialog(RegisterPageActivity.this, "Email is not valid!");
+                    return;
+                }
+
                 String email = emailEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
 
@@ -260,12 +249,9 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                 break;
 
             default:
-                Toast.makeText(this, "Error occured!!", Toast.LENGTH_SHORT).show();
                 break;
         }
     }
-
-
 
     public void hideKeyBoard(){
 
@@ -306,39 +292,6 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         }
 
         return valid;
-    }
-
-    public String formatE164Number(String countryCode, String phNum) {
-
-        //Log.i("Info","formatE164Number");
-        //Log.i("Info","  >>countryCode:" + countryCode);
-        //Log.i("Info","  >>phNum      :" + phNum);
-
-        String e164Number;
-        if (TextUtils.isEmpty(countryCode)) {
-            e164Number = phNum;
-        } else {
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
-                e164Number = PhoneNumberUtils.formatNumberToE164(phNum, countryCode);
-                //Log.i("Info","  >>e164Number1      :" + e164Number);
-            } else {
-                try {
-                    PhoneNumberUtil instance = PhoneNumberUtil.getInstance();
-                    Phonenumber.PhoneNumber phoneNumber = instance.parse(phNum, countryCode);
-                    e164Number = instance.format(phoneNumber, PhoneNumberUtil.PhoneNumberFormat.E164);
-                    //Log.i("Info","  >>e164Number2      :" + e164Number);
-
-                } catch (NumberParseException e) {
-                    Log.i("Info" ," Phone error"+ e.getMessage());
-                    e164Number = phNum;
-                    Log.i("Info","  >>e164Number3      :" + e164Number);
-                }
-            }
-        }
-
-        //Log.i("Info","  >>e164Numberlast      :" + e164Number);
-
-        return e164Number;
     }
 
     public void scaleAnimation(int genderType){

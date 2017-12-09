@@ -2,12 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutEmailVerify"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="uur.com.pinbook.Activities.EmailVerifyPageActivity"
     android:orientation="vertical"
     android:weightSum="10"
-    android:id="@+id/layoutEmailVerify">
+    tools:context="uur.com.pinbook.Activities.EmailVerifyPageActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_top"
@@ -16,7 +16,6 @@
         android:background="@color/background"
         android:gravity="center"
         android:minHeight="?attr/actionBarSize">
-
 
         <TextView
             android:id="@+id/toolbar_title"
@@ -28,26 +27,24 @@
             android:textColor="@android:color/white"
             android:textSize="30sp" />
 
-
     </android.support.v7.widget.Toolbar>
 
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:text="Neredeyse tamam!"
-        android:textSize="30sp"
         android:layout_weight="2"
         android:gravity="bottom|center_horizontal"
-        />
+        android:text="Activation is almost done"
+        android:textSize="20sp" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:text="Size gönderdiğimiz e-postadaki linki tıklayın."
-        android:textSize="15sp"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:text="@string/pleaseClickActivateMail"
+        android:textSize="15sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -59,22 +56,20 @@
         <android.support.design.widget.TextInputLayout
             android:id="@+id/email_text_input_layout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            >
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/textEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="17"
-                android:inputType="textEmailAddress"
-                android:drawablePadding="8dp"
-                android:drawableLeft="@drawable/email"
                 android:layout_margin="3dp"
-                android:gravity="center_vertical"
-                android:textSize="15sp"
                 android:background="@drawable/shape"
-                android:paddingLeft="8dp" />
+                android:drawablePadding="8dp"
+                android:ems="17"
+                android:gravity="center_vertical"
+                android:inputType="textEmailAddress"
+                android:paddingLeft="8dp"
+                android:textSize="15sp" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -88,30 +83,22 @@
 
         <Button
             android:id="@+id/buttonActivated"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/pacifico"
-            android:text="Aktifleştir"
-            android:textColor="@color/cardview_light_background"
-            android:background = "@drawable/roundedbutton"/>
+            android:layout_width="@dimen/buttons_width"
+            android:layout_height="@dimen/buttons_height"
+            android:background="@drawable/roundedbutton"
+            android:text="ACTIVATE YOUR ACCOUNT"
+            android:textColor="@color/cardview_light_background" />
 
     </LinearLayout>
 
-
     <TextView
         android:id="@+id/textVerifyAgain"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:text="E-postayı yeniden gönder"
-        android:textSize="15sp"
-        android:gravity="center"
-        android:textColor="@color/button_color"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
 
-
-
-
-
-
+        android:layout_gravity="center"
+        android:text="@string/sendEmailAgain"
+        android:textSize="17sp" />
 
 </LinearLayout>

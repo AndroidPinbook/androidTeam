@@ -10,12 +10,13 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.animation.AlphaAnimation;
@@ -47,7 +48,7 @@ import cn.refactor.lib.colordialog.ColorDialog;
 import cn.refactor.lib.colordialog.PromptDialog;
 import okhttp3.Response;
 import uur.com.pinbook.Controller.CustomDialogAdapter;
-import uur.com.pinbook.Controller.ErrorMessageAdapter;
+import uur.com.pinbook.Controller.ValidationAdapter;
 import uur.com.pinbook.R;
 
 public class LoginPageActivity extends AppCompatActivity implements View.OnClickListener {
@@ -84,12 +85,8 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         inputLayout = (LinearLayout) findViewById(R.id.inputLayout);
         rememberMeCheckBox = findViewById(R.id.rememberMeCb);
 
-
         editTextEmail = (EditText) findViewById(R.id.editTextEmail);
         editTextPassword = (EditText) findViewById(R.id.editTextPassword);
-        setTextViewDrawableColor(editTextEmail, R.color.button_color);
-        setTextViewDrawableColor(editTextPassword, R.color.button_color);
-
 
         buttonSignIn = (Button) findViewById(R.id.buttonSignIn);
         textViewFogetPassword = (TextView) findViewById(R.id.textViewForgetPassword);
@@ -131,7 +128,7 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         }
 
         if(view == backGroundLayout){
-            inputLayout.clearFocus();
+            saveLoginInformation();
             hideKeyBoard();
         }
 
@@ -240,7 +237,9 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         Log.i("İnfo : ", "forget password clicked");
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(LoginPageActivity.this);
         View mView = getLayoutInflater().inflate(R.layout.layout_forget_password, null);
+
         final EditText mEmail = (EditText) mView.findViewById(R.id.etEmail);
+
         Button mReset = (Button) mView.findViewById(R.id.buttonReset);
 
         mEmail.setText("");
@@ -249,6 +248,7 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         mBuilder.setView(mView);
         final AlertDialog dialog = mBuilder.create();
         dialog.show();
+
         mReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -288,11 +288,9 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
                     dialog.dismiss();
                 }else{
-                    /*Toast.makeText(LoginPageActivity.this,
+                    Toast.makeText(LoginPageActivity.this,
                             "Please enter your email address",
-                            Toast.LENGTH_SHORT).show();*/
-                    String s = "Please enter your email address";
-                    CustomDialogAdapter.showErrorDialog(LoginPageActivity.this, s);
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -309,24 +307,25 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
     private void userLogin(){
 
-        Log.i("info:", "userLogin'deyiz..");
         String email = editTextEmail.getText().toString().trim();
-        Log.i("info:", "email_ok");
         String password = editTextPassword.getText().toString().trim();
-        Log.i("info:", "password_ok");
+
 
         if(TextUtils.isEmpty(email)){
-            Toast.makeText(this,"Please enter your email", Toast.LENGTH_SHORT).show();
+            editTextEmail.setError("Required.");
             return;
         }
-        Log.i("info:", "email_ok");
-        if(TextUtils.isEmpty(password)){
-            Toast.makeText(this,"Please enter your password", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        Log.i("info:", "password_ok");
 
-        //if validations ok
+        if(TextUtils.isEmpty(password)){
+            editTextPassword.setError("Required.");
+            return;
+        }
+
+        if(!ValidationAdapter.isValidEmail(email)){
+            CustomDialogAdapter.showErrorDialog(LoginPageActivity.this, "Email is not valid!");
+            return;
+        }
+
         progressDialog.setMessage("Registering User..");
         progressDialog.show();
 
@@ -352,7 +351,7 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 //                                intent.putExtra("user_email", user.getEmail().toString());
 //                                startActivity(intent);
 
-                                startActivity(new Intent(getApplicationContext(), ProfilePageActivity.class));
+                                startActivity(new Intent(getApplicationContext(), PinThrowActivity.class));
 
 
                             }else{
@@ -367,8 +366,7 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
                             }
                             Log.i("sonuç :", "cikis..");
                         }else{
-                            //
-                            Log.i("info:", "sign in fail..");
+                            CustomDialogAdapter.showErrorDialog(LoginPageActivity.this, "Email or password is incorrect!");
 
                             try {
                                 throw task.getException();
@@ -389,10 +387,8 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
                             }
 
                         }
-
                     }
                 });
-
     }
 
     public void displayResult(){
@@ -428,9 +424,18 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
-    public void onBackPressed() {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK){
 
-        Intent intent = new Intent(getApplicationContext(), EnterPageActivity.class);
-        startActivity(intent);
+            saveLoginInformation();
+            Intent intent = new Intent(getApplicationContext(), EnterPageActivity.class);
+            startActivity(intent);
+
+        }else if(keyCode == KeyEvent.KEYCODE_HOME){
+
+            saveLoginInformation();
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 }

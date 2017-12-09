@@ -226,7 +226,7 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
             if(photoChoosenType == getResources().getString(R.string.camera)){
 
                 photo = (Bitmap) data.getExtras().get("data");
-                photo = BitmapConversion.getRoundedShape(photo, 250, 250);
+                photo = BitmapConversion.getRoundedShape(photo, 600, 600);
                 tempUri = getImageUri(getApplicationContext(), photo);
 
             }else if(photoChoosenType == getResources().getString(R.string.gallery)){
@@ -234,7 +234,7 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
                 tempUri = data.getData();
                 profileImageStream = getContentResolver().openInputStream(tempUri);
                 photo = BitmapFactory.decodeStream(profileImageStream);
-                photo = BitmapConversion.getRoundedShape(photo, 250, 250);
+                photo = BitmapConversion.getRoundedShape(photo, 600, 600);
 
             }
 
@@ -393,7 +393,7 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
         FirebaseUserAdapter.saveUserInfo(user);
 
-        Intent intent = new Intent(getApplicationContext(), EmailVerifyPageActivity.class);
+        Intent intent = new Intent(ProfilePhotoActivity.this, EmailVerifyPageActivity.class);
         startActivity(intent);
     }
 
@@ -408,6 +408,6 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
     @Override
     public void onBackPressed() {
 
-
+        Toast.makeText(this, "Please Continue Email Verification", Toast.LENGTH_SHORT).show();
     }
 }

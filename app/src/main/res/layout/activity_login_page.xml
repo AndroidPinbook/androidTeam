@@ -8,7 +8,6 @@
     tools:context="uur.com.pinbook.Activities.LoginPageActivity"
     android:id="@+id/layoutLogIn">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -23,7 +22,6 @@
             android:gravity="center"
             android:minHeight="?attr/actionBarSize">
 
-
             <TextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
@@ -33,16 +31,25 @@
                 android:text="PinBook"
                 android:textColor="@android:color/white"
                 android:textSize="30sp" />
-
-
         </android.support.v7.widget.Toolbar>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:orientation="vertical">
+            android:layout_height="100dp"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
 
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -53,15 +60,11 @@
                 android:focusableInTouchMode="true"
                 android:id="@+id/inputLayout">
 
-
-
-                <!--  Email Label -->
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/email_text_input_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:hintTextAppearance="@style/ButtonColor"
-                    >
+                    app:hintTextAppearance="@style/YellowTextInputLayout">
 
                     <EditText
                         android:id="@+id/editTextEmail"
@@ -73,19 +76,14 @@
                         android:hint="Email"
                         android:inputType="textEmailAddress"
                         android:drawablePadding="8dp"
-                        android:drawableLeft="@drawable/email"
-                        android:layout_margin="3dp"
-                        android:importantForAutofill="noExcludeDescendants"/>
-
+                        android:layout_margin="3dp" />
                 </android.support.design.widget.TextInputLayout>
 
-
-                <!--  Password Label -->
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/password_text_input_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:hintTextAppearance="@style/ButtonColor">
+                    app:hintTextAppearance="@style/YellowTextInputLayout">
 
                     <EditText
                         android:id="@+id/editTextPassword"
@@ -97,34 +95,26 @@
                         android:hint="Password"
                         android:inputType="textPassword"
                         android:drawablePadding="8dp"
-                        android:drawableLeft="@drawable/password"
-                        android:layout_margin="3dp"
-                        android:importantForAutofill="noExcludeDescendants"/>
-
-                    <CheckBox
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Remember me"
-                        android:id="@+id/rememberMeCb"
-                        android:theme="@style/cbColor"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginLeft="5dp"/>
-
+                        android:layout_margin="3dp" />
                 </android.support.design.widget.TextInputLayout>
 
 
-
+                <CheckBox
+                    android:id="@+id/rememberMeCb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="18dp"
+                    android:textSize="12sp"
+                    android:text="Remember me" />
 
                 <Button
                     android:id="@+id/buttonSignIn"
-                    android:layout_width="wrap_content"
+                    android:layout_width="150dp"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="24dp"
                     android:layout_marginTop="24dp"
-
-                    android:fontFamily="@font/pacifico"
                     android:padding="12dp"
-                    android:text="Login"
+                    android:text="SIGN IN"
                     android:textColor="@color/cardview_light_background"
                     android:background = "@drawable/roundedbutton"/>
 
@@ -137,16 +127,6 @@
                     android:gravity="center"
                     android:text="Forget Password?"
                     android:textSize="16dip" />
-
-
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1">
-
 
             </LinearLayout>
 
