@@ -70,7 +70,6 @@ public class WelcomePageActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
 
 
-
         if (firebaseAuth.getCurrentUser() != null) {
 
             FirebaseUser user = firebaseAuth.getCurrentUser();
