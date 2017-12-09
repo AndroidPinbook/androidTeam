@@ -1,6 +1,5 @@
 package uur.com.pinbook.Controller;
 
-
 /**
  * Created by mac on 4.12.2017.
  */
@@ -10,7 +9,8 @@ public enum ErrorMessageAdapter{
     //  Add Error Tags here -with next number
     EMAIL_EMPTY(101),
     PASSWORD_EMPTY(102),
-    INVALID_USER(103);
+    INVALID_USER(103),
+    INVALID_CREDENTIALS(104);
 
     public final int number;
 
@@ -25,28 +25,28 @@ public enum ErrorMessageAdapter{
     // Add Error Code explanation here..
     public String getText() {
 
-        String s;
+        String message;
 
         switch(number) {
             case 101:
-                s = "Email can't be empty";
+                message = "Email can't be empty";
                 break;
             case 102:
-                s = "Password can't be empty";
+                message = "Password can't be empty";
                 break;
             case 103:
-                s = "User is invalid";
+                message = "User is invalid";
                 break;
             case 104:
-                s = "";
+                message = "User or password wrong!";
                 break;
             default:
-                s = "Unknown Error";
+                message = "Unknown Error";
 
 
         }
 
-        return s;
+        return message;
     }
 
     public static void setError(int number){

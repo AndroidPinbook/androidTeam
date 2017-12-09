@@ -75,8 +75,8 @@
                         android:ems="15"
                         android:hint="Email"
                         android:inputType="textEmailAddress"
-                        android:drawablePadding="8dp"
-                        android:layout_margin="3dp" />
+                        android:layout_margin="3dp"
+                        android:importantForAutofill="noExcludeDescendants"/>
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -94,8 +94,9 @@
                         android:ems="15"
                         android:hint="Password"
                         android:inputType="textPassword"
-                        android:drawablePadding="8dp"
-                        android:layout_margin="3dp" />
+                        android:layout_margin="3dp"
+                        android:importantForAutofill="noExcludeDescendants"/>
+
                 </android.support.design.widget.TextInputLayout>
 
 

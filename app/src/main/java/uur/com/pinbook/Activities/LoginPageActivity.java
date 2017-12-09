@@ -18,11 +18,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.ScaleAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -42,12 +37,8 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 
-import org.w3c.dom.Text;
-
-import cn.refactor.lib.colordialog.ColorDialog;
-import cn.refactor.lib.colordialog.PromptDialog;
-import okhttp3.Response;
 import uur.com.pinbook.Controller.CustomDialogAdapter;
+import uur.com.pinbook.Controller.ErrorMessageAdapter;
 import uur.com.pinbook.Controller.ValidationAdapter;
 import uur.com.pinbook.R;
 
@@ -78,8 +69,6 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
-
-        CustomDialogAdapter.showErrorDialog(LoginPageActivity.this, ErrorMessageAdapter.PASSWORD_EMPTY.getText() );
 
         backGroundLayout = (RelativeLayout) findViewById(R.id.layoutLogIn);
         inputLayout = (LinearLayout) findViewById(R.id.inputLayout);
@@ -115,120 +104,24 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     }
 
     public void onClick(View view) {
-        if(view == buttonSignIn){
+        if (view == buttonSignIn) {
             userLogin();
         }
 
-        if (view == rememberMeCheckBox){
+        if (view == rememberMeCheckBox) {
             saveLoginInformation();
         }
 
-        if(view == textViewFogetPassword){
+        if (view == textViewFogetPassword) {
             startForgetPassFunc();
         }
 
-        if(view == backGroundLayout){
+        if (view == backGroundLayout) {
             saveLoginInformation();
             hideKeyBoard();
         }
 
-
-        if(view == btn_showPromptDlg){
-            new PromptDialog(this)
-                    .setDialogType(PromptDialog.DIALOG_TYPE_SUCCESS)
-                    .setAnimationEnable(true)
-                    .setTitleText("Başarılı")
-                    .setContentText("text_data")
-                    .setPositiveListener("ok", new PromptDialog.OnPositiveListener() {
-                        @Override
-                        public void onClick(PromptDialog dialog) {
-                            dialog.dismiss();
-                        }
-                    }).show();
-        }
-
-        if(view == btn_showPicDialog){
-            ColorDialog dialog = new ColorDialog(this);
-            dialog.setTitle("operation");
-            dialog.setAnimationEnable(true);
-            dialog.setAnimationIn(getInAnimationTest(this));
-            dialog.setAnimationOut(getOutAnimationTest(this));
-            dialog.setContentImage(getResources().getDrawable(R.mipmap.ic_help));
-            dialog.setPositiveListener("delete", new ColorDialog.OnPositiveListener() {
-                @Override
-                public void onClick(ColorDialog dialog) {
-                    Toast.makeText(LoginPageActivity.this, dialog.getPositiveText().toString(), Toast.LENGTH_SHORT).show();
-                }
-            })
-                    .setNegativeListener("cancel", new ColorDialog.OnNegativeListener() {
-                        @Override
-                        public void onClick(ColorDialog dialog) {
-                            Toast.makeText(LoginPageActivity.this, dialog.getNegativeText().toString(), Toast.LENGTH_SHORT).show();
-                            dialog.dismiss();
-                        }
-                    }).show();
-        }
-
-        if(view == btn_showTextDialog){
-            ColorDialog dialog = new ColorDialog(this);
-            dialog.setColor("#8ECB54");
-            dialog.setAnimationEnable(true);
-            dialog.setTitle("operation");
-            dialog.setContentText("content_text");
-            dialog.setPositiveListener("text_know", new ColorDialog.OnPositiveListener() {
-                @Override
-                public void onClick(ColorDialog dialog) {
-                    Toast.makeText(LoginPageActivity.this, dialog.getPositiveText().toString(), Toast.LENGTH_SHORT).show();
-                }
-            }).show();
-        }
-
-        if(view == btn_showAllModeDialog){
-            ColorDialog dialog = new ColorDialog(this);
-            dialog.setTitle("operation");
-            dialog.setAnimationEnable(true);
-                dialog.setContentText("content_text");
-            dialog.setContentImage(getResources().getDrawable(R.mipmap.ic_help));
-            dialog.setPositiveListener("delete", new ColorDialog.OnPositiveListener() {
-                @Override
-                public void onClick(ColorDialog dialog) {
-                    Toast.makeText(LoginPageActivity.this, dialog.getPositiveText().toString(), Toast.LENGTH_SHORT).show();
-                }
-            })
-                    .setNegativeListener("cancel", new ColorDialog.OnNegativeListener() {
-                        @Override
-                        public void onClick(ColorDialog dialog) {
-                            Toast.makeText(LoginPageActivity.this, dialog.getNegativeText().toString(), Toast.LENGTH_SHORT).show();
-                            dialog.dismiss();
-                        }
-                    }).show();
-        }
-
     }
-
-
-    public static AnimationSet getInAnimationTest(Context context) {
-        AnimationSet out = new AnimationSet(context, null);
-        AlphaAnimation alpha = new AlphaAnimation(0.0f, 1.0f);
-        alpha.setDuration(150);
-        ScaleAnimation scale = new ScaleAnimation(0.6f, 1.0f, 0.6f, 1.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        scale.setDuration(150);
-        out.addAnimation(alpha);
-        out.addAnimation(scale);
-        return out;
-    }
-
-    public static AnimationSet getOutAnimationTest(Context context) {
-        AnimationSet out = new AnimationSet(context, null);
-        AlphaAnimation alpha = new AlphaAnimation(1.0f, 0.0f);
-        alpha.setDuration(150);
-        ScaleAnimation scale = new ScaleAnimation(1.0f, 0.6f, 1.0f, 0.6f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        scale.setDuration(150);
-        out.addAnimation(alpha);
-        out.addAnimation(scale);
-        return out;
-    }
-
 
 
     private void startForgetPassFunc() {
@@ -322,7 +215,7 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         }
 
         if(!ValidationAdapter.isValidEmail(email)){
-            CustomDialogAdapter.showErrorDialog(LoginPageActivity.this, "Email is not valid!");
+            //CustomDialogAdapter.showErrorDialog(LoginPageActivity.this, "Email is not valid!");
             return;
         }
 
@@ -366,17 +259,14 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
                             }
                             Log.i("sonuç :", "cikis..");
                         }else{
-                            CustomDialogAdapter.showErrorDialog(LoginPageActivity.this, "Email or password is incorrect!");
 
                             try {
                                 throw task.getException();
-                            } catch(FirebaseAuthWeakPasswordException e) {
-                                editTextPassword.setError("weak_password");
-                                editTextPassword.requestFocus();
-                                Log.i("error ", e.toString());
                             } catch(FirebaseAuthInvalidCredentialsException e) {
-                                editTextEmail.setError("error_invalid_email");
-                                editTextEmail.requestFocus();
+                                CustomDialogAdapter.showDialogError(LoginPageActivity.this, ErrorMessageAdapter.INVALID_CREDENTIALS.getText());
+
+                                //editTextEmail.setError("error_invalid_email");
+                                //editTextEmail.requestFocus();
                                 Log.i("error ", e.toString());
                             } catch(FirebaseAuthUserCollisionException e) {
                                 editTextEmail.setError("error_user_exists");
