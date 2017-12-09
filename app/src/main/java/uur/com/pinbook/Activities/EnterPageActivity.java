@@ -318,6 +318,9 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
         @Override
         public void onPageSelected(int position) {
+
+            Log.i("Info", "  >>position:" + position);
+
             addBottomDots(position);
 
             // changing the next button text 'NEXT' / 'GOT IT'
@@ -332,10 +335,18 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         @Override
         public void onPageScrolled(int arg0, float arg1, int arg2) {
 
+            Log.i("Info", "  >>onPageScrolled");
+            Log.i("Info", "       >>arg0:" + arg0);
+            Log.i("Info", "       >>arg1:" + arg1);
+            Log.i("Info", "       >>arg2:" + arg2);
+
         }
 
         @Override
         public void onPageScrollStateChanged(int arg0) {
+
+            Log.i("Info", "  >>onPageScrollStateChanged");
+            Log.i("Info", "       >>arg0:" + arg0);
 
         }
     };
