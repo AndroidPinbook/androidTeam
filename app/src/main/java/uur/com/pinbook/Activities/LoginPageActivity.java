@@ -35,7 +35,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import uur.com.pinbook.Controller.CustomDialogAdapter;
-import uur.com.pinbook.Controller.ErrorMessageAdapter;
 import uur.com.pinbook.R;
 
 public class LoginPageActivity extends AppCompatActivity implements View.OnClickListener {
