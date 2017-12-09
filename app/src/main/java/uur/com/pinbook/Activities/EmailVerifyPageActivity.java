@@ -91,7 +91,7 @@ public class EmailVerifyPageActivity extends AppCompatActivity implements View.O
                 if(user.isEmailVerified()){
                     Log.i("verified: ", "yes");
                     finish();
-                    startActivity(new Intent(EmailVerifyPageActivity.this, ProfilePageActivity.class));
+                    startActivity(new Intent(EmailVerifyPageActivity.this, PinThrowActivity.class));
                 }else{
                     Log.i("!verified: ", "no");
                     Toast.makeText(getApplicationContext(),

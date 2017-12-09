@@ -400,6 +400,6 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
     @Override
     public void onBackPressed() {
 
-
+        Toast.makeText(this, "Please Continue Email Verification", Toast.LENGTH_SHORT).show();
     }
 }

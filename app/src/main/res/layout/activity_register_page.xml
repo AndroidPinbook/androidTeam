@@ -49,22 +49,50 @@
             android:layout_height="60dp"
             android:layout_below="@+id/toolbarLayout"
             android:orientation="horizontal"
-            android:layout_marginTop="15dp">
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="15dp"
+            android:weightSum="6"
+            android:gravity="center">
 
-            <ImageView
-                android:id="@+id/maleImageView"
-                android:layout_width="190dp"
+
+
+
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:paddingLeft="80dp"
-                android:src="@drawable/batman_icon" />
+                android:layout_weight="1">
 
+                <ImageView
+                    android:id="@+id/maleImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/batman_icon"/>
 
-            <ImageView
-                android:id="@+id/femaleImageView"
-                android:layout_width="190dp"
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:paddingRight="80dp"
-                android:src="@drawable/wonder_woman_icon" />
+                android:layout_weight="0.7">
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/femaleImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/wonder_woman_icon"/>
+
+            </LinearLayout>
+
+
+
         </LinearLayout>
 
         <android.support.design.widget.TextInputLayout
