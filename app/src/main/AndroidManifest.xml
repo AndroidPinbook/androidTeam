@@ -46,7 +46,9 @@
         <activity
             android:name=".Activities.RegisterPageActivity"
             android:exported="true"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/Toolbar">
+        </activity>
+
         <activity
             android:name=".Activities.ProfilePageActivity"
         android:theme="@style/AppTheme.NoActionBar"></activity>
@@ -76,9 +78,14 @@
         </activity>
         <activity
             android:name=".Activities.ProfilePhotoActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
+
         <activity android:name=".Activities.EmailVerifyPageActivity"
-            android:theme="@style/Toolbar"></activity>
+            android:theme="@style/Toolbar">
+
+        </activity>
 
     </application>
 

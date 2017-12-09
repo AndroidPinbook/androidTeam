@@ -68,8 +68,8 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
         editTextEmail = (EditText) findViewById(R.id.editTextEmail);
         editTextPassword = (EditText) findViewById(R.id.editTextPassword);
-        setTextViewDrawableColor(editTextEmail, R.color.button_color);
-        setTextViewDrawableColor(editTextPassword, R.color.button_color);
+        //setTextViewDrawableColor(editTextEmail, R.color.button_color);
+        //setTextViewDrawableColor(editTextPassword, R.color.button_color);
 
 
         buttonSignIn = (Button) findViewById(R.id.buttonSignIn);
@@ -123,7 +123,9 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         Log.i("İnfo : ", "forget password clicked");
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(LoginPageActivity.this);
         View mView = getLayoutInflater().inflate(R.layout.layout_forget_password, null);
+
         final EditText mEmail = (EditText) mView.findViewById(R.id.etEmail);
+
         Button mReset = (Button) mView.findViewById(R.id.buttonReset);
 
         mEmail.setText("");
@@ -132,6 +134,7 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         mBuilder.setView(mView);
         final AlertDialog dialog = mBuilder.create();
         dialog.show();
+
         mReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
