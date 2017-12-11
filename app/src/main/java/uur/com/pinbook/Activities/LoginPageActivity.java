@@ -11,9 +11,11 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -36,6 +38,8 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.Locale;
 
 import uur.com.pinbook.Controller.CustomDialogAdapter;
 import uur.com.pinbook.Controller.ErrorMessageAdapter;
@@ -203,19 +207,7 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
-
-        if(TextUtils.isEmpty(email)){
-            editTextEmail.setError("Required.");
-            return;
-        }
-
-        if(TextUtils.isEmpty(password)){
-            editTextPassword.setError("Required.");
-            return;
-        }
-
-        if(!ValidationAdapter.isValidEmail(email)){
-            //CustomDialogAdapter.showErrorDialog(LoginPageActivity.this, "Email is not valid!");
+        if(!validateForm()){
             return;
         }
 
@@ -240,21 +232,12 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
                             if(user.isEmailVerified()){
                                 Log.i("verified :", "yes");
                                 finish();
-//                                Intent intent = new Intent(getBaseContext(), ProfilePageActivity.class);
-//                                intent.putExtra("user_email", user.getEmail().toString());
-//                                startActivity(intent);
-
                                 startActivity(new Intent(getApplicationContext(), PinThrowActivity.class));
-
 
                             }else{
                                 Log.i("verified :", "no!");
                                 displayResult();
                                 finish();
-//                                Intent intent = new Intent(getBaseContext(), EmailVerifyPageActivity.class);
-//                                intent.putExtra("user_email", user.getEmail().toString());
-//                                startActivity(intent);
-
                                 startActivity(new Intent(getApplicationContext(), EmailVerifyPageActivity.class));
                             }
                             Log.i("sonuç :", "cikis..");
@@ -328,4 +311,61 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
         return super.onKeyDown(keyCode, event);
     }
+
+    private boolean validateForm() {
+        boolean valid = true;
+
+        Log.i("Info", "validateForm");
+
+        String email = editTextEmail.getText().toString();
+        String password = editTextPassword.getText().toString();
+
+        //Email - password check
+        if(TextUtils.isEmpty(email) || TextUtils.isEmpty((password))){
+            if (TextUtils.isEmpty(email)) {
+                editTextEmail.setError("Required");
+                valid = false;
+            } else {
+                if(!ValidationAdapter.isValidEmail(email)){
+                    editTextEmail.setError("Email is not valid");
+                    valid = false;
+
+                }else{
+                    editTextEmail.setError(null);
+                }
+            }
+
+            if (TextUtils.isEmpty(password)) {
+                editTextPassword.setError("Required");
+                valid = false;
+            } else {
+                editTextPassword.setError(null);
+            }
+
+        }else{
+
+            if(!ValidationAdapter.isValidEmail(email)){
+                editTextEmail.setError("Email is not valid");
+                valid = false;
+
+            }else{
+                editTextEmail.setError(null);
+            }
+
+            /*
+            if(!ValidationAdapter.isValidPassword(email)){
+                editTextPassword.setError("Password min length is 6");
+                valid = false;
+            }else{
+                editTextPassword.setError(null);
+            }
+            */
+
+        }
+
+        return valid;
+
+    }
+
+
 }

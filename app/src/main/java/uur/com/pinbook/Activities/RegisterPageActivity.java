@@ -36,6 +36,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -54,6 +56,7 @@ import java.util.Map;
 import android.Manifest;
 
 import uur.com.pinbook.Controller.CustomDialogAdapter;
+import uur.com.pinbook.Controller.ErrorMessageAdapter;
 import uur.com.pinbook.Controller.ValidationAdapter;
 import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
@@ -183,7 +186,13 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                         } else {
                             Log.i("Info","CreateUserEmail:Failed:" + task.getException());
 
-                            CustomDialogAdapter.showErrorDialog(RegisterPageActivity.this, task.getException().toString());
+                            try {
+                                throw task.getException();
+                            } catch(FirebaseAuthUserCollisionException e) {
+                                CustomDialogAdapter.showDialogError(RegisterPageActivity.this, ErrorMessageAdapter.COLLISION_EXCEPTION.getText());
+                            } catch(Exception e) {
+                                Log.i("error :", e.getMessage());
+                            }
                         }
                     }
                 });
@@ -218,11 +227,6 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         switch (i){
             case R.id.registerButton:
                 if(!validateForm()){
-                    return;
-                }
-
-                if(!ValidationAdapter.isValidEmail(emailEditText.getText().toString())){
-                    CustomDialogAdapter.showErrorDialog(RegisterPageActivity.this, "Email is not valid!");
                     return;
                 }
 
@@ -267,21 +271,90 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         Log.i("Info", "validateForm");
 
         String email = emailEditText.getText().toString();
+        String password = passwordEditText.getText().toString();
+        String username = usernameEditText.getText().toString();
+        String name = nameEditText.getText().toString();
+        String surname = surnameEditText.getText().toString();
+        String birthdate = birthdateEditText.getText().toString();
 
-        if (TextUtils.isEmpty(email)) {
-            emailEditText.setError("Required.");
-            valid = false;
-        } else {
-            emailEditText.setError(null);
+        //Email - password check
+        if(TextUtils.isEmpty(email) || TextUtils.isEmpty((password))){
+            Log.i("i", "1");
+            if (TextUtils.isEmpty(email)) {
+                emailEditText.setError("Required");
+                valid = false;
+            } else {
+                if(!ValidationAdapter.isValidEmail(email)){
+                    emailEditText.setError("Email is not valid");
+                    valid = false;
+
+                }else{
+                    emailEditText.setError(null);
+                }
+            }
+
+            if (TextUtils.isEmpty(password)) {
+                Log.i("i", "2");
+                passwordEditText.setError("Required");
+                valid = false;
+            } else {
+                Log.i("i", "3");
+                if(!ValidationAdapter.isValidPassword(password)){
+                    Log.i("i", "4");
+                    passwordEditText.setError("Password min length is 6");
+                    valid = false;
+
+                }else{
+                    Log.i("i", "5");
+                    passwordEditText.setError(null);
+                }
+            }
+
+        }else{
+            if(!ValidationAdapter.isValidEmail(email)){
+                emailEditText.setError("Email is not valid");
+                valid = false;
+
+            }else{
+                emailEditText.setError(null);
+            }
+
+            if(!ValidationAdapter.isValidPassword(password)){
+                passwordEditText.setError("Password min length is 6");
+                valid = false;
+            }else{
+                passwordEditText.setError(null);
+            }
+
         }
 
-        String password = passwordEditText.getText().toString();
-
-        if (TextUtils.isEmpty(password)) {
-            passwordEditText.setError("Required.");
+        //Username check
+        if (TextUtils.isEmpty(username)) {
+            usernameEditText.setError("Required");
             valid = false;
         } else {
-            passwordEditText.setError(null);
+            usernameEditText.setError(null);
+        }
+        //Name check
+        if (TextUtils.isEmpty(name)) {
+            nameEditText.setError("Required");
+            valid = false;
+        } else {
+            nameEditText.setError(null);
+        }
+        //Surname check
+        if (TextUtils.isEmpty(surname)) {
+            surnameEditText.setError("Required");
+            valid = false;
+        } else {
+            surnameEditText.setError(null);
+        }
+        //Birthdate check
+        if (TextUtils.isEmpty(birthdate)) {
+            birthdateEditText.setError("Required");
+            valid = false;
+        } else {
+            birthdateEditText.setError(null);
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

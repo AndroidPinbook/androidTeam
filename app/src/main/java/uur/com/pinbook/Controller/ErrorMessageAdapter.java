@@ -10,7 +10,8 @@ public enum ErrorMessageAdapter{
     EMAIL_EMPTY(101),
     PASSWORD_EMPTY(102),
     INVALID_USER(103),
-    INVALID_CREDENTIALS(104);
+    INVALID_CREDENTIALS(104),
+    COLLISION_EXCEPTION(105);
 
     public final int number;
 
@@ -38,7 +39,10 @@ public enum ErrorMessageAdapter{
                 message = "User is invalid";
                 break;
             case 104:
-                message = "User or password wrong!";
+                message = "Yanlış e-posta veya şifre!";
+                break;
+            case 105:
+                message = "E-mail adresi kayıtlı. Lütfen başka e-mail adresi giriniz..";
                 break;
             default:
                 message = "Unknown Error";

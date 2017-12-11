@@ -99,14 +99,14 @@
 
                 </android.support.design.widget.TextInputLayout>
 
-
                 <CheckBox
                     android:id="@+id/rememberMeCb"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="18dp"
+                    android:layout_marginLeft="20dp"
                     android:textSize="12sp"
-                    android:text="Remember me" />
+                    android:text="Beni hatırla"
+                    android:theme="@style/cbColor"/>
 
                 <Button
                     android:id="@+id/buttonSignIn"
@@ -118,7 +118,6 @@
                     android:text="SIGN IN"
                     android:textColor="@color/cardview_light_background"
                     android:background = "@drawable/roundedbutton"/>
-
 
                 <TextView
                     android:id="@+id/textViewForgetPassword"

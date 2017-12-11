@@ -77,9 +77,9 @@ public class CustomDialogAdapter extends DialogFragment {
         new PromptDialog(context)
                 .setDialogType(PromptDialog.DIALOG_TYPE_WRONG)
                 .setAnimationEnable(true)
-                .setTitleText("Error")
+                .setTitleText("HATA")
                 .setContentText(errMessage)
-                .setPositiveListener("ok", new PromptDialog.OnPositiveListener() {
+                .setPositiveListener("Tamam", new PromptDialog.OnPositiveListener() {
                     @Override
                     public void onClick(PromptDialog dialog) {
                         dialog.dismiss();
