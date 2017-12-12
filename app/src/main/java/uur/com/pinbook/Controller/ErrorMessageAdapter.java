@@ -11,7 +11,8 @@ public enum ErrorMessageAdapter{
     PASSWORD_EMPTY(102),
     INVALID_USER(103),
     INVALID_CREDENTIALS(104),
-    COLLISION_EXCEPTION(105);
+    COLLISION_EXCEPTION(105),
+    FAIL_TO_SEND_VERIFICATION_MAIL(106);
 
     public final int number;
 
@@ -30,10 +31,10 @@ public enum ErrorMessageAdapter{
 
         switch(number) {
             case 101:
-                message = "Email can't be empty";
+                message = "Email boş bırakılamaz";
                 break;
             case 102:
-                message = "Password can't be empty";
+                message = "Şifre boş bırakılamaz";
                 break;
             case 103:
                 message = "User is invalid";
@@ -42,7 +43,10 @@ public enum ErrorMessageAdapter{
                 message = "Yanlış e-posta veya şifre!";
                 break;
             case 105:
-                message = "E-mail adresi kayıtlı. Lütfen başka e-mail adresi giriniz..";
+                message = "E-mail adresi kayıtlı. Lütfen başka e-mail adresi giriniz.";
+                break;
+            case 106:
+                message = "Email aktivasyon linki gönderimi başarısız, lütfen tekrar deneyiniz.";
                 break;
             default:
                 message = "Unknown Error";

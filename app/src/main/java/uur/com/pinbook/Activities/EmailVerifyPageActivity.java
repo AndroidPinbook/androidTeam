@@ -27,6 +27,8 @@ import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import java.net.URL;
 
 import retrofit2.http.Url;
+import uur.com.pinbook.Controller.CustomDialogAdapter;
+import uur.com.pinbook.Controller.ErrorMessageAdapter;
 import uur.com.pinbook.R;
 
 public class EmailVerifyPageActivity extends AppCompatActivity implements View.OnClickListener{
@@ -38,14 +40,9 @@ public class EmailVerifyPageActivity extends AppCompatActivity implements View.O
 
     private ActionCodeSettings actionCodeSettings;
 
-    private static final String DEEP_LINK_URL = "https://androidteam-f4c25.firebaseapp.com";
-    private Uri deepLink;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 
         try {
             setContentView(R.layout.activity_email_verify_page);
@@ -58,10 +55,8 @@ public class EmailVerifyPageActivity extends AppCompatActivity implements View.O
 
         sendVerificationMail();
 
-        String userEmail = getIntent().getStringExtra("user_email");
         TextView textEmail = (TextView) findViewById(R.id.textEmail);
-        String s = user.getEmail().toString();
-        textEmail.setText(s);
+        textEmail.setText(user.getEmail().toString());
 
         textVerifyAgain = (TextView) findViewById(R.id.textVerifyAgain);
         buttonActivated = (Button) findViewById(R.id.buttonActivated);
@@ -94,9 +89,8 @@ public class EmailVerifyPageActivity extends AppCompatActivity implements View.O
                     startActivity(new Intent(EmailVerifyPageActivity.this, PinThrowActivity.class));
                 }else{
                     Log.i("!verified: ", "no");
-                    Toast.makeText(getApplicationContext(),
-                            "Please verify your email.. " + user.getEmail(),
-                            Toast.LENGTH_SHORT).show();
+                    CustomDialogAdapter.showDialogWarning(EmailVerifyPageActivity.this,
+                            "Lütfen önce hesabınızı aktifleştirin.");
                 }
             }
         });
@@ -117,14 +111,12 @@ public class EmailVerifyPageActivity extends AppCompatActivity implements View.O
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(getApplicationContext(),
-                            "Verification email sent to " + user.getEmail(),
-                            Toast.LENGTH_SHORT).show();
+                    CustomDialogAdapter.showDialogInfo(EmailVerifyPageActivity.this,
+                                                       "Aktivasyon linki mailinize gönderildi, lütfen aktive ediniz.");
                 } else {
-                    Log.i("hata : ", task.getException().toString());
-                    Toast.makeText(getApplicationContext(),
-                            "Failed to send verification email.",
-                            Toast.LENGTH_SHORT).show();
+                    Log.i("hata ", task.getException().toString());
+                    CustomDialogAdapter.showDialogInfo(EmailVerifyPageActivity.this,
+                            ErrorMessageAdapter.FAIL_TO_SEND_VERIFICATION_MAIL.getText());
                 }
             }
 

@@ -177,6 +177,8 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         Log.i("reset Email status :", "Email sent.");
+                                        CustomDialogAdapter.showDialogInfo(LoginPageActivity.this,
+                                                "Şifre sıfırlama linki e-mail adresinize gönderildi.");
 
                                     }
                                 }
@@ -236,7 +238,6 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
                             }else{
                                 Log.i("verified :", "no!");
-                                displayResult();
                                 finish();
                                 startActivity(new Intent(getApplicationContext(), EmailVerifyPageActivity.class));
                             }
@@ -262,10 +263,6 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
                         }
                     }
                 });
-    }
-
-    public void displayResult(){
-        Toast.makeText(this, "Please verify your email..", Toast.LENGTH_SHORT).show();
     }
 
     public void hideKeyBoard(){

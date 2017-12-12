@@ -94,7 +94,22 @@ public class CustomDialogAdapter extends DialogFragment {
                 .setAnimationEnable(true)
                 .setTitleText("Info")
                 .setContentText(errMessage)
-                .setPositiveListener("ok", new PromptDialog.OnPositiveListener() {
+                .setPositiveListener("Tamam", new PromptDialog.OnPositiveListener() {
+                    @Override
+                    public void onClick(PromptDialog dialog) {
+                        dialog.dismiss();
+                    }
+                }).show();
+    }
+
+    public static void showDialogWarning(Context context, String errMessage){
+
+        new PromptDialog(context)
+                .setDialogType(PromptDialog.DIALOG_TYPE_WARNING)
+                .setAnimationEnable(true)
+                .setTitleText("WARNING")
+                .setContentText(errMessage)
+                .setPositiveListener("Tamam", new PromptDialog.OnPositiveListener() {
                     @Override
                     public void onClick(PromptDialog dialog) {
                         dialog.dismiss();
