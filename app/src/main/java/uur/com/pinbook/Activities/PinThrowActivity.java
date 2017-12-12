@@ -100,6 +100,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
 
     private Circle searchCircle;
+    private Circle mapCircle;
 
     private Handler handler;
 
@@ -124,7 +125,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     LocationRequest mLocationRequest;
 
     LatLng latLng;
-    private CircleOptions circleOptions;
+    //private CircleOptions circleOptions;
 
     private LocationListener locationListener;
     private Runnable runnable = null;
@@ -174,8 +175,11 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         Location currentLocation = getLastKnownLocation();
 
         LatLng userLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        mMap.clear();
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 14));
+
+        if(mMap != null) {
+            mMap.clear();
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18));
+        }
     }
 
     /*========================================================================================*/
@@ -279,6 +283,13 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             }
 
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                centerMapOnLocation();
+                showCircleCurrentLocation();
+            }
+
         } catch (Exception e) {
             Log.i("Info", "     >>onMapReadyException Error:" + e.toString());
         }
@@ -372,14 +383,24 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         Log.i("Info", "     >>--2--");
 
-        circleOptions = new CircleOptions()
-                .center(latLng)
-                .radius(300)
-                .strokeColor(Color.TRANSPARENT)
-                .fillColor(Color.argb(100, 150, 150, 150))
-                .strokeWidth(2);
+        if(mapCircle!=null){
+            mapCircle.remove();
+        }
 
-        mMap.addCircle(circleOptions);
+        CircleOptions circleOptions = new CircleOptions()
+                .center(latLng)
+                .radius(5)
+                .strokeColor(Color.TRANSPARENT)
+                .fillColor(0x220000FF)
+                .strokeWidth(5);
+
+
+
+        //.strokeColor(getResources().getColor(R.color.mapTransparentColor))
+                //.fillColor(Color.argb(100, 150, 150, 150))
+                //.strokeWidth(2);
+
+        mapCircle = mMap.addCircle(circleOptions);
 
         Location.distanceBetween(currentLocation.getLatitude(), currentLocation.getLongitude(),
                 circleOptions.getCenter().latitude, circleOptions.getCenter().longitude, meters);
@@ -644,8 +665,8 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                     ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                centerMapOnLocation();
-                showCircleCurrentLocation();
+                //centerMapOnLocation();
+                //showCircleCurrentLocation();
             }
 
         } catch (Exception e) {
@@ -671,6 +692,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             case R.id.pinThrowButton:
                 centerMapOnLocation();
                 saveCurrLocation();
+                showCircleCurrentLocation();
                 break;
 
             default:
