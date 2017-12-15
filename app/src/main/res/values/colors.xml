@@ -15,5 +15,6 @@
     <color name="drawable_left_color">#ffffff</color>
 
     <color name="mapTransparentColor">#808edbfe</color>
+    <color name="popupBgColor">#F9BF3A</color>
 
 </resources>

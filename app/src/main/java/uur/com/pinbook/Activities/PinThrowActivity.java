@@ -2,6 +2,7 @@ package uur.com.pinbook.Activities;
 
 import android.*;
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,6 +10,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Interpolator;
+import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -16,7 +19,12 @@ import android.location.Criteria;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
@@ -35,7 +43,13 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -81,7 +95,7 @@ import uur.com.pinbook.R;
 
 
 public class PinThrowActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener, GoogleMap.OnMarkerClickListener
-        , GeoFire.CompletionListener, GeoQueryEventListener, GoogleMap.OnCameraChangeListener,
+        , GeoFire.CompletionListener, GeoQueryEventListener, GoogleMap.OnCameraChangeListener,GoogleMap.OnMapClickListener,
         View.OnClickListener {
 
     private GoogleMap mMap;
@@ -93,8 +107,15 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     private GeoQuery geoQuery;
     private GeoLocation geoLocation;
 
+    private FrameLayout mapRelativeLayout;
+    private View popupMainView = null;
+    private int mWidth;
+    private int mHeight;
+
     private Marker marker;
     private MapView mapView;
+
+    private String markerAddress;
 
     private Map<String, Marker> markers;
 
@@ -133,6 +154,16 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     private FirebaseUser currentUser;
     private String FBuserId;
 
+    private boolean mLocationPermissionGranted = false;
+
+    private PopupWindow popupWindow = null;
+
+    private static final int DIALOG_PICTURE_SELECTED = 1;
+    private static final int DIALOG_VIDEO_SELECTED = 2;
+    private static final int DIALOG_DESCRIPTION_SELECTED = 3;
+    private static final int MY_PERMISSION_ACTION_GET_CONTENT = 4;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 5;
+
 
     /*========================================================================================*/
     @Override
@@ -141,17 +172,22 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         try {
 
-            Log.i("Info", "onRequestPermissionsResult============");
+            switch (requestCode){
 
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
+                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        mLocationPermissionGranted = true;
 
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                    Log.i("Info", "     >>permission is ok");
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-
-                    centerMapOnLocation();
-                }
+                            Log.i("Info", "     >>permission is ok");
+                            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                            centerMapOnLocation();
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
         } catch (Exception e) {
             Log.i("Info", "     >>onRequestPermissionsResult Error:" + e.toString());
@@ -159,12 +195,12 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     }
 
     /*========================================================================================*/
+    @SuppressLint("MissingPermission")
     public void centerMapOnLocation() {
 
         Log.i("Info", "centerMapOnLocation============");
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (!mLocationPermissionGranted) {
 
             bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
             locationManager.requestLocationUpdates(bestProvider, 0, 0, locationListener);
@@ -176,7 +212,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         LatLng userLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
-        if(mMap != null) {
+        if (mMap != null) {
             mMap.clear();
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18));
         }
@@ -198,13 +234,17 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             nextButton = (FloatingActionButton) findViewById(R.id.nextButton);
             pinThrowButton = (FloatingActionButton) findViewById(R.id.pinThrowButton);
+            mapRelativeLayout = (FrameLayout) findViewById(R.id.mapRelativeLayout);
 
             nextButton.setOnClickListener(this);
             pinThrowButton.setOnClickListener(this);
+            mapRelativeLayout.setOnClickListener(this);
 
             mAuth = FirebaseAuth.getInstance();
             currentUser = mAuth.getCurrentUser();
             FBuserId = currentUser.getUid();
+
+
 
 
             FirebaseOptions options = new FirebaseOptions.Builder().
@@ -235,6 +275,8 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             mMap.setOnMapLongClickListener(this);
             mMap.setOnMarkerClickListener(this);
+            mMap.setOnMapClickListener(this);
+            mMap.setOnCameraChangeListener(this);
 
             Intent intent = getIntent();
 
@@ -248,6 +290,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
                     Log.i("Info", "     >>onLocationChanged method......");
                     Log.i("Info", "     >>centerMapOnLocation3");
+                    Toast.makeText(PinThrowActivity.this, "onLocation Changed", Toast.LENGTH_SHORT).show();
                     centerMapOnLocation();
                     showCircleCurrentLocation();
                 }
@@ -271,29 +314,27 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
                 }
             };
 
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-
-            }
-
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 2);
-
-            }
-
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-                centerMapOnLocation();
-                showCircleCurrentLocation();
-            }
+            getLocationPermission();
 
         } catch (Exception e) {
             Log.i("Info", "     >>onMapReadyException Error:" + e.toString());
         }
+    }
 
+    /*========================================================================================*/
+    private void getLocationPermission() {
+
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted = true;
+            Log.i("Info", "     >>mLocationPermissionGranted:" + mLocationPermissionGranted);
+            centerMapOnLocation();
+            showCircleCurrentLocation();
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
     }
 
     /*========================================================================================*/
@@ -306,8 +347,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         runnable = new Runnable() {
             public void run() {
 
-                if (ActivityCompat.checkSelfPermission(PinThrowActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                        ActivityCompat.checkSelfPermission(PinThrowActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (mLocationPermissionGranted) {
 
                     Log.i("Info", "     >>permissons are ok on runLocationHandler");
 
@@ -361,14 +401,14 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     }
 
     /*========================================================================================*/
+    @SuppressLint("MissingPermission")
     public void showCircleCurrentLocation() {
 
         Log.i("Info", "showCircleCurrenctLocation starts");
 
         float[] meters = new float[300];
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (!mLocationPermissionGranted) {
 
             bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
             locationManager.requestLocationUpdates(bestProvider, 0, 0, locationListener);
@@ -389,7 +429,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         CircleOptions circleOptions = new CircleOptions()
                 .center(latLng)
-                .radius(5)
+                .radius(8)
                 .strokeColor(Color.TRANSPARENT)
                 .fillColor(0x220000FF)
                 .strokeWidth(5);
@@ -418,6 +458,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     }
 
     /*========================================================================================*/
+    @SuppressLint("MissingPermission")
     private Location getLastKnownLocation() {
 
         Log.i("Info", "getLastKnownLocation starts");
@@ -430,15 +471,13 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             Location location = null;
 
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (mLocationPermissionGranted) {
 
                 location = locationManager.getLastKnownLocation(provider);
 
             } else {
 
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 2);
             }
 
             if (location == null) {
@@ -457,6 +496,8 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
 
     }
+
+
 
     /*========================================================================================*/
     public void saveCurrLocation() {
@@ -484,7 +525,13 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             FirebaseLocationAdapter firebaseLocationAdapter = new FirebaseLocationAdapter();
             firebaseLocationAdapter.saveLocationInfo(geocoder, latLng, FBuserId, itemId, geoLocation, mDbref);
 
-            marker = mMap.addMarker(new MarkerOptions().position(latLng).title(FirebaseLocationAdapter.getAddress()));
+            marker = mMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    //.title(FirebaseLocationAdapter.getAddress())
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                    .snippet("bu ne la"));
+
+            markerAddress = FirebaseLocationAdapter.getAddress();
 
             Toast.makeText(this, "Location Saved", Toast.LENGTH_SHORT).show();
 
@@ -500,8 +547,81 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         Log.i("Info", "onMarkerClick starts");
 
-        Toast.makeText(this, "Marker clicked", Toast.LENGTH_SHORT).show();
+        //showItemSelectionDialog();
+
+
+
+
+        if(popupWindow == null)
+            displayPopupWindow();
+        else {
+            if(popupWindow.isShowing())
+                popupWindow.dismiss();
+            else
+                updatePopup();
+            //popupWindow = null;
+            //displayPopupWindow();
+        }
+
+
+
+
+
+
         return false;
+    }
+
+    /*========================================================================================*/
+    public void showItemSelectionDialog(){
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        adapter.add("  Picture");
+        adapter.add("  Video");
+        adapter.add("  Description");
+        AlertDialog.Builder builder = new AlertDialog.Builder(PinThrowActivity.this, android.R.style.Theme_Material_Dialog);
+        builder.setTitle("Choose a profile photo");
+
+        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+
+                Log.i("Info", "  >>Item selected:" + item);
+
+                switch (item){
+
+                    case DIALOG_PICTURE_SELECTED:
+
+                        startGalleryProcess();
+                        break;
+
+                    case DIALOG_VIDEO_SELECTED:
+
+                        break;
+
+                    case DIALOG_DESCRIPTION_SELECTED:
+
+                        break;
+
+                    default:
+
+                        break;
+
+                }
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    /*========================================================================================*/
+    private void startGalleryProcess() {
+
+        Log.i("Info", "startGalleryProcess");
+
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"),MY_PERMISSION_ACTION_GET_CONTENT);
     }
 
     /*========================================================================================*/
@@ -615,13 +735,18 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             Log.i("Info", "onCameraChange starts");
 
-            LatLng center = cameraPosition.target;
+            /*LatLng center = cameraPosition.target;
             double radius = zoomLevelToRadius(cameraPosition.zoom);
             this.searchCircle.setCenter(center);
             this.searchCircle.setRadius(radius);
             this.geoQuery.setCenter(new GeoLocation(center.latitude, center.longitude));
-            // radius in km
-            this.geoQuery.setRadius(radius / 1000);
+            this.geoQuery.setRadius(radius / 1000);*/
+
+            //updatePopup();
+
+
+
+
         } catch (Exception e) {
             Log.i("Info", "     >>onCameraChanged Error:" + e.toString());
         }
@@ -662,8 +787,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             Log.i("Info", "onStart starts");
 
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (mLocationPermissionGranted) {
 
                 //centerMapOnLocation();
                 //showCircleCurrentLocation();
@@ -695,6 +819,10 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
                 showCircleCurrentLocation();
                 break;
 
+            case R.id.mapRelativeLayout:
+                checkPopupShown();
+                break;
+
             default:
                 break;
         }
@@ -712,7 +840,88 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     public void onBackPressed() {
         super.onBackPressed();
         handler.removeCallbacks(runnable);
+    }
+
+    /*========================================================================================*/
+    private void displayPopupWindow() {
+
+        popupMainView = getLayoutInflater().inflate(R.layout.default_marker_info_window, null);
+
+        ViewFlipper markerInfoContainer = (ViewFlipper)popupMainView.findViewById(R.id.markerInfoContainer);
+
+        View viewContainer = getLayoutInflater().inflate(R.layout.default_marker_info_layout, null);
+
+        TextView usernameTv = (TextView) viewContainer.findViewById(R.id.usernameTextView);
+        TextView addressTv = (TextView) viewContainer.findViewById(R.id.addressTextView);
+
+
+
+        addressTv.setText(markerAddress);
+
+        markerInfoContainer.addView(viewContainer);
+
+        popupWindow = new PopupWindow(popupMainView,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        Point p = mMap.getProjection().toScreenLocation(marker.getPosition());
+
+        Point size = new Point();
+        popupMainView.measure(size.x, size.y);
+
+        mWidth = popupMainView.getMeasuredWidth();
+        mHeight = popupMainView.getMeasuredHeight();
+
+        popupWindow.showAtLocation(findViewById(R.id.map),
+                Gravity.NO_GRAVITY,p.x - mWidth/2, p.y - mHeight - 65); //map is the fragment on the activity layout where I put the map
 
     }
 
+    @Override
+    public void onMapClick(LatLng latLng) {
+
+        checkPopupShown();
+    }
+
+    public void checkPopupShown(){
+
+        if(popupWindow != null){
+            popupWindow.dismiss();
+            Log.i("Info", "   >>onMapClick not null");
+        }
+    }
+
+    private void updatePopup() {
+
+        //if(popupWindow == null) {
+        //    return;
+        //}
+        //else if(!popupWindow.isShowing()){
+        //    popupWindow.dismiss();
+        //    return;
+        //}
+
+
+
+
+        Log.i("Info", "   >>popupWindow not null");
+
+        if (marker != null && popupWindow != null) {
+            // marker is visible
+            if (mMap.getProjection().getVisibleRegion().latLngBounds.contains(marker.getPosition())) {
+
+                Point p = mMap.getProjection().toScreenLocation(marker.getPosition());
+
+                if (!popupWindow.isShowing()) {
+                    popupWindow.showAtLocation(popupMainView, Gravity.NO_GRAVITY, p.x - mWidth/2,
+                            p.y - mHeight - 65);
+                }
+
+                popupWindow.update(p.x - mWidth/2, p.y - mHeight - 65, -1, -1);
+
+            } else { // marker outside screen
+                popupWindow.dismiss();
+            }
+        }
+    }
 }
