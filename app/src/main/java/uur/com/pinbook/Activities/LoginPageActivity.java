@@ -20,6 +20,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -41,6 +45,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Locale;
 
+import cn.refactor.lib.colordialog.ColorDialog;
 import uur.com.pinbook.Controller.CustomDialogAdapter;
 import uur.com.pinbook.Controller.ErrorMessageAdapter;
 import uur.com.pinbook.Controller.ValidationAdapter;
@@ -126,7 +131,49 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         }
 
     }
+    public static void showCustomDialog2(final Context context, String errMessage){
+        ColorDialog dialog = new ColorDialog(context);
+        dialog.setTitle("operation");
+        dialog.setAnimationEnable(true);
+        dialog.setAnimationIn(getInAnimationTest(context));
+        dialog.setAnimationOut(getOutAnimationTest(context));
+        dialog.setContentImage((R.mipmap.ic_help));
+        dialog.setPositiveListener("delete", new ColorDialog.OnPositiveListener() {
+            @Override
+            public void onClick(ColorDialog dialog) {
+                Toast.makeText(context, dialog.getPositiveText().toString(), Toast.LENGTH_SHORT).show();
+            }
+        })
+                .setNegativeListener("cancel", new ColorDialog.OnNegativeListener() {
+                    @Override
+                    public void onClick(ColorDialog dialog) {
+                        Toast.makeText(context, dialog.getNegativeText().toString(), Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
+                }).show();
+    }
 
+    public static AnimationSet getInAnimationTest(Context context) {
+        AnimationSet out = new AnimationSet(context, null);
+        AlphaAnimation alpha = new AlphaAnimation(0.0f, 1.0f);
+        alpha.setDuration(150);
+        ScaleAnimation scale = new ScaleAnimation(0.6f, 1.0f, 0.6f, 1.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        scale.setDuration(150);
+        out.addAnimation(alpha);
+        out.addAnimation(scale);
+        return out;
+    }
+
+    public static AnimationSet getOutAnimationTest(Context context) {
+        AnimationSet out = new AnimationSet(context, null);
+        AlphaAnimation alpha = new AlphaAnimation(1.0f, 0.0f);
+        alpha.setDuration(150);
+        ScaleAnimation scale = new ScaleAnimation(1.0f, 0.6f, 1.0f, 0.6f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        scale.setDuration(150);
+        out.addAnimation(alpha);
+        out.addAnimation(scale);
+        return out;
+    }
 
     private void startForgetPassFunc() {
 

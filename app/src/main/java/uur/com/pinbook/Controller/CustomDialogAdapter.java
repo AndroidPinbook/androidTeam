@@ -75,7 +75,7 @@ public class CustomDialogAdapter extends DialogFragment {
     public static void showDialogError(Context context, String errMessage){
 
         new PromptDialog(context)
-                .setDialogType(PromptDialog.DIALOG_TYPE_WRONG)
+                .setDialogType(PromptDialog.DIALOG_TYPE_DEFAULT)
                 .setAnimationEnable(true)
                 .setTitleText("HATA")
                 .setContentText(errMessage)
@@ -137,6 +137,8 @@ public class CustomDialogAdapter extends DialogFragment {
         dialog.setAnimationEnable(true);
         dialog.setAnimationIn(getInAnimationTest(context));
         dialog.setAnimationOut(getOutAnimationTest(context));
+        dialog.setContentText("Email sıfırla");
+        dialog.addContentView(null, null);
         dialog.setContentImage((R.mipmap.ic_help));
         dialog.setPositiveListener("delete", new ColorDialog.OnPositiveListener() {
             @Override
