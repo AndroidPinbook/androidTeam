@@ -23,4 +23,26 @@
     <string name="facebook_app_id">165627764176787</string>
     <string name="fb_login_protocol_scheme">fb165627764176787</string>
 
+    <string name="male_text">male</string>
+    <string name="female_text">female</string>
+
+    <string name="camera">camera</string>
+    <string name="gallery">gallery</string>
+
+    <string name="choseProfilePictureText"><u>Choose a profile picture</u></string>
+
+    <string name="fbLoginType">facebookLoginType</string>
+    <string name="twLoginType">twitterLoginType</string>
+    <string name="mailLoginType">mailLoginType</string>
+
+    <string name="EntryType">EntryType</string>
+    <string name="User">User</string>
+    <string name="app_code">g2wx4</string>
+
+    <string name="sendEmailAgain"><u>Send Email Again</u></string>
+    <string name="pleaseClickActivateMail">Please click sending mail to your Email address</string>
+    <string name="forgotPassword"><u>Forget Password?</u></string>
+    <string name="resetYourPassword">Reset Your Password</string>
+    <string name="changePassword">Enter your email address below, and we will send instructions for settings a new one</string>
+    <string name="title_activity_pin_throw">Map</string>
 </resources>

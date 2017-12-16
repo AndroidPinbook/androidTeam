@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="uur.com.pinbook.Activities.LoginPageActivity">
+    tools:context="uur.com.pinbook.Activities.LoginPageActivity"
+    android:id="@+id/layoutLogIn">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,66 +14,58 @@
         android:orientation="vertical"
         android:weightSum="5.8">
 
-        <LinearLayout
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar_top"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:background="@color/background"
             android:gravity="center"
+            android:minHeight="?attr/actionBarSize">
+
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/pacifico"
+                android:text="PinBook"
+                android:textColor="@android:color/white"
+                android:textSize="30sp" />
+        </android.support.v7.widget.Toolbar>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginTop="20dp"
             android:orientation="horizontal">
 
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/cross"
-                    android:layout_weight="0.01" />
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="4"
-                android:gravity="center">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="4"
-                    android:gravity="center"
-                    android:text="PinBook" />
-
-
-            </RelativeLayout>
-
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="3"
+            android:layout_weight="2"
             android:orientation="vertical">
-
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
                 android:orientation="vertical"
-                android:gravity="center">
-
+                android:gravity="center"
+                android:focusableInTouchMode="true"
+                android:id="@+id/inputLayout">
 
                 <!--  Email Label -->
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/email_text_input_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    app:hintTextAppearance="@style/YellowTextInputLayout">
 
                     <EditText
                         android:id="@+id/editTextEmail"
@@ -82,18 +76,16 @@
                         android:ems="15"
                         android:hint="Email"
                         android:inputType="textEmailAddress"
-                        android:drawablePadding="8dp"
-                        android:drawableLeft="@drawable/email"
-                        android:layout_margin="3dp"/>
-
+                        android:layout_margin="3dp"
+                        android:importantForAutofill="noExcludeDescendants"/>
                 </android.support.design.widget.TextInputLayout>
-
 
                 <!--  Password Label -->
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/password_text_input_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    app:hintTextAppearance="@style/YellowTextInputLayout">
 
                     <EditText
                         android:id="@+id/editTextPassword"
@@ -104,66 +96,45 @@
                         android:ems="15"
                         android:hint="Password"
                         android:inputType="textPassword"
-                        android:drawablePadding="8dp"
-                        android:drawableLeft="@drawable/password"
-                        android:layout_margin="3dp"/>
+                        android:layout_margin="3dp"
+                        android:importantForAutofill="noExcludeDescendants"/>
 
                 </android.support.design.widget.TextInputLayout>
 
+                <CheckBox
+                    android:id="@+id/rememberMeCb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:textSize="12sp"
+                    android:text="Beni hatırla"
+                    android:theme="@style/cbColor"/>
 
                 <Button
                     android:id="@+id/buttonSignIn"
-                    android:layout_width="wrap_content"
+                    android:layout_width="150dp"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="24dp"
                     android:layout_marginTop="24dp"
-                    android:background="@color/background"
                     android:padding="12dp"
-                    android:text="Login" />
+                    android:text="SIGN IN"
+                    android:textColor="@color/cardview_light_background"
+                    android:background = "@drawable/roundedbutton"/>
 
                 <TextView
                     android:id="@+id/textViewForgetPassword"
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="24dp"
                     android:gravity="center"
                     android:text="Forget Password?"
                     android:textSize="16dip" />
 
-
             </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1">
-
-
-            </LinearLayout>
-
-
 
         </LinearLayout>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     </LinearLayout>
-
-
-
-
-
 
 
 </RelativeLayout>

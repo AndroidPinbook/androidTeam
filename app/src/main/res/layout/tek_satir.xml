@@ -5,22 +5,23 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/image_item"
-        android:scaleType="centerCrop"
-        android:src="@drawable/batman_icon"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="40dp"
-        android:text="Place Holder title"
-        android:textColor="@android:color/white"
-        android:textSize="35sp"
-        />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/image_item"
+            android:scaleType="centerCrop"
+            android:src="@drawable/batman_icon"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="1dp"
+            android:text=" "
+            android:textColor="@android:color/white"
+            android:textSize="15sp"
+            />
 
 </FrameLayout>

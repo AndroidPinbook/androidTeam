@@ -2,5 +2,7 @@
 <resources>
     <string name="twitter_consumer_key">TOtoeqPo0TOBuiGNArTLN7zkb</string>
     <string name="twitter_consumer_secret">kMXOVQNb5PQyiVZ89TvRafed05bQ0vjyUjU2WQzixXlHwCPxuq</string>
+    <string name="twitter_token">168467620-eqENxjF95hbY23eTP7EdP8qA6Ykkp7hyAwvtQsIS</string>
+    <string name="twitter_token_secret">l7vx9yrtgZNgN5QJcJ7u1sKKAYh5pLh3FJoCHnYo40kTe</string>
 
 </resources>
