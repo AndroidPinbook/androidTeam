@@ -64,14 +64,14 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="3dp"
                 android:background="@drawable/shape"
-                android:drawablePadding="8dp"
-                android:ems="17"
-                android:gravity="center_vertical"
+                android:ems="15"
                 android:inputType="textEmailAddress"
-                android:paddingLeft="8dp"
-                android:textSize="15sp" />
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                 />
 
         </android.support.design.widget.TextInputLayout>
+
 
     </LinearLayout>
 

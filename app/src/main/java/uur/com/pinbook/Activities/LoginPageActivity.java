@@ -11,13 +11,19 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -32,9 +38,16 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.Locale;
+
+import cn.refactor.lib.colordialog.ColorDialog;
 import uur.com.pinbook.Controller.CustomDialogAdapter;
+import uur.com.pinbook.Controller.ErrorMessageAdapter;
 import uur.com.pinbook.Controller.ValidationAdapter;
 import uur.com.pinbook.R;
 
@@ -55,13 +68,16 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     private SharedPreferences.Editor loginPrefsEditor;
     private Boolean saveLogin;
 
+    private Button btn_showPromptDlg;
+    private Button btn_showTextDialog;
+    private Button btn_showPicDialog;
+    private Button btn_showAllModeDialog;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
-
-
 
         backGroundLayout = (RelativeLayout) findViewById(R.id.layoutLogIn);
         inputLayout = (LinearLayout) findViewById(R.id.inputLayout);
@@ -97,22 +113,66 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     }
 
     public void onClick(View view) {
-        if(view == buttonSignIn){
+        if (view == buttonSignIn) {
             userLogin();
         }
 
-        if (view == rememberMeCheckBox){
+        if (view == rememberMeCheckBox) {
             saveLoginInformation();
         }
 
-        if(view == textViewFogetPassword){
+        if (view == textViewFogetPassword) {
             startForgetPassFunc();
         }
 
-        if(view == backGroundLayout){
+        if (view == backGroundLayout) {
             saveLoginInformation();
             hideKeyBoard();
         }
+
+    }
+    public static void showCustomDialog2(final Context context, String errMessage){
+        ColorDialog dialog = new ColorDialog(context);
+        dialog.setTitle("operation");
+        dialog.setAnimationEnable(true);
+        dialog.setAnimationIn(getInAnimationTest(context));
+        dialog.setAnimationOut(getOutAnimationTest(context));
+        dialog.setContentImage((R.mipmap.ic_help));
+        dialog.setPositiveListener("delete", new ColorDialog.OnPositiveListener() {
+            @Override
+            public void onClick(ColorDialog dialog) {
+                Toast.makeText(context, dialog.getPositiveText().toString(), Toast.LENGTH_SHORT).show();
+            }
+        })
+                .setNegativeListener("cancel", new ColorDialog.OnNegativeListener() {
+                    @Override
+                    public void onClick(ColorDialog dialog) {
+                        Toast.makeText(context, dialog.getNegativeText().toString(), Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
+                }).show();
+    }
+
+    public static AnimationSet getInAnimationTest(Context context) {
+        AnimationSet out = new AnimationSet(context, null);
+        AlphaAnimation alpha = new AlphaAnimation(0.0f, 1.0f);
+        alpha.setDuration(150);
+        ScaleAnimation scale = new ScaleAnimation(0.6f, 1.0f, 0.6f, 1.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        scale.setDuration(150);
+        out.addAnimation(alpha);
+        out.addAnimation(scale);
+        return out;
+    }
+
+    public static AnimationSet getOutAnimationTest(Context context) {
+        AnimationSet out = new AnimationSet(context, null);
+        AlphaAnimation alpha = new AlphaAnimation(1.0f, 0.0f);
+        alpha.setDuration(150);
+        ScaleAnimation scale = new ScaleAnimation(1.0f, 0.6f, 1.0f, 0.6f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        scale.setDuration(150);
+        out.addAnimation(alpha);
+        out.addAnimation(scale);
+        return out;
     }
 
     private void startForgetPassFunc() {
@@ -164,6 +224,8 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         Log.i("reset Email status :", "Email sent.");
+                                        CustomDialogAdapter.showDialogInfo(LoginPageActivity.this,
+                                                "Şifre sıfırlama linki e-mail adresinize gönderildi.");
 
                                     }
                                 }
@@ -194,25 +256,12 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
-
-        if(TextUtils.isEmpty(email)){
-            editTextEmail.setError("Required.");
-            return;
-        }
-
-        if(TextUtils.isEmpty(password)){
-            editTextPassword.setError("Required.");
-            return;
-        }
-
-        if(!ValidationAdapter.isValidEmail(email)){
-            CustomDialogAdapter.showErrorDialog(LoginPageActivity.this, "Email is not valid!");
+        if(!validateForm()){
             return;
         }
 
         progressDialog.setMessage("Registering User..");
         progressDialog.show();
-        Intent intent = new Intent();
 
         firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -232,34 +281,35 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
                             if(user.isEmailVerified()){
                                 Log.i("verified :", "yes");
                                 finish();
-//                                Intent intent = new Intent(getBaseContext(), ProfilePageActivity.class);
-//                                intent.putExtra("user_email", user.getEmail().toString());
-//                                startActivity(intent);
-
                                 startActivity(new Intent(getApplicationContext(), PinThrowActivity.class));
-
 
                             }else{
                                 Log.i("verified :", "no!");
-                                displayResult();
                                 finish();
-//                                Intent intent = new Intent(getBaseContext(), EmailVerifyPageActivity.class);
-//                                intent.putExtra("user_email", user.getEmail().toString());
-//                                startActivity(intent);
-
                                 startActivity(new Intent(getApplicationContext(), EmailVerifyPageActivity.class));
                             }
                             Log.i("sonuç :", "cikis..");
                         }else{
-                            CustomDialogAdapter.showErrorDialog(LoginPageActivity.this, "Email or password is incorrect!");
+
+                            try {
+                                throw task.getException();
+                            } catch(FirebaseAuthInvalidCredentialsException e) {
+                                CustomDialogAdapter.showDialogError(LoginPageActivity.this, ErrorMessageAdapter.INVALID_CREDENTIALS.getText());
+
+                                //editTextEmail.setError("error_invalid_email");
+                                //editTextEmail.requestFocus();
+                                Log.i("error ", e.toString());
+                            } catch(FirebaseAuthUserCollisionException e) {
+                                editTextEmail.setError("error_user_exists");
+                                editTextEmail.requestFocus();
+                                Log.i("error ", e.toString());
+                            } catch(Exception e) {
+                                Log.i("error :", e.getMessage());
+                            }
 
                         }
                     }
                 });
-    }
-
-    public void displayResult(){
-        Toast.makeText(this, "Please verify your email..", Toast.LENGTH_SHORT).show();
     }
 
     public void hideKeyBoard(){
@@ -305,4 +355,61 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
         return super.onKeyDown(keyCode, event);
     }
+
+    private boolean validateForm() {
+        boolean valid = true;
+
+        Log.i("Info", "validateForm");
+
+        String email = editTextEmail.getText().toString();
+        String password = editTextPassword.getText().toString();
+
+        //Email - password check
+        if(TextUtils.isEmpty(email) || TextUtils.isEmpty((password))){
+            if (TextUtils.isEmpty(email)) {
+                editTextEmail.setError("Required");
+                valid = false;
+            } else {
+                if(!ValidationAdapter.isValidEmail(email)){
+                    editTextEmail.setError("Email is not valid");
+                    valid = false;
+
+                }else{
+                    editTextEmail.setError(null);
+                }
+            }
+
+            if (TextUtils.isEmpty(password)) {
+                editTextPassword.setError("Required");
+                valid = false;
+            } else {
+                editTextPassword.setError(null);
+            }
+
+        }else{
+
+            if(!ValidationAdapter.isValidEmail(email)){
+                editTextEmail.setError("Email is not valid");
+                valid = false;
+
+            }else{
+                editTextEmail.setError(null);
+            }
+
+            /*
+            if(!ValidationAdapter.isValidPassword(email)){
+                editTextPassword.setError("Password min length is 6");
+                valid = false;
+            }else{
+                editTextPassword.setError(null);
+            }
+            */
+
+        }
+
+        return valid;
+
+    }
+
+
 }
