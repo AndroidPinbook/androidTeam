@@ -130,6 +130,12 @@
                     android:text="Forget Password?"
                     android:textSize="16dip" />
 
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/buttonGoMap"
+                    android:text="Go Map"/>
+
             </LinearLayout>
 
         </LinearLayout>

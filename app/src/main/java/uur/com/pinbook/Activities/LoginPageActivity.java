@@ -72,12 +72,16 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     private Button btn_showTextDialog;
     private Button btn_showPicDialog;
     private Button btn_showAllModeDialog;
+    private Button btnGoMap;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
+
+        btnGoMap = (Button) findViewById(R.id.buttonGoMap);
+        btnGoMap.setOnClickListener(this);
 
         backGroundLayout = (RelativeLayout) findViewById(R.id.layoutLogIn);
         inputLayout = (LinearLayout) findViewById(R.id.inputLayout);
@@ -128,6 +132,12 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         if (view == backGroundLayout) {
             saveLoginInformation();
             hideKeyBoard();
+        }
+
+        if(view == btnGoMap){
+            Log.i("info", " --> btnGoMap clicked");
+            finish();
+            startActivity(new Intent(getApplicationContext(), denemeActivity.class));
         }
 
     }
