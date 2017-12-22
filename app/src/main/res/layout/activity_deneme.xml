@@ -13,57 +13,66 @@
         tools:context="uur.com.pinbook.Activities.denemeActivity" />
 
     <LinearLayout
-        android:layout_width="40dp"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/startstopripple"
-        android:layout_alignParentLeft="true"
-        android:layout_margin="6dp"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:weightSum="5">
 
-        <Button
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="4">
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@color/colorPrimary"
-            android:onClick="simpleRipple"
-            android:text="S\ni\nm\np\nl\ne\n"
-            android:textColor="#ffffff" />
+            android:weightSum="7"
+            android:orientation="vertical">
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="6dp"
-            android:layout_weight="1"
-            android:background="@color/colorPrimary"
-            android:onClick="advancedRipple"
-            android:text="M\nu\nl\nt\ni\np\nl\ne"
-            android:textColor="#ffffff" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="5"></LinearLayout>
+
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginRight="10dp">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/button_location"
+                    android:id="@+id/imgPinThrow"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/button_next"
+                    android:id="@+id/imgNext"/>
+            </LinearLayout>
+            
+
+        
+
+        </LinearLayout>
+
+
+
 
     </LinearLayout>
 
-    <Button
-        android:layout_width="40dp"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/startstopripple"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="6dp"
-        android:layout_marginRight="6dp"
-        android:layout_marginTop="60dp"
-        android:background="@color/colorPrimary"
-        android:onClick="radarAnimation"
-        android:text="R\na\nd\na\nr\n"
-        android:textColor="#ffffff" />
 
-    <Button
-        android:id="@+id/startstopripple"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="6dp"
-        android:layout_marginLeft="6dp"
-        android:layout_marginRight="6dp"
-        android:background="@color/colorPrimary"
-        android:onClick="startstopAnimation"
-        android:text="Stop Animation"
-        android:textColor="#ffffff" />
 </RelativeLayout>

@@ -7,46 +7,41 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.ImageView;
 
 import com.arsy.maps_library.MapRadar;
 import com.arsy.maps_library.MapRipple;
-import com.firebase.geofire.GeoFire;
-import com.firebase.geofire.GeoLocation;
-import com.firebase.geofire.GeoQueryEventListener;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import uur.com.pinbook.Controller.CustomInfoWindowAdapter;
 import uur.com.pinbook.R;
 
 public class denemeActivity extends AppCompatActivity
-        implements OnMapReadyCallback {
+        implements OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
     private LatLng latLng = new LatLng(28.7938709, 77.1427639);
@@ -60,6 +55,12 @@ public class denemeActivity extends AppCompatActivity
     private final int ANIMATION_TYPE_RADAR = 1;
     private int whichAnimationWasRunning = ANIMATION_TYPE_RIPPLE;
 
+    private ImageView imgViewPinThrow;
+    private ImageView imgViewNext;
+    private Marker marker;
+    private List<Marker> markers = new ArrayList<Marker>();
+
+    String arrayFeatures[] = {"Text", "Image", "Video"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +79,28 @@ public class denemeActivity extends AppCompatActivity
                 checkLocationPermission();
             }
         }
-        startstoprippleBtn = (Button) findViewById(R.id.startstopripple);
+
+        imgViewPinThrow = (ImageView) findViewById(R.id.imgPinThrow);
+        imgViewNext = (ImageView) findViewById(R.id.imgNext);
+        imgViewPinThrow.setOnClickListener(this);
+        imgViewNext.setOnClickListener(this);
+
+        /*
+        CircleMenu circleMenu = (CircleMenu) findViewById(R.id.circleMenu);
+        circleMenu.setMainMenu(Color.parseColor("CDCDCD"), R.drawable.batman_icon, R.drawable.wonder_woman_icon)
+                .addSubMenu(Color.parseColor("258CFF"), R.drawable.img_school_material)
+                .addSubMenu(Color.parseColor("6d4c41"), R.drawable.img_photo_camera)
+                .addSubMenu(Color.parseColor("ff0000"), R.drawable.img_play_button)
+                .setOnMenuSelectedListener(new OnMenuSelectedListener() {
+                    @Override
+                    public void onMenuSelected(int index) {
+                        Toast.makeText(denemeActivity.this, "You selected "+ arrayFeatures[index], Toast.LENGTH_SHORT);
+                    }
+                });
+        */
+
+
+
 
     }
 
@@ -111,7 +133,7 @@ public class denemeActivity extends AppCompatActivity
         } else {
             initializeMap(mMap);
         }
-
+        mMap.setOnMarkerClickListener(this);
 
     }
 
@@ -153,18 +175,6 @@ public class denemeActivity extends AppCompatActivity
             //mapRipple.startRippleMapAnimation();
 
 
-            mapRadar = new MapRadar(mMap, latLng, context);
-            //mapRadar.withClockWiseAnticlockwise(true);
-            mapRadar.withDistance(2000);
-            mapRadar.withClockwiseAnticlockwiseDuration(2);
-            //mapRadar.withOuterCircleFillColor(Color.parseColor("#12000000"));
-            mapRadar.withOuterCircleStrokeColor(Color.parseColor("#fccd29"));
-            //mapRadar.withRadarColors(Color.parseColor("#00000000"), Color.parseColor("#ff000000"));  //starts from transparent to fuly black
-            mapRadar.withRadarColors(Color.parseColor("#00fccd29"), Color.parseColor("#fffccd29"));  //starts from transparent to fuly black
-            //mapRadar.withOuterCircleStrokewidth(7);
-            //mapRadar.withRadarSpeed(5);
-            mapRadar.withOuterCircleTransparency(0.5f);
-            mapRadar.withRadarTransparency(0.5f);
         }
     }
 
@@ -184,21 +194,20 @@ public class denemeActivity extends AppCompatActivity
                     android.Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
                 location = locationManager.getLastKnownLocation(provider);
-            }
-           else{
+            } else {
 
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-                }
-
-                if (location == null) {
-                    continue;
-                }
-                if (bestLocation == null || location.getAccuracy() < bestLocation.getAccuracy()) {
-                    bestLocation = location;
-                }
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             }
-            return bestLocation;
+
+            if (location == null) {
+                continue;
+            }
+            if (bestLocation == null || location.getAccuracy() < bestLocation.getAccuracy()) {
+                bestLocation = location;
+            }
         }
+        return bestLocation;
+    }
 
     public boolean checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this,
@@ -232,52 +241,6 @@ public class denemeActivity extends AppCompatActivity
         }
     }
 
-    public void startstopAnimation(View view) {
-        if (mapRadar.isAnimationRunning() || mapRipple.isAnimationRunning()) {
-            if (mapRadar.isAnimationRunning())
-                mapRadar.stopRadarAnimation();
-            if (mapRipple.isAnimationRunning())
-                mapRipple.stopRippleMapAnimation();
-            ((Button) view).setText("Start Animation");
-        } else {
-            if (whichAnimationWasRunning == ANIMATION_TYPE_RADAR)
-                mapRadar.startRadarAnimation();
-            else
-                mapRipple.startRippleMapAnimation();
-            startstoprippleBtn.setText("Stop Animation");
-        }
-    }
-
-    public void advancedRipple(View view) {
-        mapRadar.stopRadarAnimation();
-        mapRipple.stopRippleMapAnimation();
-        mapRipple.withNumberOfRipples(3);
-        mapRipple.withFillColor(Color.parseColor("#FFA3D2E4"));
-        mapRipple.withStrokewidth(0);      //0dp
-        mapRipple.startRippleMapAnimation();
-        startstoprippleBtn.setText("Stop Animation");
-        whichAnimationWasRunning = ANIMATION_TYPE_RIPPLE;
-    }
-
-    public void radarAnimation(View view) {
-        mapRipple.stopRippleMapAnimation();
-        mapRadar.startRadarAnimation();
-        startstoprippleBtn.setText("Stop Animation");
-        whichAnimationWasRunning = ANIMATION_TYPE_RADAR;
-    }
-
-    public void simpleRipple(View view) {
-        mapRadar.stopRadarAnimation();
-        mapRipple.stopRippleMapAnimation();
-        mapRipple.withNumberOfRipples(1);
-        mapRipple.withFillColor(Color.parseColor("#00000000"));
-        mapRipple.withStrokeColor(Color.BLACK);
-        mapRipple.withStrokewidth(10);      // 10dp
-        mapRipple.startRippleMapAnimation();
-        startstoprippleBtn.setText("Stop Animation");
-        whichAnimationWasRunning = ANIMATION_TYPE_RIPPLE;
-    }
-
 
     @Override
     protected void onDestroy() {
@@ -291,6 +254,60 @@ public class denemeActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onClick(View v) {
+        if (v == imgViewPinThrow) {
+            //Throw a pin
+            v.startAnimation(AnimationUtils.loadAnimation(denemeActivity.this, R.anim.img_anim));
+            saveCurrLocation();
+        }
+
+        if (v == imgViewNext) {
+            //Go to next page
+            v.startAnimation(AnimationUtils.loadAnimation(denemeActivity.this, R.anim.img_anim));
+        }
+    }
+
+    public void saveCurrLocation() {
+
+        Log.i("Info", "saveCurrLocation============");
+
+
+        Location location = getLastKnownLocation();
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+        Log.i("Info", "     >>Latlng latitude :" + latLng.latitude);
+        Log.i("Info", "     >>Latlng longitude:" + latLng.longitude);
+
+
+        if(markers.size() != 0){
+            markers.remove(marker);
+            marker.remove();
+        }
+
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(denemeActivity.this));
+
+        marker = mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title("Title")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                .snippet("bu ne la"));
+        markers.add(marker);
+
+        marker.showInfoWindow();
+
+    }
+
+    @Override
+    public boolean onMarkerClick(final Marker mark) {
+
+        Log.i("info ", "marker clk..");
+        if (mark.equals(marker)) {
+            //handle click here
+            Log.i("info ", "marker clicked..");
+        }
+        return true;
+    }
 
     private class LocationTracker implements LocationListener {
 
