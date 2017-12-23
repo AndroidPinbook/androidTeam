@@ -75,11 +75,16 @@
                 android:id="@+id/approveFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/background"
                 android:src="@drawable/approve_icon40"
                 app:borderWidth="0dp"
                 app:elevation="6dp"
-                android:scaleType="center"/>
+                android:scaleType="center"
+                app:fabSize="normal"
+                android:clickable="true"
+                android:background="@drawable/fab"
+                app:backgroundTint="@android:color/white"
+                app:rippleColor="@android:color/black"
+                app:pressedTranslationZ="12dp"/>
 
 
             <LinearLayout
@@ -92,12 +97,16 @@
                 android:id="@+id/cancelFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
                 android:src="@drawable/cancel_icon"
                 app:borderWidth="0dp"
                 app:elevation="6dp"
-                android:scaleType="fitXY"
-                />
+                android:scaleType="center"
+                app:fabSize="normal"
+                android:clickable="true"
+                android:background="@drawable/fab"
+                app:backgroundTint="@android:color/white"
+                app:rippleColor="@android:color/darker_gray"
+                app:pressedTranslationZ="6dp"/>
 
 
         </LinearLayout>
