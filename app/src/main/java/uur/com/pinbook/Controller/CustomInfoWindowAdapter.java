@@ -1,8 +1,10 @@
 package uur.com.pinbook.Controller;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -15,7 +17,7 @@ import uur.com.pinbook.R;
  * Created by ASUS on 22.12.2017.
  */
 
-public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter{
+public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter, View.OnClickListener{
 
     private final View mWindow;
     private Context mContext;
@@ -26,7 +28,6 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter{
     }
 
     private void rendowWindowText(Marker marker, View view){
-
 
 
     }
@@ -40,7 +41,13 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter{
 
     @Override
     public View getInfoContents(Marker marker) {
+
         rendowWindowText(marker, mWindow);
         return mWindow;
+    }
+
+    @Override
+    public void onClick(View v) {
+        Log.i("info ", "btn1 clicked..");
     }
 }

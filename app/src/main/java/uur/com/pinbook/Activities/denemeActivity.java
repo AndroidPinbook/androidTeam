@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
@@ -16,10 +17,17 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.arsy.maps_library.MapRadar;
 import com.arsy.maps_library.MapRipple;
@@ -29,6 +37,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -41,7 +50,8 @@ import uur.com.pinbook.Controller.CustomInfoWindowAdapter;
 import uur.com.pinbook.R;
 
 public class denemeActivity extends AppCompatActivity
-        implements OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener {
+        implements OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnCameraChangeListener{
 
     private GoogleMap mMap;
     private LatLng latLng = new LatLng(28.7938709, 77.1427639);
@@ -61,6 +71,10 @@ public class denemeActivity extends AppCompatActivity
     private List<Marker> markers = new ArrayList<Marker>();
 
     String arrayFeatures[] = {"Text", "Image", "Video"};
+
+    private ViewGroup infoWindow;
+    private Button infoButton1, infoButton2;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,22 +99,38 @@ public class denemeActivity extends AppCompatActivity
         imgViewPinThrow.setOnClickListener(this);
         imgViewNext.setOnClickListener(this);
 
-        /*
-        CircleMenu circleMenu = (CircleMenu) findViewById(R.id.circleMenu);
-        circleMenu.setMainMenu(Color.parseColor("CDCDCD"), R.drawable.batman_icon, R.drawable.wonder_woman_icon)
-                .addSubMenu(Color.parseColor("258CFF"), R.drawable.img_school_material)
-                .addSubMenu(Color.parseColor("6d4c41"), R.drawable.img_photo_camera)
-                .addSubMenu(Color.parseColor("ff0000"), R.drawable.img_play_button)
-                .setOnMenuSelectedListener(new OnMenuSelectedListener() {
-                    @Override
-                    public void onMenuSelected(int index) {
-                        Toast.makeText(denemeActivity.this, "You selected "+ arrayFeatures[index], Toast.LENGTH_SHORT);
-                    }
-                });
-        */
+    }
 
+    private View popupMainView = null;
+    private PopupWindow popupWindow = null;
+    private int mWidth;
+    private int mHeight;
 
+    /*========================================================================================*/
+    private void displayPopupWindow() {
 
+        popupMainView = getLayoutInflater().inflate(R.layout.default_marker_info_window, null);
+
+        ViewFlipper markerInfoContainer = (ViewFlipper)popupMainView.findViewById(R.id.markerInfoContainer);
+
+        View viewContainer = getLayoutInflater().inflate(R.layout.default_marker_info_layout, null);
+
+        markerInfoContainer.addView(viewContainer);
+
+        popupWindow = new PopupWindow(popupMainView,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        Point p = mMap.getProjection().toScreenLocation(marker.getPosition());
+
+        Point size = new Point();
+        popupMainView.measure(size.x, size.y);
+
+        mWidth = popupMainView.getMeasuredWidth();
+        mHeight = popupMainView.getMeasuredHeight();
+
+        popupWindow.showAtLocation(findViewById(R.id.map),
+                Gravity.NO_GRAVITY,p.x - mWidth/2, p.y - mHeight - 65); //map is the fragment on the activity layout where I put the map
 
     }
 
@@ -134,6 +164,7 @@ public class denemeActivity extends AppCompatActivity
             initializeMap(mMap);
         }
         mMap.setOnMarkerClickListener(this);
+
 
     }
 
@@ -259,14 +290,42 @@ public class denemeActivity extends AppCompatActivity
         if (v == imgViewPinThrow) {
             //Throw a pin
             v.startAnimation(AnimationUtils.loadAnimation(denemeActivity.this, R.anim.img_anim));
+
+            throwPin();
+
+
+
+
+
             saveCurrLocation();
+            displayPopupWindow();
         }
 
         if (v == imgViewNext) {
             //Go to next page
             v.startAnimation(AnimationUtils.loadAnimation(denemeActivity.this, R.anim.img_anim));
         }
+
     }
+
+    public void throwPin() {
+        Log.i("Info", "   >> throwPin");
+
+        Location location = getLastKnownLocation();
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+        Log.i("Info", "     >>Latlng latitude :" + latLng.latitude);
+        Log.i("Info", "     >>Latlng longitude:" + latLng.longitude);
+
+        if(marker != null){
+
+        }else{
+
+        }
+
+
+    }
+
 
     public void saveCurrLocation() {
 
@@ -285,7 +344,7 @@ public class denemeActivity extends AppCompatActivity
             marker.remove();
         }
 
-        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(denemeActivity.this));
+        //mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(denemeActivity.this));
 
         marker = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
@@ -296,6 +355,8 @@ public class denemeActivity extends AppCompatActivity
 
         marker.showInfoWindow();
 
+
+
     }
 
     @Override
@@ -305,8 +366,67 @@ public class denemeActivity extends AppCompatActivity
         if (mark.equals(marker)) {
             //handle click here
             Log.i("info ", "marker clicked..");
+
+            if(popupWindow == null)
+                displayPopupWindow();
+            else {
+                if(popupWindow.isShowing())
+                    popupWindow.dismiss();
+                else
+                    updatePopup();
+                //popupWindow = null;
+                //displayPopupWindow();
+            }
+
+
+
+
         }
         return true;
+    }
+
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition) {
+        try {
+            Log.i("Info", "onCameraChange starts");
+            updatePopup();
+        } catch (Exception e) {
+            Log.i("Info", "     >>onCameraChanged Error:" + e.toString());
+        }
+    }
+
+    private void updatePopup() {
+
+        //if(popupWindow == null) {
+        //    return;
+        //}
+        //else if(!popupWindow.isShowing()){
+        //    popupWindow.dismiss();
+        //    return;
+        //}
+
+
+
+
+        Log.i("Info", "   >>popupWindow not null");
+
+        if (marker != null && popupWindow != null) {
+            // marker is visible
+            if (mMap.getProjection().getVisibleRegion().latLngBounds.contains(marker.getPosition())) {
+
+                Point p = mMap.getProjection().toScreenLocation(marker.getPosition());
+
+                if (!popupWindow.isShowing()) {
+                    popupWindow.showAtLocation(popupMainView, Gravity.NO_GRAVITY, p.x - mWidth/2,
+                            p.y - mHeight - 65);
+                }
+
+                popupWindow.update(p.x - mWidth/2, p.y - mHeight - 65, -1, -1);
+
+            } else { // marker outside screen
+                popupWindow.dismiss();
+            }
+        }
     }
 
     private class LocationTracker implements LocationListener {
