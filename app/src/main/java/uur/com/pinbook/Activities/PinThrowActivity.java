@@ -44,7 +44,9 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -78,7 +80,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
+import com.arsy.maps_library.MapRipple;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -91,14 +93,16 @@ import java.util.Map;
 import java.util.Set;
 
 import uur.com.pinbook.Controller.FirebaseLocationAdapter;
+import uur.com.pinbook.Controller.LocationTrackerAdapter;
+import uur.com.pinbook.Controller.OnInfoWindowElemTouchListener;
 import uur.com.pinbook.R;
 
 
 public class PinThrowActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener, GoogleMap.OnMarkerClickListener
-        , GeoFire.CompletionListener, GeoQueryEventListener, GoogleMap.OnCameraChangeListener,GoogleMap.OnMapClickListener,
-        View.OnClickListener {
+        , GeoFire.CompletionListener, GeoQueryEventListener, GoogleMap.OnCameraChangeListener, GoogleMap.OnMapClickListener,
+        View.OnClickListener, LocationListener{
 
-    private GoogleMap mMap;
+    public GoogleMap mMap;
 
     LocationManager locationManager;
     //LocationListener locationListener;
@@ -109,8 +113,10 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
     private FrameLayout mapRelativeLayout;
     private View popupMainView = null;
+    private View popupSelectionView = null;
     private int mWidth;
     private int mHeight;
+
 
     private Marker marker;
     private MapView mapView;
@@ -119,9 +125,16 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
     private Map<String, Marker> markers;
 
+    private boolean isMarkerClicked = false;
+    private boolean isPinThrowClicked = false;
+
+    private LocationTrackerAdapter locationTrackObj;
+
 
     private Circle searchCircle;
     private Circle mapCircle;
+
+    private Context context;
 
     private Handler handler;
 
@@ -157,6 +170,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     private boolean mLocationPermissionGranted = false;
 
     private PopupWindow popupWindow = null;
+    private PopupWindow popupSelectionWindow = null;
 
     private static final int DIALOG_PICTURE_SELECTED = 1;
     private static final int DIALOG_VIDEO_SELECTED = 2;
@@ -165,6 +179,8 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 5;
 
 
+    private MapRipple mapRipple;
+
     /*========================================================================================*/
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -172,18 +188,20 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         try {
 
-            switch (requestCode){
+            switch (requestCode) {
 
                 case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
                     if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         mLocationPermissionGranted = true;
 
-                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                             Log.i("Info", "     >>permission is ok");
                             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
                             centerMapOnLocation();
-                        }
+                        }*/
+
+                        initializeMap(mMap);
                     }
                     break;
                 default:
@@ -203,7 +221,12 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         if (!mLocationPermissionGranted) {
 
             bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
-            locationManager.requestLocationUpdates(bestProvider, 0, 0, locationListener);
+            //locationManager.requestLocationUpdates(bestProvider, 0, 0, locationListener);
+
+            locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    0,
+                    0, (android.location.LocationListener) context);
         }
 
         Log.i("Info", "     >>centerMapOnLocation will go on");
@@ -214,7 +237,19 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         if (mMap != null) {
             mMap.clear();
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18));
+            //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18));
+
+            mapRipple = new MapRipple(mMap, latLng, context);
+
+            float zoom = mMap.getCameraPosition().zoom;
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new
+                    LatLng(currentLocation.getLatitude(),
+                    currentLocation.getLongitude()), zoom));
+
+            //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new
+            //                                LatLng(userLocation.latitude,
+            //                                userLocation.longitude), 14));
         }
     }
 
@@ -232,6 +267,10 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             mapFragment.getMapAsync(this);
 
+            context = this;
+
+            locationTrackObj = new LocationTrackerAdapter(PinThrowActivity.this);
+
             nextButton = (FloatingActionButton) findViewById(R.id.nextButton);
             pinThrowButton = (FloatingActionButton) findViewById(R.id.pinThrowButton);
             mapRelativeLayout = (FrameLayout) findViewById(R.id.mapRelativeLayout);
@@ -245,20 +284,24 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             FBuserId = currentUser.getUid();
 
 
-
-
             FirebaseOptions options = new FirebaseOptions.Builder().
                     setApplicationId(appId).setDatabaseUrl(GEO_FIRE_REF).build();
 
             Log.i("Info", "     >>FirebaseOptions.AppId:" + options.getApplicationId());
 
 
-            //FirebaseApp app = FirebaseApp.initializeApp(this, options, appId);
+
+            if (!locationTrackObj.canGetLocation()) {
+                locationTrackObj.showSettingsAlert();
+            } else {
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    checkLocationPermission();
+                }
+            }
 
 
-            // setup GeoFire
-            this.geoFire = new GeoFire(FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_REF));
-            this.geoQuery = this.geoFire.queryAtLocation(INITIAL_CENTER, 1);
+            //this.geoFire = new GeoFire(FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_REF));
+            //this.geoQuery = this.geoFire.queryAtLocation(INITIAL_CENTER, 1);
 
         } catch (Exception e) {
             Log.i("Info", "     >>onCreate try error:" + e.toString());
@@ -278,8 +321,18 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             mMap.setOnMapClickListener(this);
             mMap.setOnCameraChangeListener(this);
 
-            Intent intent = getIntent();
 
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (ActivityCompat.checkSelfPermission(this,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    initializeMap(mMap);
+                }
+            } else {
+                initializeMap(mMap);
+            }
+
+            /*
             locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
             runLocationHandler();
@@ -314,31 +367,105 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
                 }
             };
 
-            getLocationPermission();
+            getLocationPermission();*/
 
         } catch (Exception e) {
             Log.i("Info", "     >>onMapReadyException Error:" + e.toString());
         }
+
+
+    }
+
+
+    private void initializeMap(GoogleMap mMap) {
+        if (mMap != null) {
+            mMap.getUiSettings().setScrollGesturesEnabled(true);
+            mMap.getUiSettings().setAllGesturesEnabled(true);
+
+            if (ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                mMap.setMyLocationEnabled(true);
+            }
+            Location location = getLastKnownLocation();
+
+            if (location == null)
+                location = locationTrackObj.getLocation();
+
+            try {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new
+                        LatLng(location.getLatitude(),
+                        location.getLongitude()), 14));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (location != null)
+                latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            else {
+                latLng = new LatLng(0.0, 0.0);
+            }
+
+            mapRipple = new MapRipple(mMap, latLng, context);
+        }
+    }
+
+    public boolean checkLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Asking user if explanation is needed
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+                //Prompt the user once explanation has been shown
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                        PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+
+
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                        PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            }
+
+            return false;
+        } else {
+            mLocationPermissionGranted = true;
+            return true;
+        }
     }
 
     /*========================================================================================*/
-    private void getLocationPermission() {
+    /*private void getLocationPermission() {
 
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mLocationPermissionGranted = true;
             Log.i("Info", "     >>mLocationPermissionGranted:" + mLocationPermissionGranted);
-            centerMapOnLocation();
-            showCircleCurrentLocation();
+            //centerMapOnLocation();
+            //showCircleCurrentLocation();
+
+
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
-    }
+    }*/
+
+
+
 
     /*========================================================================================*/
-    public void runLocationHandler() {
+    /*public void runLocationHandler() {
 
         Log.i("Info", "runLocationHandler starts");
 
@@ -360,7 +487,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             }
         };
         handler.postDelayed(runnable, 1500);
-    }
+    }*/
 
     /*========================================================================================*/
     private void isLocationEnabled() {
@@ -423,11 +550,13 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         Log.i("Info", "     >>--2--");
 
-        if(mapCircle!=null){
+        if (mapCircle != null) {
             mapCircle.remove();
         }
 
-        CircleOptions circleOptions = new CircleOptions()
+        mapRipple = new MapRipple(mMap, latLng, context);
+
+        /*CircleOptions circleOptions = new CircleOptions()
                 .center(latLng)
                 .radius(8)
                 .strokeColor(Color.TRANSPARENT)
@@ -436,25 +565,21 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
 
 
-        //.strokeColor(getResources().getColor(R.color.mapTransparentColor))
-                //.fillColor(Color.argb(100, 150, 150, 150))
-                //.strokeWidth(2);
-
         mapCircle = mMap.addCircle(circleOptions);
 
         Location.distanceBetween(currentLocation.getLatitude(), currentLocation.getLongitude(),
                 circleOptions.getCenter().latitude, circleOptions.getCenter().longitude, meters);
 
         if (meters[0] < circleOptions.getRadius()) {
-            //Toast.makeText(getBaseContext(), "Inside given radius", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getBaseContext(), "Inside given radius", Toast.LENGTH_SHORT).show();
 
-           /* marker = mMap.addMarker(new MarkerOptions()
+            marker = mMap.addMarker(new MarkerOptions()
                     .position(latLng)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
                     .title("title"));
 
-            markers.put("1", marker);*/
-        }
+            markers.put("1", marker);
+        }*/
     }
 
     /*========================================================================================*/
@@ -495,8 +620,8 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     public void onMapLongClick(LatLng latLng) {
 
 
+        //displaySelectionWindow();
     }
-
 
 
     /*========================================================================================*/
@@ -525,19 +650,34 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             FirebaseLocationAdapter firebaseLocationAdapter = new FirebaseLocationAdapter();
             firebaseLocationAdapter.saveLocationInfo(geocoder, latLng, FBuserId, itemId, geoLocation, mDbref);
 
-            marker = mMap.addMarker(new MarkerOptions()
-                    .position(latLng)
-                    //.title(FirebaseLocationAdapter.getAddress())
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
-                    .snippet("bu ne la"));
 
-            markerAddress = FirebaseLocationAdapter.getAddress();
-
-            Toast.makeText(this, "Location Saved", Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
             Log.i("Info", "     >>SaveCurrLocation Error:" + e.toString());
         }
+    }
+
+    /*========================================================================================*/
+    public void addMarkerToMap(){
+
+        isPinThrowClicked = true;
+        centerMapOnLocation();
+        Location location = getLastKnownLocation();
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(latLng)
+                //.title(FirebaseLocationAdapter.getAddress())
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+        //.snippet("bu ne la");
+
+        marker = mMap.addMarker(markerOptions);
+
+        markerAddress = FirebaseLocationAdapter.getAddress();
+
+        Toast.makeText(this, "Location Saved", Toast.LENGTH_SHORT).show();
+
+        //displayPopupWindow();
     }
 
 
@@ -547,32 +687,25 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         Log.i("Info", "onMarkerClick starts");
 
-        //showItemSelectionDialog();
+        isMarkerClicked = true;
 
 
+        if (popupWindow == null) {
 
 
-        if(popupWindow == null)
-            displayPopupWindow();
-        else {
-            if(popupWindow.isShowing())
+            Log.i("Info", "  >>popupWindow null");
+        } else {
+            if (popupWindow.isShowing()) {
                 popupWindow.dismiss();
-            else
-                updatePopup();
-            //popupWindow = null;
-            //displayPopupWindow();
+                popupWindow = null;
+            }
         }
-
-
-
-
-
 
         return false;
     }
 
     /*========================================================================================*/
-    public void showItemSelectionDialog(){
+    public void showItemSelectionDialog() {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
         adapter.add("  Picture");
@@ -586,7 +719,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
                 Log.i("Info", "  >>Item selected:" + item);
 
-                switch (item){
+                switch (item) {
 
                     case DIALOG_PICTURE_SELECTED:
 
@@ -621,7 +754,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"),MY_PERMISSION_ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), MY_PERMISSION_ACTION_GET_CONTENT);
     }
 
     /*========================================================================================*/
@@ -634,14 +767,14 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     @Override
     public void onKeyEntered(String key, GeoLocation location) {
 
-        try {
+        /*try {
             Log.i("Info", "onKeyEntered============");
 
             Marker marker = this.mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)));
             this.markers.put(key, marker);
         } catch (Exception e) {
             Log.i("Info", "     >>onKeyEntered Error:" + e.toString());
-        }
+        }*/
     }
 
     /*========================================================================================*/
@@ -735,16 +868,23 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             Log.i("Info", "onCameraChange starts");
 
-            /*LatLng center = cameraPosition.target;
-            double radius = zoomLevelToRadius(cameraPosition.zoom);
-            this.searchCircle.setCenter(center);
-            this.searchCircle.setRadius(radius);
-            this.geoQuery.setCenter(new GeoLocation(center.latitude, center.longitude));
-            this.geoQuery.setRadius(radius / 1000);*/
 
             //updatePopup();
 
+            if (popupWindow == null) {
+                Log.i("Info", "  >>onCameraChange popupWindow null");
+                if (isMarkerClicked || isPinThrowClicked)
+                    displayPopupWindow();
+            } else if (popupWindow.isShowing()) {
 
+                if (!isMarkerClicked || !isPinThrowClicked) {
+                    popupWindow.dismiss();
+                    popupWindow = null;
+                }
+            }
+
+            isMarkerClicked = false;
+            isPinThrowClicked = false;
 
 
         } catch (Exception e) {
@@ -761,7 +901,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     /*========================================================================================*/
     @Override
     protected void onStop() {
-        handler.removeCallbacks(runnable);
+        //handler.removeCallbacks(runnable);
 
         try {
             Log.i("Info", "onStop============");
@@ -790,7 +930,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             if (mLocationPermissionGranted) {
 
                 //centerMapOnLocation();
-                //showCircleCurrentLocation();
+                showCircleCurrentLocation();
             }
 
         } catch (Exception e) {
@@ -814,14 +954,16 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
                 break;
 
             case R.id.pinThrowButton:
-                centerMapOnLocation();
-                saveCurrLocation();
-                showCircleCurrentLocation();
+                //centerMapOnLocation();
+                //saveCurrLocation();
+                addMarkerToMap();
+                //showCircleCurrentLocation();
                 break;
 
             case R.id.mapRelativeLayout:
                 checkPopupShown();
                 break;
+
 
             default:
                 break;
@@ -832,14 +974,14 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     @Override
     public void onPause() {
         super.onPause();
-        handler.removeCallbacks(runnable);
+//        handler.removeCallbacks(runnable);
     }
 
     /*========================================================================================*/
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        handler.removeCallbacks(runnable);
+        //handler.removeCallbacks(runnable);
     }
 
     /*========================================================================================*/
@@ -847,16 +989,15 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         popupMainView = getLayoutInflater().inflate(R.layout.default_marker_info_window, null);
 
-        ViewFlipper markerInfoContainer = (ViewFlipper)popupMainView.findViewById(R.id.markerInfoContainer);
+        ViewFlipper markerInfoContainer = (ViewFlipper) popupMainView.findViewById(R.id.markerInfoContainer);
 
         View viewContainer = getLayoutInflater().inflate(R.layout.default_marker_info_layout, null);
 
-        TextView usernameTv = (TextView) viewContainer.findViewById(R.id.usernameTextView);
-        TextView addressTv = (TextView) viewContainer.findViewById(R.id.addressTextView);
+        //TextView usernameTv = (TextView) viewContainer.findViewById(R.id.usernameTextView);
+        //TextView addressTv = (TextView) viewContainer.findViewById(R.id.addressTextView);
 
 
-
-        addressTv.setText(markerAddress);
+        //addressTv.setText(markerAddress);
 
         markerInfoContainer.addView(viewContainer);
 
@@ -873,7 +1014,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         mHeight = popupMainView.getMeasuredHeight();
 
         popupWindow.showAtLocation(findViewById(R.id.map),
-                Gravity.NO_GRAVITY,p.x - mWidth/2, p.y - mHeight - 65); //map is the fragment on the activity layout where I put the map
+                Gravity.NO_GRAVITY, p.x - mWidth / 2, p.y - mHeight - 65); //map is the fragment on the activity layout where I put the map
 
     }
 
@@ -883,10 +1024,14 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         checkPopupShown();
     }
 
-    public void checkPopupShown(){
+    public void checkPopupShown() {
 
-        if(popupWindow != null){
-            popupWindow.dismiss();
+        if (popupWindow != null) {
+            if (popupWindow.isShowing()) {
+                popupWindow.dismiss();
+                popupWindow = null;
+            }
+
             Log.i("Info", "   >>onMapClick not null");
         }
     }
@@ -902,8 +1047,6 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         //}
 
 
-
-
         Log.i("Info", "   >>popupWindow not null");
 
         if (marker != null && popupWindow != null) {
@@ -913,15 +1056,178 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
                 Point p = mMap.getProjection().toScreenLocation(marker.getPosition());
 
                 if (!popupWindow.isShowing()) {
-                    popupWindow.showAtLocation(popupMainView, Gravity.NO_GRAVITY, p.x - mWidth/2,
+                    popupWindow.showAtLocation(popupMainView, Gravity.NO_GRAVITY, p.x - mWidth / 2,
                             p.y - mHeight - 65);
                 }
 
-                popupWindow.update(p.x - mWidth/2, p.y - mHeight - 65, -1, -1);
+                popupWindow.update(p.x - mWidth / 2, p.y - mHeight - 65, -1, -1);
 
             } else { // marker outside screen
                 popupWindow.dismiss();
             }
         }
     }
+
+    /*private void displaySelectionWindow() {
+
+        popupSelectionView = getLayoutInflater().inflate(R.layout.default_marker_info_window, null);
+
+        ViewFlipper markerInfoContainer = (ViewFlipper) popupSelectionView.findViewById(R.id.markerInfoContainer);
+
+        View viewContainer = getLayoutInflater().inflate(R.layout.defaut_marker_selection_layout, null);
+
+
+        markerInfoContainer.addView(viewContainer);
+
+        popupSelectionWindow = new PopupWindow(popupSelectionView,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        Point p = mMap.getProjection().toScreenLocation(marker.getPosition());
+
+        Point size = new Point();
+        popupSelectionView.measure(size.x, size.y);
+
+        mWidth = popupSelectionView.getMeasuredWidth();
+        mHeight = popupSelectionView.getMeasuredHeight();
+
+        popupSelectionWindow.showAtLocation(findViewById(R.id.map),
+                Gravity.NO_GRAVITY, p.x - mWidth / 2, p.y - mHeight - 65); //map is the fragment on the activity layout where I put the map
+
+    }*/
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            if (mapRipple.isAnimationRunning()) {
+                mapRipple.stopRippleMapAnimation();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
+    public void onLocationChanged(Location location) {
+
+        if (mapRipple.isAnimationRunning())
+            mapRipple.withLatLng(new LatLng(location.getLatitude(), location.getLongitude()));
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+   /* @Override
+    public void onInfoWindowClick(Marker marker) {
+
+
+
+        Log.i("xx", "xxxx");
+
+
+        View viewContainer = getLayoutInflater().inflate(R.layout.custom_info_window, null);
+
+        LatLng latLng = marker.getPosition();
+
+        TextView usernameTextView = (TextView) viewContainer.findViewById(R.id.usernameTextView);
+        TextView addressTextView = (TextView) viewContainer.findViewById(R.id.addressTextView);
+
+        ImageView pictureImageView = (ImageView) viewContainer.findViewById(R.id.pictureImageView);
+        ImageView videoImageView = (ImageView) viewContainer.findViewById(R.id.videoImageView);
+
+        pictureImageView.setOnClickListener((View.OnClickListener) viewContainer.getContext());
+        videoImageView.setOnClickListener((View.OnClickListener) viewContainer.getContext());
+
+
+
+
+
+        /*infoWindow = (ViewGroup)getLayoutInflater().inflate(R.layout.custom_info_window, null);
+
+        infoButton1 = (ImageView) infoWindow.findViewById(R.id.pictureImageView);
+        infoButton2 = (ImageView) infoWindow.findViewById(R.id.videoImageView);
+
+
+
+
+        // Setting custom OnTouchListener which deals with the pressed state
+        // so it shows up
+        this.infoButton1.setOnTouchListener(infoButtonListener);
+
+        this.infoButtonListener = new OnInfoWindowElemTouchListener(infoButton1, getResources().getDrawable(R.drawable.pin_loc_icon), getResources().getDrawable(R.drawable.pin_loc_icon)){
+            @Override
+            protected void onClickConfirmed(View v, Marker marker) {
+                // Here we can perform some action triggered after clicking the button
+                Toast.makeText(PinThrowActivity.this, "click on button 1", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+
+        infoButtonListener = new OnInfoWindowElemTouchListener(infoButton2, getResources().getDrawable(R.drawable.pin_loc_icon),getResources().getDrawable(R.drawable.pin_loc_icon)){
+            @Override
+            protected void onClickConfirmed(View v, Marker marker) {
+                Toast.makeText(getApplicationContext(), "click on button 2", Toast.LENGTH_LONG).show();
+            }
+        };
+        infoButton2.setOnTouchListener(infoButtonListener);
+
+
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker marker) {
+
+
+
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                return null;
+            }
+        });
+
+
+
+    }*/
+
+    /*@Override
+    public View getInfoWindow(Marker marker) {
+        return null;
+    }*/
+
+    /*@Override
+    public View getInfoContents(Marker marker)
+    {
+        View viewContainer = getLayoutInflater().inflate(R.layout.custom_info_window, null);
+
+        LatLng latLng = marker.getPosition();
+
+        TextView usernameTextView = (TextView) viewContainer.findViewById(R.id.usernameTextView);
+        TextView addressTextView = (TextView) viewContainer.findViewById(R.id.addressTextView);
+
+        ImageView pictureImageView = (ImageView) viewContainer.findViewById(R.id.pictureImageView);
+        ImageView videoImageView = (ImageView) viewContainer.findViewById(R.id.videoImageView);
+
+        pictureImageView.setOnClickListener((View.OnClickListener) viewContainer.getContext());
+        videoImageView.setOnClickListener((View.OnClickListener) viewContainer.getContext());
+
+        return null;
+    }*/
+
 }
