@@ -17,12 +17,13 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:gravity="center">
 
                 <ImageView
                     android:id="@+id/videoImageView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:src="@drawable/video_icon80" />
             </LinearLayout>
 
@@ -31,19 +32,19 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:weightSum="2">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:gravity="center">
 
                 <ImageView
                     android:id="@+id/pictureImageView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:src="@drawable/gallery_icon80" />
             </LinearLayout>
 
@@ -51,13 +52,15 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:gravity="center">
 
                 <ImageView
                     android:id="@+id/noteImageView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/text_icon80" />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/text_icon80"
+                    />
             </LinearLayout>
 
         </LinearLayout>
@@ -80,8 +83,8 @@
                 app:backgroundTint="@color/background"
                 app:fabSize="mini"
                 android:clickable="true"
-                />
-
+                android:background="@drawable/fab"
+                app:rippleColor="@android:color/black"/>
 
             <LinearLayout
                 android:layout_width="20dp"
@@ -96,9 +99,10 @@
                 android:scaleType="center"
                 android:src="@drawable/cancel_icon"
                 app:backgroundTint="@color/background"
-                android:clickable="true"
                 app:fabSize="mini"
-                 />
+                android:clickable="true"
+                android:background="@drawable/fab"
+                app:rippleColor="@android:color/black" />
 
 
         </LinearLayout>

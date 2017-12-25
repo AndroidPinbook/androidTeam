@@ -23,4 +23,7 @@
 
     <dimen name="floatAbSize">40dp</dimen>
 
+    <dimen name="design_fab_size_normal">56dp</dimen>
+    <dimen name="design_fab_size_mini">43dp</dimen>
+
 </resources>

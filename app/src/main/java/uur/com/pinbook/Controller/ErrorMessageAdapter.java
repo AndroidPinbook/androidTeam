@@ -12,7 +12,8 @@ public enum ErrorMessageAdapter{
     INVALID_USER(103),
     INVALID_CREDENTIALS(104),
     COLLISION_EXCEPTION(105),
-    FAIL_TO_SEND_VERIFICATION_MAIL(106);
+    FAIL_TO_SEND_VERIFICATION_MAIL(106),
+    UNKNOW_ERROR(107);
 
     public final int number;
 
@@ -47,6 +48,9 @@ public enum ErrorMessageAdapter{
                 break;
             case 106:
                 message = "Email aktivasyon linki gönderimi başarısız, lütfen tekrar deneyiniz.";
+                break;
+            case 107:
+                message = "Firebase HATA!";
                 break;
             default:
                 message = "Unknown Error";

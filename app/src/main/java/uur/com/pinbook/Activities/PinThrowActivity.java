@@ -1,34 +1,24 @@
 package uur.com.pinbook.Activities;
 
-import android.*;
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.Interpolator;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.location.Criteria;
-import android.provider.Settings;
-import android.support.annotation.Nullable;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.hardware.SensorListener;
-import android.hardware.SensorManager;
-import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
@@ -42,13 +32,12 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -57,10 +46,8 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -69,11 +56,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -81,20 +66,18 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.arsy.maps_library.MapRipple;
+import com.google.firebase.storage.StorageReference;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
+import uur.com.pinbook.Controller.BitmapConversion;
+import uur.com.pinbook.Controller.CustomDialogAdapter;
 import uur.com.pinbook.Controller.FirebaseLocationAdapter;
 import uur.com.pinbook.Controller.LocationTrackerAdapter;
-import uur.com.pinbook.Controller.OnInfoWindowElemTouchListener;
 import uur.com.pinbook.R;
 
 
@@ -178,8 +161,34 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     private static final int MY_PERMISSION_ACTION_GET_CONTENT = 4;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 5;
 
-
     private MapRipple mapRipple;
+
+    private FloatingActionButton btnSave;
+    private FloatingActionButton btnCancel;
+    private ImageView imgPicture;
+    private ImageView imgVideo;
+    private ImageView imgText;
+
+
+    public String photoChoosenType = "";
+
+    private Button continueWithEmailVerifButton;
+    private ImageView photoImageView;
+    private InputStream profileImageStream;
+    private StorageReference riversRef;
+
+    private Bitmap photo = null;
+    private Uri tempUri = null;
+
+    private static final int  MY_PERMISSION_CAMERA = 1;
+    private static final int  MY_PERMISSION_WRITE_EXTERNAL_STORAGE = 2;
+    private static final int  MY_PERMISSION_READ_EXTERNAL_STORAGE = 3;
+
+    private static final int PROFILE_PIC_CAMERA_SELECTED = 0;
+    private static final int PROFILE_PIC_GALLERY_SELECTED = 1;
+
+    private TextView chooseProfilePicTextView;
+
 
     /*========================================================================================*/
     @Override
@@ -219,9 +228,6 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         Log.i("Info", "centerMapOnLocation============");
 
         if (!mLocationPermissionGranted) {
-
-            bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
-            //locationManager.requestLocationUpdates(bestProvider, 0, 0, locationListener);
 
             locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
@@ -271,26 +277,6 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             locationTrackObj = new LocationTrackerAdapter(PinThrowActivity.this);
 
-            nextButton = (FloatingActionButton) findViewById(R.id.nextButton);
-            pinThrowButton = (FloatingActionButton) findViewById(R.id.pinThrowButton);
-            mapRelativeLayout = (FrameLayout) findViewById(R.id.mapRelativeLayout);
-
-            nextButton.setOnClickListener(this);
-            pinThrowButton.setOnClickListener(this);
-            mapRelativeLayout.setOnClickListener(this);
-
-            mAuth = FirebaseAuth.getInstance();
-            currentUser = mAuth.getCurrentUser();
-            FBuserId = currentUser.getUid();
-
-
-            FirebaseOptions options = new FirebaseOptions.Builder().
-                    setApplicationId(appId).setDatabaseUrl(GEO_FIRE_REF).build();
-
-            Log.i("Info", "     >>FirebaseOptions.AppId:" + options.getApplicationId());
-
-
-
             if (!locationTrackObj.canGetLocation()) {
                 locationTrackObj.showSettingsAlert();
             } else {
@@ -298,6 +284,26 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
                     checkLocationPermission();
                 }
             }
+
+            nextButton = (FloatingActionButton) findViewById(R.id.nextButton);
+            pinThrowButton = (FloatingActionButton) findViewById(R.id.pinThrowButton);
+            mapRelativeLayout = (FrameLayout) findViewById(R.id.mapRelativeLayout);
+            nextButton.setOnClickListener(this);
+            pinThrowButton.setOnClickListener(this);
+            mapRelativeLayout.setOnClickListener(this);
+
+            currentUser = mAuth.getCurrentUser();
+            mAuth = FirebaseAuth.getInstance();
+            FBuserId = currentUser.getUid();
+
+
+
+
+            FirebaseOptions options = new FirebaseOptions.Builder().
+                    setApplicationId(appId).setDatabaseUrl(GEO_FIRE_REF).build();
+
+            Log.i("Info", "     >>FirebaseOptions.AppId:" + options.getApplicationId());
+
 
             //this.geoFire = new GeoFire(FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_REF));
             //this.geoQuery = this.geoFire.queryAtLocation(INITIAL_CENTER, 1);
@@ -312,6 +318,8 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     public void onMapReady(GoogleMap googleMap) {
         try {
             mMap = googleMap;
+            //Disable Map Toolbar:
+            mMap.getUiSettings().setMapToolbarEnabled(false);
 
             Log.i("Info", "onMapReady============");
 
@@ -517,8 +525,10 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             if (popupWindow.isShowing()) {
                 popupWindow.dismiss();
                 popupWindow = null;
+                marker.hideInfoWindow();
             }
         }
+
 
         return false;
     }
@@ -721,9 +731,182 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
                 checkPopupShown();
                 break;
 
+            case R.id.approveFab:
+                Log.i("info ", "save btn clicked..");
+                break;
+
+            case R.id.cancelFab:
+                Log.i("info ", "cancel btn clicked..");
+                break;
+
+            case R.id.pictureImageView:
+                Log.i("info ", "picture img clicked..");
+                imgPicture.startAnimation(AnimationUtils.loadAnimation(PinThrowActivity.this, R.anim.img_anim));
+                startImageProcess();
+                break;
+
+            case R.id.videoImageView:
+                Log.i("info ", "video img clicked..");
+                imgVideo.startAnimation(AnimationUtils.loadAnimation(PinThrowActivity.this, R.anim.img_anim));
+                break;
+
+            case R.id.noteImageView:
+                Log.i("info ", "note img clicked..");
+                imgText.startAnimation(AnimationUtils.loadAnimation(PinThrowActivity.this, R.anim.img_anim));
+                break;
 
             default:
                 break;
+        }
+    }
+
+    private void startImageProcess() {
+        Log.i("Info", "   >> start Image Process");
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        adapter.add("  Open Camera");
+        adapter.add("  Open Galery");
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Choose a profile photo");
+
+        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+
+                Log.i("Info", "  >>Item selected:" + item);
+
+                if(item == PROFILE_PIC_CAMERA_SELECTED){
+
+                    photoChoosenType = getResources().getString(R.string.camera);
+                    startCameraProcess();
+
+                }else if(item == PROFILE_PIC_GALLERY_SELECTED){
+
+                    photoChoosenType = getResources().getString(R.string.gallery);
+                    startGalleryProcess();
+
+                }else {
+                    CustomDialogAdapter.showDialogError(PinThrowActivity.this, "Choose error!");
+                }
+
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+
+    }
+
+    public void startCameraProcess(){
+
+        Log.i("Info", "startCameraProcess");
+
+        if(!checkCameraHardware(this)){
+            Toast.makeText(this, "Device has no camera!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        checkMediaStoragePermission();
+    }
+
+    private void checkMediaStoragePermission() {
+
+        Log.i("Info","checkMediaStoragePermission");
+
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSION_WRITE_EXTERNAL_STORAGE);
+        }else{
+
+            checkCameraPermission();
+        }
+    }
+
+    private void checkCameraPermission() {
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+
+            requestPermissions(new String[]{Manifest.permission.CAMERA},MY_PERMISSION_CAMERA);
+        }else{
+
+            Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+            startActivityForResult(intent, MY_PERMISSION_CAMERA);
+        }
+    }
+
+    /** Check if this device has a camera */
+    private boolean checkCameraHardware(Context context) {
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+            // this device has a camera
+            return true;
+        } else {
+            // no camera on this device
+            return false;
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        Log.i("Info", "onActivityResult starts");
+
+        if(resultCode == Activity.RESULT_OK){
+
+            switch (requestCode){
+
+                case MY_PERMISSION_CAMERA:
+                    manageProfilePicChoosen(data);
+                    break;
+
+                case MY_PERMISSION_ACTION_GET_CONTENT:
+                    manageProfilePicChoosen(data);
+                    break;
+
+                default:
+                    Toast.makeText(this, "requestCode error:" + requestCode, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void manageProfilePicChoosen(Intent data) {
+
+        try {
+
+            if(photoChoosenType == getResources().getString(R.string.camera)){
+
+                photo = (Bitmap) data.getExtras().get("data");
+                photo = BitmapConversion.getRoundedShape(photo, 600, 600);
+                tempUri = getImageUri(getApplicationContext(), photo);
+
+            }else if(photoChoosenType == getResources().getString(R.string.gallery)){
+
+                tempUri = data.getData();
+                profileImageStream = getContentResolver().openInputStream(tempUri);
+                photo = BitmapFactory.decodeStream(profileImageStream);
+                photo = BitmapConversion.getRoundedShape(photo, 600, 600);
+
+            }
+
+            imgPicture.setImageBitmap(photo);
+
+            //saveProfilePicToFirebase();
+
+        }catch (Exception e){
+            Log.i("Info", "  >>manageProfilePicChoosen exception:" + e.toString());
+        }
+    }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        try {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+            String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+
+            return Uri.parse(path);
+        }catch (Exception e){
+
+            Log.i("Info", "getImageUri exception:" + e.toString());
+            return null;
         }
     }
 
@@ -744,11 +927,31 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     /*========================================================================================*/
     private void displayPopupWindow() {
 
-        popupMainView = getLayoutInflater().inflate(R.layout.default_marker_info_window, null);
+        ViewFlipper markerInfoContainer = null;
+        View viewContainer = null;
 
-        ViewFlipper markerInfoContainer = (ViewFlipper) popupMainView.findViewById(R.id.markerInfoContainer);
+        try {
+            popupMainView = getLayoutInflater().inflate(R.layout.default_marker_info_window, null);
 
-        View viewContainer = getLayoutInflater().inflate(R.layout.default_marker_info_layout, null);
+            markerInfoContainer = (ViewFlipper) popupMainView.findViewById(R.id.markerInfoContainer);
+
+            viewContainer = getLayoutInflater().inflate(R.layout.default_marker_info_layout, null);
+
+            btnSave = (FloatingActionButton) viewContainer.findViewById(R.id.approveFab);
+            btnCancel = (FloatingActionButton) viewContainer.findViewById(R.id.cancelFab);
+            imgPicture = (ImageView) viewContainer.findViewById(R.id.pictureImageView);
+            imgVideo = (ImageView) viewContainer.findViewById(R.id.videoImageView);
+            imgText = (ImageView) viewContainer.findViewById(R.id.noteImageView);
+
+            btnSave.setOnClickListener(this);
+            btnCancel.setOnClickListener(this);
+            imgPicture.setOnClickListener(this);
+            imgVideo.setOnClickListener(this);
+            imgText.setOnClickListener(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i("ErrorDisplay ", e.toString());
+        }
 
         markerInfoContainer.addView(viewContainer);
 
@@ -776,7 +979,6 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     }
 
     public void checkPopupShown() {
-
         if (popupWindow != null) {
             if (popupWindow.isShowing()) {
                 popupWindow.dismiss();
@@ -785,6 +987,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             Log.i("Info", "   >>onMapClick not null");
         }
+
     }
 
     @Override

@@ -96,7 +96,6 @@
         <activity
             android:name=".Activities.PinThrowActivity"
             android:label="@string/title_activity_pin_throw" />
-        <activity android:name=".Activities.denemeActivity"></activity>
     </application>
 
 </manifest>

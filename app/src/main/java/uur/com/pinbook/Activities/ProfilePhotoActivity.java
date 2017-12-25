@@ -397,13 +397,6 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         startActivity(intent);
     }
 
-    public void startEmailVerifyPage(){
-
-        FirebaseUserAdapter.saveUserInfo(user);
-
-        Intent intent = new Intent(getApplicationContext(), EmailVerifyPageActivity.class);
-        startActivity(intent);
-    }
 
     @Override
     public void onBackPressed() {
