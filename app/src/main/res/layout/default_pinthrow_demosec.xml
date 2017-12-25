@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparentBlack">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="150dp"
+            android:fontFamily="@font/gloria_hallelujah"
+            android:text="Hello:) Would you like to"
+            android:textColor="@color/background_white"
+            android:textSize="20dp"
+            android:textStyle="normal|bold|italic" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/gloria_hallelujah"
+            android:text="mark your first pin ?"
+            android:textColor="@color/background_white"
+            android:textSize="20dp"
+            android:textStyle="normal|bold|italic" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="40dp">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/appOkButton"
+                android:layout_gravity="center"
+                android:text="Yes"
+                android:background="@drawable/demo_ripple"
+                android:textAllCaps="false"
+                android:textColor="@color/background_white"
+                android:textStyle="normal|bold|italic"/>
+
+            <Button
+                android:id="@+id/appCancelButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="90dp"
+                android:background="@drawable/demo_ripple"
+                android:text="No"
+                android:textAllCaps="false"
+                android:textColor="@color/background_white"
+                android:textStyle="normal|bold|italic" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</RelativeLayout>

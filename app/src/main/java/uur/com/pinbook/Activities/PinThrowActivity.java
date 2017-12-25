@@ -8,6 +8,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Interpolator;
 import android.graphics.Point;
@@ -16,12 +19,18 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.location.Criteria;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
+import android.media.ThumbnailUtils;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -45,12 +54,17 @@ import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.MediaController;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 import android.widget.ViewFlipper;
 
 import com.firebase.geofire.GeoFire;
@@ -82,7 +96,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.arsy.maps_library.MapRipple;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -92,38 +109,55 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import retrofit2.http.Url;
+import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.Controller.FirebaseLocationAdapter;
 import uur.com.pinbook.Controller.LocationTrackerAdapter;
 import uur.com.pinbook.Controller.OnInfoWindowElemTouchListener;
 import uur.com.pinbook.R;
+import wseemann.media.FFmpegMediaMetadataRetriever;
 
 
-public class PinThrowActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener, GoogleMap.OnMarkerClickListener
-        , GeoFire.CompletionListener, GeoQueryEventListener, GoogleMap.OnCameraChangeListener, GoogleMap.OnMapClickListener,
-        View.OnClickListener, LocationListener{
+public class PinThrowActivity extends FragmentActivity implements
+        OnMapReadyCallback,
+        GoogleMap.OnMapLongClickListener,
+        GoogleMap.OnMarkerClickListener,
+        GeoFire.CompletionListener,
+        GoogleMap.OnCameraChangeListener,
+        GoogleMap.OnMapClickListener,
+        View.OnClickListener,
+        LocationListener,
+        MediaPlayer.OnPreparedListener {
 
     public GoogleMap mMap;
 
     LocationManager locationManager;
-    //LocationListener locationListener;
 
-    private GeoFire geoFire;
-    private GeoQuery geoQuery;
     private GeoLocation geoLocation;
 
     private FrameLayout mapRelativeLayout;
     private View popupMainView = null;
-    private View popupSelectionView = null;
+
     private int mWidth;
     private int mHeight;
 
+    private View firstDemoLayout;
+    private View secondDemoLayout;
+    private View noteTextLayout;
+    private static View markerInfoLayout;
+
+    private ImageView videoImageView;
+    private ImageView noteTextImageView;
+
+    private static EditText noteTextEditText;
+
 
     private Marker marker;
-    private MapView mapView;
+
+    private boolean pinMarkedApproved = false;
 
     private String markerAddress;
 
-    private Map<String, Marker> markers;
 
     private boolean isMarkerClicked = false;
     private boolean isPinThrowClicked = false;
@@ -177,9 +211,16 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     private static final int DIALOG_DESCRIPTION_SELECTED = 3;
     private static final int MY_PERMISSION_ACTION_GET_CONTENT = 4;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 5;
+    private static final int REQUEST_VIDEO_CAPTURE = 6;
+    private static final int REQUEST_READ_EXTERNAL_STORAGE = 7;
 
+    private static final int VIDEO_CAMERA_SELECTED = 0;
+    private static final int VIDEO_GALLERY_SELECTED = 1;
 
     private MapRipple mapRipple;
+
+    private static Uri videoUri = null;
+    private VideoView pinVideoView = null;
 
     /*========================================================================================*/
     @Override
@@ -193,17 +234,22 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
                 case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
                     if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         mLocationPermissionGranted = true;
-
-                        /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-                            Log.i("Info", "     >>permission is ok");
-                            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-                            centerMapOnLocation();
-                        }*/
-
                         initializeMap(mMap);
                     }
                     break;
+
+                case REQUEST_VIDEO_CAPTURE:
+                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        dispatchTakeVideoIntent();
+                    }
+                    break;
+
+                case REQUEST_READ_EXTERNAL_STORAGE:
+                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        setBitmapFromUriForVideo();
+                    }
+                    break;
+
                 default:
                     break;
             }
@@ -216,11 +262,14 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     @SuppressLint("MissingPermission")
     public void centerMapOnLocation() {
 
+
+        if (!pinMarkedApproved) return;
+
         Log.i("Info", "centerMapOnLocation============");
 
         if (!mLocationPermissionGranted) {
 
-            bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
+            //bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
             //locationManager.requestLocationUpdates(bestProvider, 0, 0, locationListener);
 
             locationManager.requestLocationUpdates(
@@ -233,7 +282,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         Location currentLocation = getLastKnownLocation();
 
-        LatLng userLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        //LatLng userLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
         if (mMap != null) {
             mMap.clear();
@@ -271,26 +320,6 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             locationTrackObj = new LocationTrackerAdapter(PinThrowActivity.this);
 
-            nextButton = (FloatingActionButton) findViewById(R.id.nextButton);
-            pinThrowButton = (FloatingActionButton) findViewById(R.id.pinThrowButton);
-            mapRelativeLayout = (FrameLayout) findViewById(R.id.mapRelativeLayout);
-
-            nextButton.setOnClickListener(this);
-            pinThrowButton.setOnClickListener(this);
-            mapRelativeLayout.setOnClickListener(this);
-
-            mAuth = FirebaseAuth.getInstance();
-            currentUser = mAuth.getCurrentUser();
-            FBuserId = currentUser.getUid();
-
-
-            FirebaseOptions options = new FirebaseOptions.Builder().
-                    setApplicationId(appId).setDatabaseUrl(GEO_FIRE_REF).build();
-
-            Log.i("Info", "     >>FirebaseOptions.AppId:" + options.getApplicationId());
-
-
-
             if (!locationTrackObj.canGetLocation()) {
                 locationTrackObj.showSettingsAlert();
             } else {
@@ -299,9 +328,23 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
                 }
             }
 
+            mapRelativeLayout = (FrameLayout) findViewById(R.id.mapRelativeLayout);
+            mapRelativeLayout.setOnClickListener(this);
 
-            //this.geoFire = new GeoFire(FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_REF));
-            //this.geoQuery = this.geoFire.queryAtLocation(INITIAL_CENTER, 1);
+            nextButton = (FloatingActionButton) findViewById(R.id.nextButton);
+            pinThrowButton = (FloatingActionButton) findViewById(R.id.pinThrowButton);
+
+            nextButton.setOnClickListener(this);
+            pinThrowButton.setOnClickListener(this);
+
+            mAuth = FirebaseAuth.getInstance();
+            currentUser = mAuth.getCurrentUser();
+            FBuserId = currentUser.getUid();
+
+            FirebaseOptions options = new FirebaseOptions.Builder().
+                    setApplicationId(appId).setDatabaseUrl(GEO_FIRE_REF).build();
+
+            Log.i("Info", "     >>FirebaseOptions.AppId:" + options.getApplicationId());
 
         } catch (Exception e) {
             Log.i("Info", "     >>onCreate try error:" + e.toString());
@@ -321,7 +364,6 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             mMap.setOnMapClickListener(this);
             mMap.setOnCameraChangeListener(this);
 
-
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (ActivityCompat.checkSelfPermission(this,
                         android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -332,51 +374,14 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
                 initializeMap(mMap);
             }
 
-            /*
-            locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-            runLocationHandler();
-
-            locationListener = new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-
-                    Log.i("Info", "     >>onLocationChanged method......");
-                    Log.i("Info", "     >>centerMapOnLocation3");
-                    Toast.makeText(PinThrowActivity.this, "onLocation Changed", Toast.LENGTH_SHORT).show();
-                    centerMapOnLocation();
-                    showCircleCurrentLocation();
-                }
-
-                @Override
-                public void onStatusChanged(String s, int i, Bundle bundle) {
-
-                    Log.i("Info", "     >>onStatusChanged method......");
-                }
-
-                @Override
-                public void onProviderEnabled(String s) {
-
-                    Log.i("Info", "     >>onProviderEnabled method......");
-                }
-
-                @Override
-                public void onProviderDisabled(String s) {
-
-                    Log.i("Info", "     >>onProviderDisabled method......");
-                }
-            };
-
-            getLocationPermission();*/
+            showDemoPageSecond();
 
         } catch (Exception e) {
             Log.i("Info", "     >>onMapReadyException Error:" + e.toString());
         }
-
-
     }
 
-
+    /*========================================================================================*/
     private void initializeMap(GoogleMap mMap) {
         if (mMap != null) {
             mMap.getUiSettings().setScrollGesturesEnabled(true);
@@ -410,6 +415,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
+    /*========================================================================================*/
     public boolean checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -442,52 +448,6 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             return true;
         }
     }
-
-    /*========================================================================================*/
-    /*private void getLocationPermission() {
-
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true;
-            Log.i("Info", "     >>mLocationPermissionGranted:" + mLocationPermissionGranted);
-            //centerMapOnLocation();
-            //showCircleCurrentLocation();
-
-
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-    }*/
-
-
-
-
-    /*========================================================================================*/
-    /*public void runLocationHandler() {
-
-        Log.i("Info", "runLocationHandler starts");
-
-        handler = new Handler();
-
-        runnable = new Runnable() {
-            public void run() {
-
-                if (mLocationPermissionGranted) {
-
-                    Log.i("Info", "     >>permissons are ok on runLocationHandler");
-
-                    //Location lastKnownLocation = getLastKnownLocation();
-                    //centerMapOnLocation();
-                    showCircleCurrentLocation();
-                }
-
-                handler.postDelayed(this, 1500);
-            }
-        };
-        handler.postDelayed(runnable, 1500);
-    }*/
 
     /*========================================================================================*/
     private void isLocationEnabled() {
@@ -528,7 +488,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     }
 
     /*========================================================================================*/
-    @SuppressLint("MissingPermission")
+    /*@SuppressLint("MissingPermission")
     public void showCircleCurrentLocation() {
 
         Log.i("Info", "showCircleCurrenctLocation starts");
@@ -556,7 +516,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         mapRipple = new MapRipple(mMap, latLng, context);
 
-        /*CircleOptions circleOptions = new CircleOptions()
+        CircleOptions circleOptions = new CircleOptions()
                 .center(latLng)
                 .radius(8)
                 .strokeColor(Color.TRANSPARENT)
@@ -578,9 +538,8 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
                     .title("title"));
 
-            markers.put("1", marker);
-        }*/
-    }
+        }
+    }*/
 
     /*========================================================================================*/
     @SuppressLint("MissingPermission")
@@ -651,14 +610,13 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             firebaseLocationAdapter.saveLocationInfo(geocoder, latLng, FBuserId, itemId, geoLocation, mDbref);
 
 
-
         } catch (Exception e) {
             Log.i("Info", "     >>SaveCurrLocation Error:" + e.toString());
         }
     }
 
     /*========================================================================================*/
-    public void addMarkerToMap(){
+    public void addMarkerToMap() {
 
         isPinThrowClicked = true;
         centerMapOnLocation();
@@ -667,9 +625,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         MarkerOptions markerOptions = new MarkerOptions()
                 .position(latLng)
-                //.title(FirebaseLocationAdapter.getAddress())
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-        //.snippet("bu ne la");
 
         marker = mMap.addMarker(markerOptions);
 
@@ -677,35 +633,15 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         Toast.makeText(this, "Location Saved", Toast.LENGTH_SHORT).show();
 
-        //displayPopupWindow();
+        createPopupWindow();
+        pinThrowButton.setEnabled(false);
     }
 
 
-    /*========================================================================================*/
-    @Override
-    public boolean onMarkerClick(Marker marker) {
 
-        Log.i("Info", "onMarkerClick starts");
-
-        isMarkerClicked = true;
-
-
-        if (popupWindow == null) {
-
-
-            Log.i("Info", "  >>popupWindow null");
-        } else {
-            if (popupWindow.isShowing()) {
-                popupWindow.dismiss();
-                popupWindow = null;
-            }
-        }
-
-        return false;
-    }
 
     /*========================================================================================*/
-    public void showItemSelectionDialog() {
+    /*public void showItemSelectionDialog() {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
         adapter.add("  Picture");
@@ -744,7 +680,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
         AlertDialog alert = builder.create();
         alert.show();
-    }
+    }*/
 
     /*========================================================================================*/
     private void startGalleryProcess() {
@@ -765,100 +701,19 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
     /*========================================================================================*/
     @Override
-    public void onKeyEntered(String key, GeoLocation location) {
+    public boolean onMarkerClick(Marker marker) {
 
-        /*try {
-            Log.i("Info", "onKeyEntered============");
+        Log.i("Info", "onMarkerClick starts");
 
-            Marker marker = this.mMap.addMarker(new MarkerOptions().position(new LatLng(location.latitude, location.longitude)));
-            this.markers.put(key, marker);
-        } catch (Exception e) {
-            Log.i("Info", "     >>onKeyEntered Error:" + e.toString());
+        isMarkerClicked = true;
+
+        /*if (popupWindow.isShowing()) {
+            popupWindow.dismiss();
+        } else {
+            showPopupWindow();
         }*/
-    }
 
-    /*========================================================================================*/
-    @Override
-    public void onKeyExited(String key) {
-        try {
-            // Remove any old marker
-            Log.i("Info", "onKeyExited============");
-            Marker marker = this.markers.get(key);
-            if (marker != null) {
-                marker.remove();
-                this.markers.remove(key);
-            }
-        } catch (Exception e) {
-            Log.i("Info", "     >>onKeyExcited Error:" + e.toString());
-        }
-    }
-
-    /*========================================================================================*/
-    @Override
-    public void onKeyMoved(String key, GeoLocation location) {
-        Log.i("Info", "onKeyMoved============");
-
-        Marker marker = this.markers.get(key);
-
-        if (marker != null) {
-
-            this.animateMarkerTo(marker, location.latitude, location.longitude);
-        }
-    }
-
-    /*========================================================================================*/
-    @Override
-    public void onGeoQueryReady() {
-
-    }
-
-    /*========================================================================================*/
-    @Override
-    public void onGeoQueryError(DatabaseError error) {
-        try {
-            Log.i("Info", "onGeoQueryError starts");
-            new AlertDialog.Builder(this)
-                    .setTitle("Error")
-                    .setMessage("There was an unexpected error querying GeoFire: " + error.getMessage())
-                    .setPositiveButton(android.R.string.ok, null)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .show();
-        } catch (Exception e) {
-            Log.i("Info", "     >>onQueryError Error:" + e.toString());
-        }
-    }
-
-    /*========================================================================================*/
-    private void animateMarkerTo(final Marker marker, final double lat, final double lng) {
-        try {
-            Log.i("Info", "animateMarkerTo============");
-
-            final Handler handler = new Handler();
-            final long start = SystemClock.uptimeMillis();
-            final long DURATION_MS = 3000;
-            final AccelerateDecelerateInterpolator interpolator = new AccelerateDecelerateInterpolator();
-            final LatLng startPosition = marker.getPosition();
-
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    float elapsed = SystemClock.uptimeMillis() - start;
-                    float t = elapsed / DURATION_MS;
-                    float v = interpolator.getInterpolation(t);
-
-                    double currentLat = (lat - startPosition.latitude) * v + startPosition.latitude;
-                    double currentLng = (lng - startPosition.longitude) * v + startPosition.longitude;
-                    marker.setPosition(new LatLng(currentLat, currentLng));
-
-                    // if animation is not finished yet, repeat
-                    if (t < 1) {
-                        handler.postDelayed(this, 16);
-                    }
-                }
-            });
-        } catch (Exception e) {
-            Log.i("Info", "     >>animateMarkerTo Error:" + e.toString());
-        }
+        return false;
     }
 
     /*========================================================================================*/
@@ -868,34 +723,21 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             Log.i("Info", "onCameraChange starts");
 
+            if (popupWindow.isShowing()) {
 
-            //updatePopup();
-
-            if (popupWindow == null) {
-                Log.i("Info", "  >>onCameraChange popupWindow null");
-                if (isMarkerClicked || isPinThrowClicked)
-                    displayPopupWindow();
-            } else if (popupWindow.isShowing()) {
-
-                if (!isMarkerClicked || !isPinThrowClicked) {
+                if (!isPinThrowClicked && !isMarkerClicked)
                     popupWindow.dismiss();
-                    popupWindow = null;
-                }
+            } else {
+                if(isMarkerClicked)
+                    showPopupWindow();
             }
 
             isMarkerClicked = false;
             isPinThrowClicked = false;
 
-
         } catch (Exception e) {
             Log.i("Info", "     >>onCameraChanged Error:" + e.toString());
         }
-    }
-
-    /*========================================================================================*/
-    private double zoomLevelToRadius(double zoomLevel) {
-        // Approximation to fit circle into view
-        return 16384000 / Math.pow(2, zoomLevel);
     }
 
     /*========================================================================================*/
@@ -907,12 +749,6 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             Log.i("Info", "onStop============");
             super.onStop();
 
-            /*this.geoQuery.removeAllListeners();
-            for (Marker marker : this.markers.values()) {
-                marker.remove();
-            }
-            this.markers.clear();*/
-
         } catch (Exception e) {
             Log.i("Info", "     >>onStop Error:" + e.toString());
         }
@@ -921,21 +757,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     /*========================================================================================*/
     @Override
     protected void onStart() {
-        try {
-
-            super.onStart();
-
-            Log.i("Info", "onStart starts");
-
-            if (mLocationPermissionGranted) {
-
-                //centerMapOnLocation();
-                showCircleCurrentLocation();
-            }
-
-        } catch (Exception e) {
-            Log.i("Info", "      >>onStart Error:" + e.toString());
-        }
+        super.onStart();
     }
 
     /*========================================================================================*/
@@ -943,27 +765,40 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     public void onClick(View v) {
         int i = v.getId();
 
-        Intent intent;
-
         switch (i) {
             case R.id.nextButton:
-
-                intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
-                finish();
-                startActivity(intent);
+                startProfilePage();
                 break;
 
             case R.id.pinThrowButton:
-                //centerMapOnLocation();
-                //saveCurrLocation();
                 addMarkerToMap();
-                //showCircleCurrentLocation();
                 break;
 
             case R.id.mapRelativeLayout:
                 checkPopupShown();
                 break;
 
+            case R.id.gotItButton:
+                Toast.makeText(context, "got it button clicked", Toast.LENGTH_SHORT).show();
+                enableMapItems();
+                pinMarkedApproved = true;
+                break;
+
+            case R.id.appOkButton:
+                showDemoPageFirst();
+                break;
+
+            case R.id.appCancelButton:
+                startProfilePage();
+                break;
+
+            case R.id.videoImageView:
+                addVideo();
+                break;
+
+            case R.id.noteImageView:
+                handleNoteText();
+                break;
 
             default:
                 break;
@@ -971,39 +806,79 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     }
 
     /*========================================================================================*/
-    @Override
-    public void onPause() {
-        super.onPause();
-//        handler.removeCallbacks(runnable);
+    private void handleNoteText() {
+
+        popupWindow.dismiss();
+
+        LayoutInflater inflater = getLayoutInflater();
+        noteTextLayout = inflater.inflate(R.layout.default_notetext_window, mapRelativeLayout, false);
+
+        FloatingActionButton textAppOkButton = (FloatingActionButton) noteTextLayout.findViewById(R.id.textApproveFab);
+        FloatingActionButton textAppCancelButton = (FloatingActionButton) noteTextLayout.findViewById(R.id.textCancelFab);
+
+        mapRelativeLayout.addView(noteTextLayout);
+
+        textAppCancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("Log", "  >>textAppCancelButton clicked");
+            }
+        });
+
+        textAppOkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("Log", "  >>textAppOkButton clicked");
+
+                showPopupWindow();
+                ScrollView noteScrollView = (ScrollView) noteTextLayout.findViewById(R.id.noteScrollView);
+                Bitmap editTextBitmap = getScreenShot(noteScrollView);
+                editTextBitmap = BitmapConversion.getRoundedShape(editTextBitmap, 600, 600);
+                noteTextImageView.setImageBitmap(editTextBitmap);
+                mapRelativeLayout.removeView(noteTextLayout);
+            }
+        });
     }
 
-    /*========================================================================================*/
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        //handler.removeCallbacks(runnable);
+    public static Bitmap getScreenShot(View view) {
+        /*View screenView = view.getRootView();
+        screenView.setDrawingCacheEnabled(true);
+        Bitmap bitmap = Bitmap.createBitmap(screenView.getDrawingCache());
+        screenView.setDrawingCacheEnabled(false);
+        return bitmap;*/
+
+        view.setDrawingCacheEnabled(true);
+        Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache());
+        view.setDrawingCacheEnabled(false);
+        return bitmap;
     }
 
+
     /*========================================================================================*/
-    private void displayPopupWindow() {
+    private void createPopupWindow() {
 
         popupMainView = getLayoutInflater().inflate(R.layout.default_marker_info_window, null);
 
         ViewFlipper markerInfoContainer = (ViewFlipper) popupMainView.findViewById(R.id.markerInfoContainer);
 
-        View viewContainer = getLayoutInflater().inflate(R.layout.default_marker_info_layout, null);
+        markerInfoLayout = getLayoutInflater().inflate(R.layout.default_marker_info_layout, null);
 
-        //TextView usernameTv = (TextView) viewContainer.findViewById(R.id.usernameTextView);
-        //TextView addressTv = (TextView) viewContainer.findViewById(R.id.addressTextView);
+        markerInfoContainer.addView(markerInfoLayout);
 
+        videoImageView = (ImageView) markerInfoLayout.findViewById(R.id.videoImageView);
+        noteTextImageView = (ImageView) markerInfoLayout.findViewById(R.id.noteImageView);
 
-        //addressTv.setText(markerAddress);
-
-        markerInfoContainer.addView(viewContainer);
+        videoImageView.setOnClickListener(this);
+        noteTextImageView.setOnClickListener(this);
 
         popupWindow = new PopupWindow(popupMainView,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        showPopupWindow();
+    }
+
+    public void showPopupWindow() {
 
         Point p = mMap.getProjection().toScreenLocation(marker.getPosition());
 
@@ -1014,8 +889,53 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         mHeight = popupMainView.getMeasuredHeight();
 
         popupWindow.showAtLocation(findViewById(R.id.map),
-                Gravity.NO_GRAVITY, p.x - mWidth / 2, p.y - mHeight - 65); //map is the fragment on the activity layout where I put the map
+                Gravity.NO_GRAVITY, p.x - mWidth / 2, p.y - mHeight - 65);
+    }
 
+    public void showDemoPageFirst() {
+
+        mapRelativeLayout.removeView(secondDemoLayout);
+
+        // inflate (create) another copy of our custom layout
+        LayoutInflater inflater = getLayoutInflater();
+        firstDemoLayout = inflater.inflate(R.layout.default_pinthrow_demofirst, mapRelativeLayout, false);
+
+        Button gotItButton = (Button) firstDemoLayout.findViewById(R.id.gotItButton);
+        gotItButton.setOnClickListener(PinThrowActivity.this);
+
+        // add our custom layout to the main layout
+        mapRelativeLayout.addView(firstDemoLayout);
+    }
+
+    private void showDemoPageSecond() {
+
+        disableMapItems();
+
+        LayoutInflater inflater = getLayoutInflater();
+        secondDemoLayout = inflater.inflate(R.layout.default_pinthrow_demosec, mapRelativeLayout, false);
+
+        Button appOkButton = (Button) secondDemoLayout.findViewById(R.id.appOkButton);
+        Button appCancelButton = (Button) secondDemoLayout.findViewById(R.id.appCancelButton);
+
+        appOkButton.setOnClickListener(PinThrowActivity.this);
+        appCancelButton.setOnClickListener(PinThrowActivity.this);
+
+        mapRelativeLayout.addView(secondDemoLayout);
+    }
+
+    private void disableMapItems() {
+
+        nextButton.setEnabled(false);
+        pinThrowButton.setEnabled(false);
+        mMap.getUiSettings().setScrollGesturesEnabled(false);
+    }
+
+    private void enableMapItems() {
+
+        nextButton.setEnabled(true);
+        pinThrowButton.setEnabled(true);
+        mMap.getUiSettings().setScrollGesturesEnabled(true);
+        mapRelativeLayout.removeView(firstDemoLayout);
     }
 
     @Override
@@ -1029,23 +949,12 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         if (popupWindow != null) {
             if (popupWindow.isShowing()) {
                 popupWindow.dismiss();
-                popupWindow = null;
+                //popupWindow = null;
             }
-
-            Log.i("Info", "   >>onMapClick not null");
         }
     }
 
     private void updatePopup() {
-
-        //if(popupWindow == null) {
-        //    return;
-        //}
-        //else if(!popupWindow.isShowing()){
-        //    popupWindow.dismiss();
-        //    return;
-        //}
-
 
         Log.i("Info", "   >>popupWindow not null");
 
@@ -1068,34 +977,6 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
-    /*private void displaySelectionWindow() {
-
-        popupSelectionView = getLayoutInflater().inflate(R.layout.default_marker_info_window, null);
-
-        ViewFlipper markerInfoContainer = (ViewFlipper) popupSelectionView.findViewById(R.id.markerInfoContainer);
-
-        View viewContainer = getLayoutInflater().inflate(R.layout.defaut_marker_selection_layout, null);
-
-
-        markerInfoContainer.addView(viewContainer);
-
-        popupSelectionWindow = new PopupWindow(popupSelectionView,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        Point p = mMap.getProjection().toScreenLocation(marker.getPosition());
-
-        Point size = new Point();
-        popupSelectionView.measure(size.x, size.y);
-
-        mWidth = popupSelectionView.getMeasuredWidth();
-        mHeight = popupSelectionView.getMeasuredHeight();
-
-        popupSelectionWindow.showAtLocation(findViewById(R.id.map),
-                Gravity.NO_GRAVITY, p.x - mWidth / 2, p.y - mHeight - 65); //map is the fragment on the activity layout where I put the map
-
-    }*/
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -1117,6 +998,13 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
     }
 
+    public void startProfilePage() {
+
+        Intent intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
+        finish();
+        startActivity(intent);
+    }
+
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
 
@@ -1132,102 +1020,272 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
     }
 
-   /* @Override
-    public void onInfoWindowClick(Marker marker) {
+    private void cancelPinSave() {
 
+        mMap.clear();
 
+        if (popupWindow != null) {
 
-        Log.i("xx", "xxxx");
-
-
-        View viewContainer = getLayoutInflater().inflate(R.layout.custom_info_window, null);
-
-        LatLng latLng = marker.getPosition();
-
-        TextView usernameTextView = (TextView) viewContainer.findViewById(R.id.usernameTextView);
-        TextView addressTextView = (TextView) viewContainer.findViewById(R.id.addressTextView);
-
-        ImageView pictureImageView = (ImageView) viewContainer.findViewById(R.id.pictureImageView);
-        ImageView videoImageView = (ImageView) viewContainer.findViewById(R.id.videoImageView);
-
-        pictureImageView.setOnClickListener((View.OnClickListener) viewContainer.getContext());
-        videoImageView.setOnClickListener((View.OnClickListener) viewContainer.getContext());
-
-
-
-
-
-        /*infoWindow = (ViewGroup)getLayoutInflater().inflate(R.layout.custom_info_window, null);
-
-        infoButton1 = (ImageView) infoWindow.findViewById(R.id.pictureImageView);
-        infoButton2 = (ImageView) infoWindow.findViewById(R.id.videoImageView);
-
-
-
-
-        // Setting custom OnTouchListener which deals with the pressed state
-        // so it shows up
-        this.infoButton1.setOnTouchListener(infoButtonListener);
-
-        this.infoButtonListener = new OnInfoWindowElemTouchListener(infoButton1, getResources().getDrawable(R.drawable.pin_loc_icon), getResources().getDrawable(R.drawable.pin_loc_icon)){
-            @Override
-            protected void onClickConfirmed(View v, Marker marker) {
-                // Here we can perform some action triggered after clicking the button
-                Toast.makeText(PinThrowActivity.this, "click on button 1", Toast.LENGTH_SHORT).show();
-            }
-        };
-
-
-        infoButtonListener = new OnInfoWindowElemTouchListener(infoButton2, getResources().getDrawable(R.drawable.pin_loc_icon),getResources().getDrawable(R.drawable.pin_loc_icon)){
-            @Override
-            protected void onClickConfirmed(View v, Marker marker) {
-                Toast.makeText(getApplicationContext(), "click on button 2", Toast.LENGTH_LONG).show();
-            }
-        };
-        infoButton2.setOnTouchListener(infoButtonListener);
-
-
-        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-            @Override
-            public View getInfoWindow(Marker marker) {
-
-
-
-                return null;
+            if (popupWindow.isShowing()) {
+                popupWindow.dismiss();
             }
 
-            @Override
-            public View getInfoContents(Marker marker) {
-                return null;
+            popupWindow = null;
+        }
+    }
+
+    private void addVideo() {
+
+        if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{android.Manifest.permission.CAMERA}, REQUEST_VIDEO_CAPTURE);
+            } else {
+                dispatchTakeVideoIntent();
+            }
+        } else {
+            dispatchTakeVideoIntent();
+
+        }
+    }
+
+    private void dispatchTakeVideoIntent() {
+
+        try {
+            if (!hasCamera()) {
+                Toast.makeText(context, "Device has no camera!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            chooseVideoProperty();
+
+        } catch (Exception e) {
+            Log.i("Info", "  >>dispatchTakeVideoIntent error:" + e.toString());
+        }
+    }
+
+    private void chooseVideoProperty() {
+
+        Log.i("Info", "chooseVideoProperty");
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        adapter.add("  Open Camera");
+        adapter.add("  Open Galery");
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+        builder.setTitle("How to upload your video?");
+
+        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+
+                Log.i("Info", "  >>Item selected:" + item);
+
+                if (item == VIDEO_CAMERA_SELECTED) {
+
+                    choseVideoFromCamera();
+
+                } else if (item == VIDEO_GALLERY_SELECTED) {
+
+
+                } else {
+                    Toast.makeText(PinThrowActivity.this, "Item Selected Error!!", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
 
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    public void choseVideoFromCamera() {
+
+        Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+
+        if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
+
+            videoUri = intent.getData();
 
 
-    }*/
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
 
-    /*@Override
-    public View getInfoWindow(Marker marker) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE);
+                } else {
+                    setBitmapFromUriForVideo();
+                }
+            } else {
+                setBitmapFromUriForVideo();
+            }
+
+
+            //try {
+            //    bitmapxx = MediaStore.Images.Media.getBitmap(getContentResolver(), videoUri);
+            //} catch (IOException e) {
+            //    e.printStackTrace();
+            //}
+
+            //Bitmap photo = (Bitmap) intent.getExtras().get("data");
+
+            //try {
+            //    Bitmap bitmap = getThumbnail(videoUri);
+            //} catch (IOException e) {
+            //    e.printStackTrace();
+            //}
+
+
+            //Bundle extras = intent.getExtras();
+            //Bitmap x = extras.getParcelable("data");
+
+
+            pinVideoView = (VideoView) findViewById(R.id.pinVideoView);
+
+            MediaController mediacontroller = new MediaController(context);
+
+            mediacontroller.setAnchorView(pinVideoView);
+
+
+            pinVideoView.setMediaController(mediacontroller);
+
+            ViewGroup.LayoutParams params = pinVideoView.getLayoutParams();
+            params.height = 150;
+            pinVideoView.setLayoutParams(params);
+
+            pinVideoView.setVideoURI(videoUri);
+            pinVideoView.requestFocus();
+
+            pinVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                public void onPrepared(MediaPlayer mp) {
+                    pinVideoView.start();
+
+
+                }
+            });
+        }
+    }
+
+    private void setBitmapFromUriForVideo() {
+
+        FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
+        //MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+        try {
+
+            retriever.setDataSource(videoUri.getPath());
+            Bitmap bitmap = retriever.getFrameAtTime();
+            //Bitmap x = ThumbnailUtils.createVideoThumbnail(uri.getPath(), MediaStore.Images.Thumbnails.MINI_KIND);
+
+            //bitmap = BitmapConversion.getRoundedShape(bitmap, 50, 50);
+
+            videoImageView.setImageBitmap(bitmap);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i("Info", "  >>getVideoFrame IllegalArgumentException:" + e.toString());
+        }
+
+    }
+
+
+    private boolean hasCamera() {
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    public Bitmap getVideoFrame(Uri uri) {
+
+
+        /*try {
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver() , Uri.parse(uri.toString()));
+            return bitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;*/
+
+
+        //MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+        FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
+
+        try {
+
+            retriever.setDataSource(uri.toString());
+            Bitmap c = retriever.getFrameAtTime(5000000);
+            //Bitmap x = ThumbnailUtils.createVideoThumbnail(uri.getPath(), MediaStore.Images.Thumbnails.MINI_KIND);
+
+            return c;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i("Info", "  >>getVideoFrame IllegalArgumentException:" + e.toString());
+        }
+
         return null;
-    }*/
+    }
 
-    /*@Override
-    public View getInfoContents(Marker marker)
-    {
-        View viewContainer = getLayoutInflater().inflate(R.layout.custom_info_window, null);
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+        mediaMetadataRetriever.setDataSource(videoUri.getPath());
+        try {
+            Bitmap bitmap = mediaMetadataRetriever.getFrameAtTime(0);
 
-        LatLng latLng = marker.getPosition();
 
-        TextView usernameTextView = (TextView) viewContainer.findViewById(R.id.usernameTextView);
-        TextView addressTextView = (TextView) viewContainer.findViewById(R.id.addressTextView);
+            pinVideoView.setBackgroundDrawable(new BitmapDrawable(bitmap));
 
-        ImageView pictureImageView = (ImageView) viewContainer.findViewById(R.id.pictureImageView);
-        ImageView videoImageView = (ImageView) viewContainer.findViewById(R.id.videoImageView);
+        } catch (OutOfMemoryError e) {
+            //Not entirely sure if this will ever be thrown but better safe than sorry.
+            pinVideoView.seekTo(0);
+            Log.i("Info", "  >>onPrepared OutOfMemoryError:" + e.toString());
+        }
+    }
 
-        pictureImageView.setOnClickListener((View.OnClickListener) viewContainer.getContext());
-        videoImageView.setOnClickListener((View.OnClickListener) viewContainer.getContext());
 
-        return null;
-    }*/
+    public Bitmap getThumbnail(Uri uri) throws FileNotFoundException, IOException {
+        InputStream input = this.getContentResolver().openInputStream(uri);
 
+        BitmapFactory.Options onlyBoundsOptions = new BitmapFactory.Options();
+        onlyBoundsOptions.inJustDecodeBounds = true;
+        onlyBoundsOptions.inDither = true;//optional
+        onlyBoundsOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;//optional
+        BitmapFactory.decodeStream(input, null, onlyBoundsOptions);
+        input.close();
+
+        if ((onlyBoundsOptions.outWidth == -1) || (onlyBoundsOptions.outHeight == -1)) {
+            return null;
+        }
+
+        int originalSize = (onlyBoundsOptions.outHeight > onlyBoundsOptions.outWidth) ? onlyBoundsOptions.outHeight : onlyBoundsOptions.outWidth;
+
+        double ratio = (originalSize > 3) ? (originalSize / 3) : 1.0;
+
+        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+        bitmapOptions.inSampleSize = getPowerOfTwoForSampleRatio(ratio);
+        bitmapOptions.inDither = true; //optional
+        bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;//
+        input = this.getContentResolver().openInputStream(uri);
+        Bitmap bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions);
+        input.close();
+        return bitmap;
+    }
+
+    private static int getPowerOfTwoForSampleRatio(double ratio) {
+        int k = Integer.highestOneBit((int) Math.floor(ratio));
+        if (k == 0) return 1;
+        else return k;
+    }
 }
