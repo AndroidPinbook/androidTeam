@@ -66,7 +66,7 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     private SharedPreferences.Editor loginPrefsEditor;
     private Boolean saveLogin;
 
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
