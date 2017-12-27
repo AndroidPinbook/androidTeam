@@ -3,6 +3,7 @@ package uur.com.pinbook.Activities;
 import android.*;
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,9 +12,11 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Interpolator;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -23,6 +26,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -31,6 +35,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -52,6 +59,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -96,11 +104,19 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.arsy.maps_library.MapRipple;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -135,11 +151,15 @@ public class PinThrowActivity extends FragmentActivity implements
 
     private GeoLocation geoLocation;
 
+    private boolean itemsAddedToFB = true;
+    private boolean isCancelPinCheck = false;
+
     private FrameLayout mapRelativeLayout;
     private View popupMainView = null;
 
     private int mWidth;
     private int mHeight;
+    private String videopath;
 
     private View firstDemoLayout;
     private View secondDemoLayout;
@@ -150,6 +170,7 @@ public class PinThrowActivity extends FragmentActivity implements
     private ImageView noteTextImageView;
 
     private static EditText noteTextEditText;
+    private static Bitmap editTextBitmap = null;
 
 
     private Marker marker;
@@ -175,7 +196,9 @@ public class PinThrowActivity extends FragmentActivity implements
     private static final GeoLocation INITIAL_CENTER = new GeoLocation(37.7789, -122.4017);
     private static final int INITIAL_ZOOM_LEVEL = 14;
     private static final String GEO_FIRE_DB = "https://androidteam-f4c25.firebaseio.com";
-    private static final String GEO_FIRE_REF = GEO_FIRE_DB + "/_locations";
+    private static final String GEO_FIRE_LOCATIONS = GEO_FIRE_DB + "/locations";
+    private static final String GEO_FIRE_USER_LOCATIONS = GEO_FIRE_DB + "/user_locations";
+    private static final String GEO_FIRE_USER_ITEMS = GEO_FIRE_DB + "/items";
 
     private String appId = "geofire";
     private double radius = 1.0f;
@@ -188,6 +211,8 @@ public class PinThrowActivity extends FragmentActivity implements
 
     private FloatingActionButton nextButton;
     private FloatingActionButton pinThrowButton;
+    private FloatingActionButton pinApproveFab;
+    private FloatingActionButton pinCancelFab;
 
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
@@ -213,6 +238,7 @@ public class PinThrowActivity extends FragmentActivity implements
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 5;
     private static final int REQUEST_VIDEO_CAPTURE = 6;
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 7;
+    private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 7;
 
     private static final int VIDEO_CAMERA_SELECTED = 0;
     private static final int VIDEO_GALLERY_SELECTED = 1;
@@ -221,6 +247,10 @@ public class PinThrowActivity extends FragmentActivity implements
 
     private static Uri videoUri = null;
     private VideoView pinVideoView = null;
+    private TextureView pinTextureView = null;
+
+    private static Location markerLocation = null;
+    private static LatLng markerLatlng = null;
 
     /*========================================================================================*/
     @Override
@@ -341,10 +371,19 @@ public class PinThrowActivity extends FragmentActivity implements
             currentUser = mAuth.getCurrentUser();
             FBuserId = currentUser.getUid();
 
-            FirebaseOptions options = new FirebaseOptions.Builder().
-                    setApplicationId(appId).setDatabaseUrl(GEO_FIRE_REF).build();
+            FirebaseOptions locationsOptions = new FirebaseOptions.Builder().
+                    setApplicationId(appId).setDatabaseUrl(GEO_FIRE_LOCATIONS).build();
 
-            Log.i("Info", "     >>FirebaseOptions.AppId:" + options.getApplicationId());
+            FirebaseOptions userLocationsOptions = new FirebaseOptions.Builder().
+                    setApplicationId(appId).setDatabaseUrl(GEO_FIRE_USER_LOCATIONS).build();
+
+            FirebaseOptions userItemsOptions = new FirebaseOptions.Builder().
+                    setApplicationId(appId).setDatabaseUrl(GEO_FIRE_USER_ITEMS).build();
+
+
+            Log.i("Info", "     >>locationsOptions.AppId    :" + locationsOptions.getApplicationId());
+            Log.i("Info", "     >>userLocationsOptions.AppId:" + userLocationsOptions.getApplicationId());
+            Log.i("Info", "     >>userItemsOptions.AppId    :" + userItemsOptions.getApplicationId());
 
         } catch (Exception e) {
             Log.i("Info", "     >>onCreate try error:" + e.toString());
@@ -582,49 +621,22 @@ public class PinThrowActivity extends FragmentActivity implements
         //displaySelectionWindow();
     }
 
-
-    /*========================================================================================*/
-    public void saveCurrLocation() {
-
-        Log.i("Info", "saveCurrLocation============");
-        Log.i("Info", "     >>userId:" + FBuserId);
-
-        centerMapOnLocation();
-        Location location = getLastKnownLocation();
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-
-        Log.i("Info", "     >>Latlng latitude :" + latLng.latitude);
-        Log.i("Info", "     >>Latlng longitude:" + latLng.longitude);
-
-        geoLocation = new GeoLocation(latLng.latitude, latLng.longitude);
-
-        mDbref = FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_REF);
-
-        String itemId = mDbref.child("locations").push().getKey();
-
-        Log.i("Info", "     >>itemId:" + itemId);
-
-        try {
-            Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-            FirebaseLocationAdapter firebaseLocationAdapter = new FirebaseLocationAdapter();
-            firebaseLocationAdapter.saveLocationInfo(geocoder, latLng, FBuserId, itemId, geoLocation, mDbref);
-
-
-        } catch (Exception e) {
-            Log.i("Info", "     >>SaveCurrLocation Error:" + e.toString());
-        }
-    }
-
     /*========================================================================================*/
     public void addMarkerToMap() {
 
+        if(marker != null){
+            Toast.makeText(context, "Please approve or delete your pin!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         isPinThrowClicked = true;
         centerMapOnLocation();
-        Location location = getLastKnownLocation();
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+        markerLocation = getLastKnownLocation();
+        markerLatlng = new LatLng(markerLocation.getLatitude(), markerLocation.getLongitude());
 
         MarkerOptions markerOptions = new MarkerOptions()
-                .position(latLng)
+                .position(markerLatlng)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
 
         marker = mMap.addMarker(markerOptions);
@@ -634,7 +646,6 @@ public class PinThrowActivity extends FragmentActivity implements
         Toast.makeText(this, "Location Saved", Toast.LENGTH_SHORT).show();
 
         createPopupWindow();
-        pinThrowButton.setEnabled(false);
     }
 
 
@@ -766,37 +777,37 @@ public class PinThrowActivity extends FragmentActivity implements
         int i = v.getId();
 
         switch (i) {
-            case R.id.nextButton:
+            case R.id.nextButton:  //Next button on map
                 startProfilePage();
                 break;
 
-            case R.id.pinThrowButton:
+            case R.id.pinThrowButton: //Pin throw button on map
                 addMarkerToMap();
                 break;
 
-            case R.id.mapRelativeLayout:
+            case R.id.mapRelativeLayout:  //Map framelayout layout
                 checkPopupShown();
                 break;
 
-            case R.id.gotItButton:
+            case R.id.gotItButton:  //Second demo page got it button
                 Toast.makeText(context, "got it button clicked", Toast.LENGTH_SHORT).show();
                 enableMapItems();
                 pinMarkedApproved = true;
                 break;
 
-            case R.id.appOkButton:
+            case R.id.appOkButton:  //First demo page yes button
                 showDemoPageFirst();
                 break;
 
-            case R.id.appCancelButton:
+            case R.id.appCancelButton: //First demo page no button
                 startProfilePage();
                 break;
 
-            case R.id.videoImageView:
+            case R.id.videoImageView: //Video Imageview on popup window
                 addVideo();
                 break;
 
-            case R.id.noteImageView:
+            case R.id.noteImageView:  //Note Imageview on popup window
                 handleNoteText();
                 break;
 
@@ -815,13 +826,26 @@ public class PinThrowActivity extends FragmentActivity implements
 
         FloatingActionButton textAppOkButton = (FloatingActionButton) noteTextLayout.findViewById(R.id.textApproveFab);
         FloatingActionButton textAppCancelButton = (FloatingActionButton) noteTextLayout.findViewById(R.id.textCancelFab);
+        LinearLayout noteTextMainLayout = (LinearLayout) noteTextLayout.findViewById(R.id.noteTextMainLayout);
 
         mapRelativeLayout.addView(noteTextLayout);
+
+        noteTextMainLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideKeyBoard();
+            }
+        });
 
         textAppCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.i("Log", "  >>textAppCancelButton clicked");
+
+                showPopupWindow();
+                noteTextImageView.setImageResource(R.drawable.text_icon80);
+                mapRelativeLayout.removeView(noteTextLayout);
+                editTextBitmap = null;
             }
         });
 
@@ -832,8 +856,8 @@ public class PinThrowActivity extends FragmentActivity implements
 
                 showPopupWindow();
                 ScrollView noteScrollView = (ScrollView) noteTextLayout.findViewById(R.id.noteScrollView);
-                Bitmap editTextBitmap = getScreenShot(noteScrollView);
-                editTextBitmap = BitmapConversion.getRoundedShape(editTextBitmap, 600, 600);
+                editTextBitmap = getScreenShot(noteScrollView);
+                editTextBitmap = BitmapConversion.getRoundedShape(editTextBitmap, 700, 700);
                 noteTextImageView.setImageBitmap(editTextBitmap);
                 mapRelativeLayout.removeView(noteTextLayout);
             }
@@ -853,7 +877,6 @@ public class PinThrowActivity extends FragmentActivity implements
         return bitmap;
     }
 
-
     /*========================================================================================*/
     private void createPopupWindow() {
 
@@ -867,9 +890,30 @@ public class PinThrowActivity extends FragmentActivity implements
 
         videoImageView = (ImageView) markerInfoLayout.findViewById(R.id.videoImageView);
         noteTextImageView = (ImageView) markerInfoLayout.findViewById(R.id.noteImageView);
+        pinApproveFab = (FloatingActionButton) markerInfoLayout.findViewById(R.id.approveFab);
+        pinCancelFab = (FloatingActionButton) markerInfoLayout.findViewById(R.id.cancelFab);
+
 
         videoImageView.setOnClickListener(this);
         noteTextImageView.setOnClickListener(this);
+
+        pinApproveFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                pinApproved();
+            }
+        });
+
+        pinCancelFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                initializeValues();
+                isCancelPinCheck = true;
+                showYesNoDialog(null, "Pin'i silmek istediginize emin misiniz?");
+            }
+        });
 
         popupWindow = new PopupWindow(popupMainView,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -877,6 +921,35 @@ public class PinThrowActivity extends FragmentActivity implements
 
         showPopupWindow();
     }
+
+    /* Pin approved and items saved to Firebase database*/
+    public void pinApproved(){
+
+        addItemsToFirebaseDatabase();
+
+        if(!itemsAddedToFB)
+            return;
+
+        checkPopupShown();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
+        builder.setTitle("CONGRATULATIONS :)");
+        builder.setIcon(R.drawable.approve_icon);
+        builder.setMessage("You added your first pin. Now we will direct you to next page");
+        final AlertDialog alert = builder.create();
+        alert.show();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //do your work here after 60 second
+                alert.dismiss();
+                startProfilePage();
+            }
+        }, 2000);
+    }
+
+
 
     public void showPopupWindow() {
 
@@ -989,7 +1062,6 @@ public class PinThrowActivity extends FragmentActivity implements
         }
     }
 
-
     @Override
     public void onLocationChanged(Location location) {
 
@@ -1029,12 +1101,66 @@ public class PinThrowActivity extends FragmentActivity implements
             if (popupWindow.isShowing()) {
                 popupWindow.dismiss();
             }
-
             popupWindow = null;
         }
+
+        pinThrowButton.setEnabled(true);
+        marker = null;
+    }
+
+    private void initializeValues() {
+
+        isCancelPinCheck = false;
+    }
+
+    public void showYesNoDialog(String title, String message){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+
+        builder.setIcon(R.drawable.warning_icon40);
+        builder.setMessage(message);
+
+        if(title != null)
+            builder.setTitle(title);
+
+        builder.setPositiveButton("EVET", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                if(isCancelPinCheck){
+                    cancelPinSave();
+                }
+            }
+        });
+
+        builder.setNegativeButton("KAPAT", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    public void hideKeyBoard(){
+
+        Log.i("Info", "hideKeyBoard");
+
+        InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
     }
 
     private void addVideo() {
+
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE);
+            }
+        }
+
 
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
 
@@ -1102,8 +1228,18 @@ public class PinThrowActivity extends FragmentActivity implements
         Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
 
         if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+
             startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
         }
+    }
+
+    public String getRealPathFromURI(Uri contentUri) {
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
+        int column_index = cursor
+                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
     }
 
     @Override
@@ -1111,6 +1247,8 @@ public class PinThrowActivity extends FragmentActivity implements
         if (requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
 
             videoUri = intent.getData();
+
+            videopath = getRealPathFromURI(videoUri);
 
 
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -1124,6 +1262,16 @@ public class PinThrowActivity extends FragmentActivity implements
             } else {
                 setBitmapFromUriForVideo();
             }
+
+
+
+
+
+
+
+
+
+
 
 
             //try {
@@ -1145,7 +1293,15 @@ public class PinThrowActivity extends FragmentActivity implements
             //Bitmap x = extras.getParcelable("data");
 
 
+
+
+
+
+
+
+
             pinVideoView = (VideoView) findViewById(R.id.pinVideoView);
+            pinTextureView = (TextureView) findViewById(R.id.pinTextureView);
 
             MediaController mediacontroller = new MediaController(context);
 
@@ -1161,28 +1317,177 @@ public class PinThrowActivity extends FragmentActivity implements
             pinVideoView.setVideoURI(videoUri);
             pinVideoView.requestFocus();
 
+
+
+
+
+            /*MediaPlayer mPlayer = new MediaPlayer();
+            try {
+                mPlayer.setDataSource( videoUri.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            int width = mPlayer.getVideoWidth();
+            int height = mPlayer.getVideoHeight();
+            Bitmap bMap = Bitmap.createBitmap( width, height, Bitmap.Config.ARGB_4444 );
+
+            videoImageView.setImageBitmap(bMap);*/
+
+
+
+
+
+
+
+
             pinVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 public void onPrepared(MediaPlayer mp) {
+
+                    /*MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+                    mediaMetadataRetriever.setDataSource(videoUri.getPath());
+                    try {
+                        Bitmap bitmap = mediaMetadataRetriever.getFrameAtTime(100);
+                        videoImageView.setImageBitmap(bitmap);
+
+                    } catch (OutOfMemoryError outOfMemoryError) {
+                        //Not entirely sure if this will ever be thrown but better safe than sorry.
+                        pinVideoView.seekTo(100);
+                    }*/
+
+                    mp.start();
+
+                    //int width = mp.getVideoWidth();
+                    //int height = mp.getVideoHeight();
+                    //Bitmap bMap = Bitmap.createBitmap( width, height, Bitmap.Config.ARGB_4444 );
+
+//                    videoImageView.setImageBitmap(bMap);
+
+                    /*mp.seekTo(100);
+
+
+
+
+
+
+
                     pinVideoView.start();
 
+                    pinVideoView.seekTo(100);
 
+
+
+                    Bitmap a = getScreenShot(pinVideoView);
+
+                    try {
+                        Log.i("Info", "mp.getVideoWidth(); : " + mp.getVideoWidth());
+
+                        videoImageView.setImageBitmap(a);
+                        pinVideoView.stopPlayback();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Log.i("Info", "exception : " + e.toString());
+                    }*/
                 }
             });
         }
     }
 
+    void savefile(Uri sourceuri)
+    {
+        String sourceFilename= sourceuri.getPath();
+        String destinationFilename = android.os.Environment.getExternalStorageDirectory().getPath()+File.separatorChar+"abc.mp4";
+
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+
+        try {
+            bis = new BufferedInputStream(new FileInputStream(sourceFilename));
+            bos = new BufferedOutputStream(new FileOutputStream(destinationFilename, false));
+            byte[] buf = new byte[1024];
+            bis.read(buf);
+            do {
+                bos.write(buf);
+            } while(bis.read(buf) != -1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (bis != null) bis.close();
+                if (bos != null) bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void createDirectoryFolder(){
+
+        String folder = Environment.getExternalStorageDirectory().toString();
+        File saveFolder = new File(folder + "/Movies/new /");
+        if(!saveFolder.exists()){
+            saveFolder.mkdirs();
+        }
+    }
+
+    public void saveFrames(ArrayList<Bitmap> saveBitmapList) throws IOException{
+
+        String folder = Environment.getExternalStorageDirectory().toString();
+        File saveFolder = new File(folder + "/Movies/new /");
+        if(!saveFolder.exists()){
+            saveFolder.mkdirs();
+        }
+
+
+        int i=1;
+        for (Bitmap b : saveBitmapList){
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            b.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+
+            File f = new File(saveFolder,"frame"+i+".jpg");
+
+            f.createNewFile();
+
+            FileOutputStream fo = new FileOutputStream(f);
+            fo.write(bytes.toByteArray());
+
+            fo.flush();
+            fo.close();
+
+            i++;
+        }
+
+    }
+
+
     private void setBitmapFromUriForVideo() {
 
-        FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
-        //MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        //FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 
         try {
 
-            retriever.setDataSource(videoUri.getPath());
-            Bitmap bitmap = retriever.getFrameAtTime();
+            retriever.setDataSource(videopath);
+            Bitmap bitmap = retriever.getFrameAtTime(100);
             //Bitmap x = ThumbnailUtils.createVideoThumbnail(uri.getPath(), MediaStore.Images.Thumbnails.MINI_KIND);
 
-            //bitmap = BitmapConversion.getRoundedShape(bitmap, 50, 50);
+            bitmap = BitmapConversion.getRoundedShape(bitmap, 60, 60);
+
+            /*int sourceWidth = bitmap.getWidth();
+            int sourceHeight = bitmap.getHeight();
+
+            float scale = Math.max(1.0f, 1.0f);
+
+            float scaledWidth = scale * sourceWidth;
+            float scaledHeight = scale * sourceHeight;
+
+            float left = (60 - scaledWidth) / 2;
+            float top = (60 - scaledHeight) / 2;
+
+            RectF targetRect = new RectF(left, top, left + scaledWidth, top + scaledHeight);
+
+            Bitmap dest = Bitmap.createBitmap(60, 60, bitmap.getConfig());
+            Canvas canvas = new Canvas(dest);
+            canvas.drawBitmap(bitmap, null, targetRect, null);*/
 
             videoImageView.setImageBitmap(bitmap);
 
@@ -1194,7 +1499,6 @@ public class PinThrowActivity extends FragmentActivity implements
 
     }
 
-
     private boolean hasCamera() {
         if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             return true;
@@ -1202,7 +1506,6 @@ public class PinThrowActivity extends FragmentActivity implements
             return false;
         }
     }
-
 
     public Bitmap getVideoFrame(Uri uri) {
 
@@ -1254,7 +1557,6 @@ public class PinThrowActivity extends FragmentActivity implements
         }
     }
 
-
     public Bitmap getThumbnail(Uri uri) throws FileNotFoundException, IOException {
         InputStream input = this.getContentResolver().openInputStream(uri);
 
@@ -1287,5 +1589,68 @@ public class PinThrowActivity extends FragmentActivity implements
         int k = Integer.highestOneBit((int) Math.floor(ratio));
         if (k == 0) return 1;
         else return k;
+    }
+
+    private void addItemsToFirebaseDatabase() {
+
+        String itemid;
+        itemid = saveCurrLocation();
+        saveLocationIDToUserLocations(itemid);
+
+    }
+
+    /* Marker's detail information saved to firebase database(locations root) **********************/
+    public String saveCurrLocation() {
+
+        if(!itemsAddedToFB)
+            return null;
+
+        Log.i("Info", "saveCurrLocation============");
+        Log.i("Info", "     >>userId:" + FBuserId);
+
+        Log.i("Info", "     >>Latlng latitude :" + markerLatlng.latitude);
+        Log.i("Info", "     >>Latlng longitude:" + markerLatlng.longitude);
+
+        try {
+            geoLocation = new GeoLocation(markerLatlng.latitude, markerLatlng.longitude);
+
+            mDbref = FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_LOCATIONS);
+
+            String itemId = mDbref.child("locations").push().getKey();
+
+            Log.i("Info", "     >>itemId:" + itemId);
+
+            Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+            FirebaseLocationAdapter firebaseLocationAdapter = new FirebaseLocationAdapter();
+            firebaseLocationAdapter.saveLocationInfo(geocoder, markerLatlng, FBuserId, itemId, geoLocation, mDbref);
+
+            return itemId;
+
+        } catch (Exception e) {
+            itemsAddedToFB = false;
+            Log.i("Info", "     >>SaveCurrLocation Error:" + e.toString());
+            return null;
+        }
+    }
+
+    /* Marker's location id is saved to firebase database(user_locations) **********************/
+    private void saveLocationIDToUserLocations(String locationId) {
+
+        if(!itemsAddedToFB)
+            return;
+
+        try{
+            mDbref = FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_USER_LOCATIONS);
+
+            String itemId = mDbref.child("user_locations").push().getKey();
+
+            FirebaseLocationAdapter firebaseLocationAdapter = new FirebaseLocationAdapter();
+            firebaseLocationAdapter.saveUserLocation(mDbref,locationId, FBuserId);
+
+
+        }catch (Exception e){
+            itemsAddedToFB = false;
+            Log.i("Info", "     >>saveUserLocation Error:" + e.toString());
+        }
     }
 }
