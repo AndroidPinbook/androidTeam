@@ -20,6 +20,12 @@
                 android:layout_weight="1"
                 android:gravity="center">
 
+                <!--VideoView
+                    android:id="@+id/videoImageView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/video_icon80"/-->
+
                 <ImageView
                     android:id="@+id/videoImageView"
                     android:layout_width="wrap_content"

@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.location.Criteria;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
@@ -40,6 +41,7 @@ import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 import android.widget.ViewFlipper;
 
 import com.firebase.geofire.GeoFire;
@@ -70,6 +72,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -161,6 +164,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     private static final int MY_PERMISSION_ACTION_GET_CONTENT = 4;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 5;
     private static final int REQUEST_VIDEO_CAPTURE = 6;
+    private static final int REQUEST_READ_EXTERNAL_STORAGE = 7;
 
     private MapRipple mapRipple;
 
@@ -191,6 +195,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
     private static final int VIDEO_GALLERY_SELECTED = 1;
 
     private TextView chooseProfilePicTextView;
+    private static VideoView videoPreview;
 
 
     /*========================================================================================*/
@@ -751,7 +756,6 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             case R.id.videoImageView:
                 Log.i("info ", "video img clicked..");
                 imgVideo.startAnimation(AnimationUtils.loadAnimation(PinThrowActivity.this, R.anim.img_anim));
-                startVideoProcess();
                 break;
 
             case R.id.noteImageView:
@@ -764,78 +768,6 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
-    private void startVideoProcess() {
-
-        if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{android.Manifest.permission.CAMERA}, REQUEST_VIDEO_CAPTURE);
-            } else {
-                dispatchTakeVideoIntent();
-            }
-        } else {
-            dispatchTakeVideoIntent();
-
-        }
-    }
-
-    private void dispatchTakeVideoIntent() {
-
-        try {
-            if (!hasCamera()) {
-                Toast.makeText(context, "Device has no camera!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            chooseVideoProperty();
-
-        } catch (Exception e) {
-            Log.i("Info", "  >>dispatchTakeVideoIntent error:" + e.toString());
-        }
-    }
-
-    private void chooseVideoProperty() {
-
-        Log.i("Info", "chooseVideoProperty");
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
-        adapter.add("  Open Camera");
-        adapter.add("  Open Galery");
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("How to upload your video?");
-
-        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int item) {
-
-                Log.i("Info", "  >>Item selected:" + item);
-
-                if (item == VIDEO_CAMERA_SELECTED) {
-
-                    choseVideoFromCamera();
-
-                } else if (item == VIDEO_GALLERY_SELECTED) {
-                    choseVideoFromGallery();
-
-                } else {
-                    Toast.makeText(PinThrowActivity.this, "Item Selected Error!!", Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
-
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    public void choseVideoFromCamera() {
-
-        Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-
-        if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
-        }
-    }
-
     private boolean hasCamera() {
         if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             return true;
@@ -844,9 +776,7 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
-    public void choseVideoFromGallery() {
 
-    }
 
     private void startImageProcess() {
         Log.i("Info", "   >> start Image Process");
@@ -915,7 +845,6 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
 
             requestPermissions(new String[]{Manifest.permission.CAMERA},MY_PERMISSION_CAMERA);
         }else{
-
             Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
             startActivityForResult(intent, MY_PERMISSION_CAMERA);
         }
@@ -986,6 +915,8 @@ public class PinThrowActivity extends FragmentActivity implements OnMapReadyCall
             return null;
         }
     }
+
+
 
     /*========================================================================================*/
     @Override
