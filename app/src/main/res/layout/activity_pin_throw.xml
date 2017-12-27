@@ -35,7 +35,7 @@
             android:src="@drawable/pin_icon"
             android:backgroundTint="@color/background"
             app:borderWidth="0dp"
-            app:elevation="6dp"/>
+            app:elevation="6dp" />
 
 
         <android.support.design.widget.FloatingActionButton
@@ -49,5 +49,15 @@
             app:elevation="6dp"/>
     </LinearLayout>
 
+    <VideoView
+        android:layout_width="50dp"
+        android:layout_height="100dp"
+        android:id="@+id/pinVideoView"/>
+
+    <TextureView
+        android:layout_width="50dp"
+        android:layout_marginTop="150dp"
+        android:layout_height="100dp"
+        android:id="@+id/pinTextureView"/>
 
 </FrameLayout>

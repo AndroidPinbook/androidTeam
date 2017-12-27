@@ -2,7 +2,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:id="@+id/markerItemsLinearLayout">
 
     <LinearLayout
         android:layout_width="250dp"
@@ -23,7 +24,7 @@
                     android:id="@+id/videoImageView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/video_icon80" />
+                    android:src="@drawable/video_icon80"/>
             </LinearLayout>
 
         </LinearLayout>

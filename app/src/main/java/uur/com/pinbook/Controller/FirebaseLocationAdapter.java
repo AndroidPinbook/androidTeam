@@ -33,6 +33,13 @@ public class FirebaseLocationAdapter {
         FirebaseLocationAdapter.locationAddress = address;
     }
 
+    public static void saveUserLocation(DatabaseReference mDbref, String locationId, String FBuserId){
+
+        Map<String, String> values = new HashMap<>();
+        values.put("locationId", locationId);
+        addItemLocation(values, FBuserId, mDbref);
+    }
+
     public static void saveLocationInfo(Geocoder geocoder, LatLng latLng, String FBuserId,
                                         String itemId, GeoLocation geoLocation,
                                         DatabaseReference mDbref){
@@ -62,33 +69,33 @@ public class FirebaseLocationAdapter {
 
             Map<String, String> values = new HashMap<>();
             values.put("userId", FBuserId);
-            addItemLocation(FBuserId, values, itemId, mDbref);
+            addItemLocation(values, itemId, mDbref);
 
 
             values.put("countryCode", listAddresses.get(0).getCountryCode());
-            addItemLocation(FBuserId, values, itemId, mDbref);
+            addItemLocation(values, itemId, mDbref);
 
 
             values.put("countryName", listAddresses.get(0).getCountryName());
-            addItemLocation(FBuserId, values, itemId, mDbref);
+            addItemLocation(values, itemId, mDbref);
 
 
             Long tsLong = System.currentTimeMillis()/1000;
             String currTimestamp = tsLong.toString();
             values.put("pinThrowTst", currTimestamp);
-            addItemLocation(FBuserId, values, itemId, mDbref);
+            addItemLocation(values, itemId, mDbref);
 
 
             values.put("postalCode", listAddresses.get(0).getPostalCode());
-            addItemLocation(FBuserId, values, itemId, mDbref);
+            addItemLocation(values, itemId, mDbref);
 
 
             values.put("thoroughFare", listAddresses.get(0).getThoroughfare());
-            addItemLocation(FBuserId, values, itemId, mDbref);
+            addItemLocation(values, itemId, mDbref);
 
 
             values.put("subThoroughfare", listAddresses.get(0).getSubThoroughfare());
-            addItemLocation(FBuserId, values, itemId, mDbref);
+            addItemLocation(values, itemId, mDbref);
 
             saveLocationGeoLocation(FBuserId, itemId, geoLocation, mDbref);
 
@@ -106,7 +113,7 @@ public class FirebaseLocationAdapter {
     }
 
     /*========================================================================================*/
-    public static void addItemLocation(String userId, Map values, String itemId, DatabaseReference mDbref) {
+    public static void addItemLocation(Map values, String itemId, DatabaseReference mDbref) {
 
         Log.i("Info", "FBLocationAdapter addItemLocation starts");
 
