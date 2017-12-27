@@ -142,8 +142,7 @@ public class PinThrowActivity extends FragmentActivity implements
         GoogleMap.OnCameraChangeListener,
         GoogleMap.OnMapClickListener,
         View.OnClickListener,
-        LocationListener,
-        MediaPlayer.OnPreparedListener {
+        LocationListener {
 
     public GoogleMap mMap;
 
@@ -247,7 +246,6 @@ public class PinThrowActivity extends FragmentActivity implements
 
     private static Uri videoUri = null;
     private VideoView pinVideoView = null;
-    private TextureView pinTextureView = null;
 
     private static Location markerLocation = null;
     private static LatLng markerLatlng = null;
@@ -933,9 +931,9 @@ public class PinThrowActivity extends FragmentActivity implements
         checkPopupShown();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
-        builder.setTitle("CONGRATULATIONS :)");
+        builder.setTitle("Tebrikler :)");
         builder.setIcon(R.drawable.approve_icon);
-        builder.setMessage("You added your first pin. Now we will direct you to next page");
+        builder.setMessage("Ilk pininizi biraktiniz. Simdi bir sonraki sayfaya yonlendirileceksiniz");
         final AlertDialog alert = builder.create();
         alert.show();
 
@@ -1250,7 +1248,6 @@ public class PinThrowActivity extends FragmentActivity implements
 
             videopath = getRealPathFromURI(videoUri);
 
-
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
 
@@ -1263,50 +1260,11 @@ public class PinThrowActivity extends FragmentActivity implements
                 setBitmapFromUriForVideo();
             }
 
-
-
-
-
-
-
-
-
-
-
-
-            //try {
-            //    bitmapxx = MediaStore.Images.Media.getBitmap(getContentResolver(), videoUri);
-            //} catch (IOException e) {
-            //    e.printStackTrace();
-            //}
-
-            //Bitmap photo = (Bitmap) intent.getExtras().get("data");
-
-            //try {
-            //    Bitmap bitmap = getThumbnail(videoUri);
-            //} catch (IOException e) {
-            //    e.printStackTrace();
-            //}
-
-
-            //Bundle extras = intent.getExtras();
-            //Bitmap x = extras.getParcelable("data");
-
-
-
-
-
-
-
-
-
             pinVideoView = (VideoView) findViewById(R.id.pinVideoView);
-            pinTextureView = (TextureView) findViewById(R.id.pinTextureView);
 
             MediaController mediacontroller = new MediaController(context);
 
             mediacontroller.setAnchorView(pinVideoView);
-
 
             pinVideoView.setMediaController(mediacontroller);
 
@@ -1317,76 +1275,10 @@ public class PinThrowActivity extends FragmentActivity implements
             pinVideoView.setVideoURI(videoUri);
             pinVideoView.requestFocus();
 
-
-
-
-
-            /*MediaPlayer mPlayer = new MediaPlayer();
-            try {
-                mPlayer.setDataSource( videoUri.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            int width = mPlayer.getVideoWidth();
-            int height = mPlayer.getVideoHeight();
-            Bitmap bMap = Bitmap.createBitmap( width, height, Bitmap.Config.ARGB_4444 );
-
-            videoImageView.setImageBitmap(bMap);*/
-
-
-
-
-
-
-
-
             pinVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 public void onPrepared(MediaPlayer mp) {
-
-                    /*MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-                    mediaMetadataRetriever.setDataSource(videoUri.getPath());
-                    try {
-                        Bitmap bitmap = mediaMetadataRetriever.getFrameAtTime(100);
-                        videoImageView.setImageBitmap(bitmap);
-
-                    } catch (OutOfMemoryError outOfMemoryError) {
-                        //Not entirely sure if this will ever be thrown but better safe than sorry.
-                        pinVideoView.seekTo(100);
-                    }*/
-
                     mp.start();
 
-                    //int width = mp.getVideoWidth();
-                    //int height = mp.getVideoHeight();
-                    //Bitmap bMap = Bitmap.createBitmap( width, height, Bitmap.Config.ARGB_4444 );
-
-//                    videoImageView.setImageBitmap(bMap);
-
-                    /*mp.seekTo(100);
-
-
-
-
-
-
-
-                    pinVideoView.start();
-
-                    pinVideoView.seekTo(100);
-
-
-
-                    Bitmap a = getScreenShot(pinVideoView);
-
-                    try {
-                        Log.i("Info", "mp.getVideoWidth(); : " + mp.getVideoWidth());
-
-                        videoImageView.setImageBitmap(a);
-                        pinVideoView.stopPlayback();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Log.i("Info", "exception : " + e.toString());
-                    }*/
                 }
             });
         }
@@ -1461,36 +1353,13 @@ public class PinThrowActivity extends FragmentActivity implements
 
     private void setBitmapFromUriForVideo() {
 
-        //FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 
         try {
-
             retriever.setDataSource(videopath);
             Bitmap bitmap = retriever.getFrameAtTime(100);
-            //Bitmap x = ThumbnailUtils.createVideoThumbnail(uri.getPath(), MediaStore.Images.Thumbnails.MINI_KIND);
-
             bitmap = BitmapConversion.getRoundedShape(bitmap, 60, 60);
-
-            /*int sourceWidth = bitmap.getWidth();
-            int sourceHeight = bitmap.getHeight();
-
-            float scale = Math.max(1.0f, 1.0f);
-
-            float scaledWidth = scale * sourceWidth;
-            float scaledHeight = scale * sourceHeight;
-
-            float left = (60 - scaledWidth) / 2;
-            float top = (60 - scaledHeight) / 2;
-
-            RectF targetRect = new RectF(left, top, left + scaledWidth, top + scaledHeight);
-
-            Bitmap dest = Bitmap.createBitmap(60, 60, bitmap.getConfig());
-            Canvas canvas = new Canvas(dest);
-            canvas.drawBitmap(bitmap, null, targetRect, null);*/
-
             videoImageView.setImageBitmap(bitmap);
-
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -1507,96 +1376,11 @@ public class PinThrowActivity extends FragmentActivity implements
         }
     }
 
-    public Bitmap getVideoFrame(Uri uri) {
-
-
-        /*try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver() , Uri.parse(uri.toString()));
-            return bitmap;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;*/
-
-
-        //MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-
-        FFmpegMediaMetadataRetriever retriever = new FFmpegMediaMetadataRetriever();
-
-        try {
-
-            retriever.setDataSource(uri.toString());
-            Bitmap c = retriever.getFrameAtTime(5000000);
-            //Bitmap x = ThumbnailUtils.createVideoThumbnail(uri.getPath(), MediaStore.Images.Thumbnails.MINI_KIND);
-
-            return c;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.i("Info", "  >>getVideoFrame IllegalArgumentException:" + e.toString());
-        }
-
-        return null;
-    }
-
-    @Override
-    public void onPrepared(MediaPlayer mp) {
-        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-        mediaMetadataRetriever.setDataSource(videoUri.getPath());
-        try {
-            Bitmap bitmap = mediaMetadataRetriever.getFrameAtTime(0);
-
-
-            pinVideoView.setBackgroundDrawable(new BitmapDrawable(bitmap));
-
-        } catch (OutOfMemoryError e) {
-            //Not entirely sure if this will ever be thrown but better safe than sorry.
-            pinVideoView.seekTo(0);
-            Log.i("Info", "  >>onPrepared OutOfMemoryError:" + e.toString());
-        }
-    }
-
-    public Bitmap getThumbnail(Uri uri) throws FileNotFoundException, IOException {
-        InputStream input = this.getContentResolver().openInputStream(uri);
-
-        BitmapFactory.Options onlyBoundsOptions = new BitmapFactory.Options();
-        onlyBoundsOptions.inJustDecodeBounds = true;
-        onlyBoundsOptions.inDither = true;//optional
-        onlyBoundsOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;//optional
-        BitmapFactory.decodeStream(input, null, onlyBoundsOptions);
-        input.close();
-
-        if ((onlyBoundsOptions.outWidth == -1) || (onlyBoundsOptions.outHeight == -1)) {
-            return null;
-        }
-
-        int originalSize = (onlyBoundsOptions.outHeight > onlyBoundsOptions.outWidth) ? onlyBoundsOptions.outHeight : onlyBoundsOptions.outWidth;
-
-        double ratio = (originalSize > 3) ? (originalSize / 3) : 1.0;
-
-        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-        bitmapOptions.inSampleSize = getPowerOfTwoForSampleRatio(ratio);
-        bitmapOptions.inDither = true; //optional
-        bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;//
-        input = this.getContentResolver().openInputStream(uri);
-        Bitmap bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions);
-        input.close();
-        return bitmap;
-    }
-
-    private static int getPowerOfTwoForSampleRatio(double ratio) {
-        int k = Integer.highestOneBit((int) Math.floor(ratio));
-        if (k == 0) return 1;
-        else return k;
-    }
-
     private void addItemsToFirebaseDatabase() {
 
         String itemid;
         itemid = saveCurrLocation();
         saveLocationIDToUserLocations(itemid);
-
     }
 
     /* Marker's detail information saved to firebase database(locations root) **********************/

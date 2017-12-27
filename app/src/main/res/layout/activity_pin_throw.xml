@@ -54,10 +54,4 @@
         android:layout_height="100dp"
         android:id="@+id/pinVideoView"/>
 
-    <TextureView
-        android:layout_width="50dp"
-        android:layout_marginTop="150dp"
-        android:layout_height="100dp"
-        android:id="@+id/pinTextureView"/>
-
 </FrameLayout>
