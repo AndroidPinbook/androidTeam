@@ -13,6 +13,10 @@ public class ValidationAdapter {
     }
 
     public static boolean isValidPassword(String password){
-        return password.length()>6;
+
+        if(password.length() < 6)
+            return false;
+        else
+            return true;
     }
 }

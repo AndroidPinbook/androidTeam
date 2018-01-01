@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparentBlack">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="40dp"
+            android:id="@+id/laymain1">
+
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/speech_bubble" />
+
+            <LinearLayout
+                android:id="@+id/laymain11"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="-135dp"
+                android:layout_marginTop="30dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/gloria_hallelujah"
+                    android:gravity="center_horizontal"
+                    android:text="20 saniyeye kadar"
+                    android:textColor="@color/background_white"
+                    android:textSize="@dimen/thirdDemoPageTextSize"
+                    android:textStyle="normal|bold|italic" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/gloria_hallelujah"
+                    android:gravity="center_horizontal"
+                    android:text="istediginiz videoyu cekebilir"
+                    android:textColor="@color/background_white"
+                    android:textSize="@dimen/thirdDemoPageTextSize"
+                    android:textStyle="normal|bold|italic" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/gloria_hallelujah"
+                    android:gravity="center_horizontal"
+                    android:text="yada yukleyebilirsiniz :)"
+                    android:textColor="@color/background_white"
+                    android:textSize="@dimen/thirdDemoPageTextSize"
+                    android:textStyle="normal|bold|italic" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginLeft="40dp"
+            android:src="@drawable/video_icon80"
+            android:layout_below="@id/laymain11"
+            android:id="@+id/demo3videoImgView"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="160dp"
+        android:layout_marginTop="150dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp">
+
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/speech_bubble2" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="-120dp"
+                android:layout_marginTop="45dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/gloria_hallelujah"
+                    android:gravity="center_horizontal"
+                    android:text="Pin uzerine resim de"
+                    android:textColor="@color/background_white"
+                    android:textSize="@dimen/thirdDemoPageTextSize"
+                    android:textStyle="normal|bold|italic" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/gloria_hallelujah"
+                    android:gravity="center_horizontal"
+                    android:text="birakabilirsiniz :)"
+                    android:textColor="@color/background_white"
+                    android:textSize="@dimen/thirdDemoPageTextSize"
+                    android:textStyle="normal|bold|italic" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginLeft="140dp"
+            android:src="@drawable/gallery_icon80"
+            android:id="@+id/demo3pictureImgView"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="260dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp">
+
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/speech_bubble" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="-125dp"
+                android:layout_marginTop="40dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/gloria_hallelujah"
+                    android:gravity="center_horizontal"
+                    android:text="120 karaktere kadar pin"
+                    android:textColor="@color/background_white"
+                    android:textSize="@dimen/thirdDemoPageTextSize"
+                    android:textStyle="normal|bold|italic" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/gloria_hallelujah"
+                    android:gravity="center_horizontal"
+                    android:text="uzerine not"
+                    android:textColor="@color/background_white"
+                    android:textSize="@dimen/thirdDemoPageTextSize"
+                    android:textStyle="normal|bold|italic" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/gloria_hallelujah"
+                    android:gravity="center_horizontal"
+                    android:text="birakabilirsiniz :)"
+                    android:textColor="@color/background_white"
+                    android:textSize="@dimen/thirdDemoPageTextSize"
+                    android:textStyle="normal|bold|italic" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginLeft="40dp"
+            android:src="@drawable/text_icon80"
+            android:id="@+id/demo3textImgView"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="450dp"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/gotItThirdButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/demo_ripple"
+            android:text="Got it  :)"
+            android:textAllCaps="false"
+            android:textColor="@color/background_white"
+            android:textStyle="normal|bold|italic" />
+
+    </LinearLayout>
+
+</RelativeLayout>

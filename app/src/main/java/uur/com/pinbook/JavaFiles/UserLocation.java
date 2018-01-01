@@ -1,10 +1,12 @@
 package uur.com.pinbook.JavaFiles;
 
+import android.location.Location;
+
 /**
- * Created by mac on 11.12.2017.
+ * Created by mac on 29.12.2017.
  */
 
-public class Location {
+public class UserLocation {
 
     String userId;
     String countryCode;
@@ -15,6 +17,40 @@ public class Location {
     String subThoroughfare;
     String latitude;
     String longitude;
+    Location location;
+    String locationId;
+
+    public String getLocationId() {
+        return locationId;
+    }
+
+    public void setLocationId(String locationId) {
+        this.locationId = locationId;
+    }
+
+    public String getThoroughFare() {
+        return thoroughFare;
+    }
+
+    public void setThoroughFare(String thoroughFare) {
+        this.thoroughFare = thoroughFare;
+    }
+
+    public String getSubThoroughfare() {
+        return subThoroughfare;
+    }
+
+    public void setSubThoroughfare(String subThoroughfare) {
+        this.subThoroughfare = subThoroughfare;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     public String getUserId() {
         return userId;

@@ -3,11 +3,11 @@
     android:shape="rectangle"   >
 
     <solid
-        android:color="@color/popupBgColor" >
+        android:color="@color/background_white" >
     </solid>
 
     <stroke
-        android:width="3dp"
+        android:width="5dp"
         android:color="@color/button_color" >
     </stroke>
 

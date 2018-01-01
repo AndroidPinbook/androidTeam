@@ -32,8 +32,8 @@
             android:id="@+id/pinThrowButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/pin_icon"
             android:backgroundTint="@color/background"
+            android:src="@drawable/pin_icon"
             app:borderWidth="0dp"
             app:elevation="6dp" />
 
@@ -49,9 +49,11 @@
             app:elevation="6dp"/>
     </LinearLayout>
 
+
     <VideoView
-        android:layout_width="50dp"
-        android:layout_height="100dp"
-        android:id="@+id/pinVideoView"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/pinVideoView"
+        android:visibility="gone"/>
 
 </FrameLayout>

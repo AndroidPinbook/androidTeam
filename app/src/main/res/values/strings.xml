@@ -30,6 +30,7 @@
     <string name="gallery">gallery</string>
 
     <string name="choseProfilePictureText"><u>Choose a profile picture</u></string>
+    <string name="FBApplicationId">1:695005347563:android:e77f50983708f0c0</string>
 
     <string name="fbLoginType">facebookLoginType</string>
     <string name="twLoginType">twitterLoginType</string>
@@ -45,4 +46,5 @@
     <string name="resetYourPassword">Reset Your Password</string>
     <string name="changePassword">Enter your email address below, and we will send instructions for settings a new one</string>
     <string name="title_activity_pin_throw">Map</string>
+
 </resources>

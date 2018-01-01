@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center"
     android:background="@color/transparentBlack"
-    android:id="@+id/noteTextMainLayout">
+    android:id="@+id/imageMainLayout">
 
     <LinearLayout
         android:layout_width="250dp"
@@ -17,32 +17,19 @@
             android:layout_height="wrap_content"
             android:background="@drawable/linear_layout_shape"
             android:backgroundTint="@color/button_color"
-            android:text="PIN NOTE"
             android:fontFamily="@font/pacifico"
-            android:textStyle="normal|bold|italic"
-            android:textColor="@color/background_white"
             android:gravity="center"
-            />
+            android:text="PIN PHOTO"
+            android:textColor="@color/background_white"
+            android:textStyle="normal|bold|italic" />
 
-        <ScrollView
+
+        <ImageView
+            android:id="@+id/pinPhotoImageView"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:id="@+id/noteScrollView"
-            android:background="@drawable/linear_layout_shape"
-            android:layout_marginTop="2dp">
-
-            <EditText
-                android:id="@+id/noteTextEditText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:maxLines="20"
-                android:textSize="16sp"
-                android:textCursorDrawable="@null"
-                android:cursorVisible="false"
-                android:backgroundTint="@color/background_white"
-                />
-
-        </ScrollView>
+            android:layout_height="match_parent"
+            android:layout_marginTop="2dp"
+            android:background="@drawable/linear_layout_shape" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -53,38 +40,31 @@
 
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/textApproveFab"
+                android:id="@+id/imageApproveFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:clickable="true"
                 android:scaleType="center"
                 android:src="@drawable/approve_icon40"
                 app:backgroundTint="@color/background"
-                app:fabSize="mini"
-                android:clickable="true"
-                />
+                app:fabSize="mini" />
 
 
             <LinearLayout
                 android:layout_width="20dp"
-                android:layout_height="wrap_content">
-
-            </LinearLayout>
+                android:layout_height="wrap_content"></LinearLayout>
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/textCancelFab"
+                android:id="@+id/imageCancelFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:clickable="true"
                 android:scaleType="center"
                 android:src="@drawable/cancel_icon"
                 app:backgroundTint="@color/background"
-                android:clickable="true"
-                app:fabSize="mini"
-                />
-
+                app:fabSize="mini" />
 
         </LinearLayout>
-
-
 
     </LinearLayout>
 

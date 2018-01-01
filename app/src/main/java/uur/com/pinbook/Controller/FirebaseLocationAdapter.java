@@ -1,119 +1,97 @@
 package uur.com.pinbook.Controller;
 
-import android.location.Address;
-import android.location.Geocoder;
 import android.util.Log;
 
-import com.firebase.geofire.GeoLocation;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-/**
- * Created by mac on 11.12.2017.
- */
+import uur.com.pinbook.JavaFiles.UserLocation;
+import static uur.com.pinbook.JavaFiles.ConstValues.*;
 
 public class FirebaseLocationAdapter {
 
-    public static String locationAddress;
+    public static DatabaseReference mDbref;
 
-    public static String getAddress() {
-        return locationAddress;
+    public static String locationId;
+
+    public FirebaseOptions locationsOptions;
+    public FirebaseOptions userLocationsOptions;
+
+    public FirebaseOptions getLocationsOptions() {
+
+        locationsOptions = new FirebaseOptions.Builder().
+                setApplicationId(FB_APPLICATION_ID).setDatabaseUrl(GEO_FIRE_DB_LOCATIONS).build();
+        return locationsOptions;
     }
 
-    public static void setAddress(String address) {
-        FirebaseLocationAdapter.locationAddress = address;
+    public FirebaseOptions getUserLocationsOptions() {
+
+        userLocationsOptions = new FirebaseOptions.Builder().
+                setApplicationId(FB_APPLICATION_ID).setDatabaseUrl(GEO_FIRE_DB_USER_LOCATIONS).build();
+        return userLocationsOptions;
     }
 
-    public static void saveUserLocation(DatabaseReference mDbref, String locationId, String FBuserId){
+    public static String getLocationId() {
+        return locationId;
+    }
+
+    public static void setLocationId(String locationId) {
+        FirebaseLocationAdapter.locationId = locationId;
+    }
+
+    public static void saveUserLocationInfo(String FBUserId){
+
+        mDbref = null;
+        mDbref = FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_DB_USER_LOCATIONS);
 
         Map<String, String> values = new HashMap<>();
-        values.put("locationId", locationId);
-        addItemLocation(values, FBuserId, mDbref);
+        addUserItemLocation(FBUserId, values, getLocationId());
     }
 
-    public static void saveLocationInfo(Geocoder geocoder, LatLng latLng, String FBuserId,
-                                        String itemId, GeoLocation geoLocation,
-                                        DatabaseReference mDbref){
+    public static void saveLocationInfo(UserLocation userLocation) {
 
-        try {
+        mDbref = null;
+        Map<String, String> values = new HashMap<>();
+        mDbref = FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_DB_LOCATIONS);
+        String locItemId = mDbref.child(Locations).push().getKey();
 
-            List<Address> listAddresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+        setLocationId(locItemId);
 
-            if (listAddresses != null && listAddresses.size() > 0) {
+        values.put(userID, userLocation.getUserId());
+        addItemLocation(values, locItemId);
 
-                Log.i("Info", "        >>Thorougfare   :" + listAddresses.get(0).getThoroughfare());
-                Log.i("Info", "        >>CountryName   :" + listAddresses.get(0).getCountryName());
-                Log.i("Info", "        >>PostalCode    :" + listAddresses.get(0).getPostalCode());
-                Log.i("Info", "        >>Locality      :" + listAddresses.get(0).getLocality());
-                Log.i("Info", "        >>CountryCode   :" + listAddresses.get(0).getCountryCode());
-                Log.i("Info", "        >>SubThorougfare:" + listAddresses.get(0).getSubThoroughfare());
+        values.put(countryCode, userLocation.getCountryCode());
+        addItemLocation(values, locItemId);
 
-                if (listAddresses.get(0).getThoroughfare() != null) {
+        values.put(countryName, userLocation.getCountryName());
+        addItemLocation(values, locItemId);
 
-                    if (listAddresses.get(0).getSubThoroughfare() != null) {
+        values.put(timestamp, userLocation.getLocTimestamp());
+        addItemLocation(values, locItemId);
 
-                        locationAddress += listAddresses.get(0).getSubThoroughfare() + " ";
-                    }
-                    locationAddress += listAddresses.get(0).getThoroughfare();
-                }
-            }
+        values.put(postalCode, userLocation.getPostalCode());
+        addItemLocation(values, locItemId);
 
-            Map<String, String> values = new HashMap<>();
-            values.put("userId", FBuserId);
-            addItemLocation(values, itemId, mDbref);
+        values.put(thorough, userLocation.getThoroughFare());
+        addItemLocation(values, locItemId);
 
+        values.put(subThorough, userLocation.getSubThoroughfare());
+        addItemLocation(values, locItemId);
 
-            values.put("countryCode", listAddresses.get(0).getCountryCode());
-            addItemLocation(values, itemId, mDbref);
+        values.put(latitude, userLocation.getLatitude());
+        addItemLocation(values, locItemId);
 
-
-            values.put("countryName", listAddresses.get(0).getCountryName());
-            addItemLocation(values, itemId, mDbref);
-
-
-            Long tsLong = System.currentTimeMillis()/1000;
-            String currTimestamp = tsLong.toString();
-            values.put("pinThrowTst", currTimestamp);
-            addItemLocation(values, itemId, mDbref);
-
-
-            values.put("postalCode", listAddresses.get(0).getPostalCode());
-            addItemLocation(values, itemId, mDbref);
-
-
-            values.put("thoroughFare", listAddresses.get(0).getThoroughfare());
-            addItemLocation(values, itemId, mDbref);
-
-
-            values.put("subThoroughfare", listAddresses.get(0).getSubThoroughfare());
-            addItemLocation(values, itemId, mDbref);
-
-            saveLocationGeoLocation(FBuserId, itemId, geoLocation, mDbref);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (locationAddress == "") {
-
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm yyyy-MM-dd");
-            locationAddress = sdf.format(new Date());
-        }
-
-        Log.i("Info", "     >>adress:" + locationAddress);
+        values.put(longitude, userLocation.getLongitude());
+        addItemLocation(values, locItemId);
     }
 
     /*========================================================================================*/
-    public static void addItemLocation(Map values, String itemId, DatabaseReference mDbref) {
+    public static void addItemLocation(Map values, String itemId) {
 
         Log.i("Info", "FBLocationAdapter addItemLocation starts");
 
@@ -125,13 +103,11 @@ public class FirebaseLocationAdapter {
         });
     }
 
-    /*========================================================================================*/
-    public static void saveLocationGeoLocation(String FBuserId, String itemId,
-                                               GeoLocation geoLocation, DatabaseReference mDbref){
+    public static void addUserItemLocation(String FBUserId, Map values, String locId){
 
-        Log.i("Info", "FBLocationAdapter saveLocationGeoLocation starts");
+        Log.i("Info", "FBLocationAdapter addItemLocation starts");
 
-        mDbref.child(itemId).child("geolocation").setValue(geoLocation, new DatabaseReference.CompletionListener() {
+        mDbref.child(FBUserId).child(locId).setValue(" ", new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 Log.i("Info", "     >>databaseError:" + databaseError);
