@@ -144,6 +144,8 @@ public class PinThrowActivity extends FragmentActivity implements
     private static ImageView noteTextDeleteImgv;
     private static ImageView pinPictureApproveImgv;
     private static ImageView pinPictureDeleteImgv;
+    private static ImageView pinThrowImgv;
+    private static ImageView gotoNextPageImgv;
 
     private static final float SHAKE_THRESHOLD = 20.0f;
     private static final int MIN_TIME_BETWEEN_SHAKES_MILLISECS = 1000;
@@ -222,8 +224,8 @@ public class PinThrowActivity extends FragmentActivity implements
     private FirebaseAuth mAuth;
     private DatabaseReference mDbref;
 
-    private FloatingActionButton nextButton;
-    private FloatingActionButton pinThrowButton;
+    //private FloatingActionButton nextButton;
+    //private FloatingActionButton pinThrowButton;
     //private FloatingActionButton pinApproveFab;
     //private FloatingActionButton pinCancelFab;
 
@@ -397,11 +399,17 @@ public class PinThrowActivity extends FragmentActivity implements
             mapRelativeLayout = (FrameLayout) findViewById(R.id.mapRelativeLayout);
             mapRelativeLayout.setOnClickListener(this);
 
-            nextButton = (FloatingActionButton) findViewById(R.id.nextButton);
-            pinThrowButton = (FloatingActionButton) findViewById(R.id.pinThrowButton);
+            //nextButton = (FloatingActionButton) findViewById(R.id.nextButton);
+            //pinThrowButton = (FloatingActionButton) findViewById(R.id.pinThrowButton);
 
-            nextButton.setOnClickListener(this);
-            pinThrowButton.setOnClickListener(this);
+            gotoNextPageImgv = (ImageView) findViewById(R.id.gotoNextPageImgv);
+            pinThrowImgv = (ImageView) findViewById(R.id.pinThrowImgv);
+
+            //nextButton.setOnClickListener(this);
+            //pinThrowButton.setOnClickListener(this);
+
+            gotoNextPageImgv.setOnClickListener(this);
+            pinThrowImgv.setOnClickListener(this);
 
             mAuth = FirebaseAuth.getInstance();
             currentUser = mAuth.getCurrentUser();
@@ -802,13 +810,13 @@ public class PinThrowActivity extends FragmentActivity implements
         int i = v.getId();
 
         switch (i) {
-            case R.id.nextButton:  //Next button on map
-                nextButton.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
+            case R.id.gotoNextPageImgv:  //Next button on map
+                gotoNextPageImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
                 startProfilePage();
                 break;
 
-            case R.id.pinThrowButton: //Pin throw button on map
-                pinThrowButton.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
+            case R.id.pinThrowImgv: //Pin throw button on map
+                pinThrowImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
                 if (!demoThirdPageShown) {
                     showDemoThirdPage();
                     demoThirdPageShown = true;
@@ -1280,15 +1288,15 @@ public class PinThrowActivity extends FragmentActivity implements
 
     private void disableMapItems() {
 
-        nextButton.setEnabled(false);
-        pinThrowButton.setEnabled(false);
+        gotoNextPageImgv.setEnabled(false);
+        pinThrowImgv.setEnabled(false);
         mMap.getUiSettings().setScrollGesturesEnabled(false);
     }
 
     private void enableMapItems() {
 
-        nextButton.setEnabled(true);
-        pinThrowButton.setEnabled(true);
+        gotoNextPageImgv.setEnabled(true);
+        pinThrowImgv.setEnabled(true);
         mMap.getUiSettings().setScrollGesturesEnabled(true);
         mapRelativeLayout.removeView(firstDemoLayout);
     }
@@ -1393,8 +1401,11 @@ public class PinThrowActivity extends FragmentActivity implements
         noteText = null;
         initializePinItems();
         marker = null;
-        noteTextEditText.setText(null);
-        pinThrowButton.setEnabled(true);
+        pinThrowImgv.setEnabled(true);
+
+        if (noteTextEditText != null)
+            noteTextEditText.setText(null);
+
     }
 
     private void initializePinItems() {

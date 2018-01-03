@@ -24,6 +24,8 @@
     <dimen name="floatAbSize">40dp</dimen>
     <dimen name="thirdDemoPageTextSize">8dp</dimen>
 
+    <dimen name="notifItemsSize">35dp</dimen>
     <dimen name="pinImgSize">40dp</dimen>
+    <dimen name="pinItemSize">60dp</dimen>
 
 </resources>

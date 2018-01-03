@@ -49,9 +49,11 @@
                 android:textStyle="normal|bold|italic" />
 
             <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:src="@drawable/pin_throw_img" />
+                android:layout_width="@dimen/pinImgSize"
+                android:layout_height="@dimen/pinImgSize"
+                android:layout_marginTop="3dp"
+                android:background="@drawable/img_border"
+                android:src="@drawable/pin_throw68" />
 
         </LinearLayout>
 
