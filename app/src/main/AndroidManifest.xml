@@ -47,14 +47,14 @@
         </activity>
         <activity
             android:name=".Activities.LoginPageActivity"
-            android:theme="@style/Toolbar" />
+            android:theme="@style/Toolbar"></activity>
         <activity
             android:name=".Activities.RegisterPageActivity"
             android:exported="true"
-            android:theme="@style/Toolbar" />
+            android:theme="@style/Toolbar"></activity>
         <activity
             android:name=".Activities.ProfilePageActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"></activity>
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
@@ -81,10 +81,14 @@
         </activity>
         <activity
             android:name=".Activities.ProfilePhotoActivity"
-            android:theme="@style/Toolbar" />
+            android:theme="@style/Toolbar">
+
+        </activity>
         <activity
             android:name=".Activities.EmailVerifyPageActivity"
-            android:theme="@style/Toolbar" />
+            android:theme="@style/Toolbar">
+
+        </activity>
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -100,8 +104,7 @@
 
         <activity
             android:name=".Activities.PinThrowActivity"
-            android:label="@string/title_activity_pin_throw" />
-        <activity android:name=".Activities.PlayVideoActivity"></activity>
+            android:label="@string/title_activity_pin_throw"></activity>
     </application>
 
 </manifest>

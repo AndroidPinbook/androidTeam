@@ -73,7 +73,7 @@ public class CustomDialogAdapter extends DialogFragment {
     public static void showDialogError(Context context, String errMessage){
 
         new PromptDialog(context)
-                .setDialogType(PromptDialog.DIALOG_TYPE_DEFAULT)
+                .setDialogType(PromptDialog.DIALOG_TYPE_WRONG)
                 .setAnimationEnable(true)
                 .setTitleText("HATA")
                 .setContentText(errMessage)

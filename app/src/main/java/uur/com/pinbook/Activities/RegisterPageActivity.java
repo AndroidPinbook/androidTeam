@@ -191,7 +191,8 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                             } catch(FirebaseAuthUserCollisionException e) {
                                 CustomDialogAdapter.showDialogError(RegisterPageActivity.this, ErrorMessageAdapter.COLLISION_EXCEPTION.getText());
                             } catch(Exception e) {
-                                Log.i("error :", e.getMessage());
+                                CustomDialogAdapter.showDialogError(RegisterPageActivity.this, ErrorMessageAdapter.UNKNOW_ERROR.getText());
+                                Log.i("error ", e.toString());
                             }
                         }
                     }

@@ -130,6 +130,7 @@
                     android:text="Forget Password?"
                     android:textSize="16dip" />
 
+
             </LinearLayout>
 
         </LinearLayout>

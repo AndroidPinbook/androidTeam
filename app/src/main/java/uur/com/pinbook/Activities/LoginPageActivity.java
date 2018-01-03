@@ -10,12 +10,10 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.telephony.PhoneNumberUtils;
+
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -39,17 +37,17 @@ import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseAuthUserCollisionException;
-import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.Locale;
+
 
 import cn.refactor.lib.colordialog.ColorDialog;
 import uur.com.pinbook.Controller.CustomDialogAdapter;
 import uur.com.pinbook.Controller.ErrorMessageAdapter;
 import uur.com.pinbook.Controller.ValidationAdapter;
 import uur.com.pinbook.R;
+
 
 public class LoginPageActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -67,11 +65,6 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
     private SharedPreferences loginPreferences;
     private SharedPreferences.Editor loginPrefsEditor;
     private Boolean saveLogin;
-
-    private Button btn_showPromptDlg;
-    private Button btn_showTextDialog;
-    private Button btn_showPicDialog;
-    private Button btn_showAllModeDialog;
 
 
     @Override
@@ -298,13 +291,13 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
                                 //editTextEmail.setError("error_invalid_email");
                                 //editTextEmail.requestFocus();
+                                Log.i("error", e.toString());
+                            } catch(FirebaseAuthInvalidUserException e){
+                                CustomDialogAdapter.showDialogError(LoginPageActivity.this, ErrorMessageAdapter.INVALID_USER.getText());
                                 Log.i("error ", e.toString());
-                            } catch(FirebaseAuthUserCollisionException e) {
-                                editTextEmail.setError("error_user_exists");
-                                editTextEmail.requestFocus();
+                            }catch(Exception e) {
+                                CustomDialogAdapter.showDialogError(LoginPageActivity.this, ErrorMessageAdapter.UNKNOW_ERROR.getText());
                                 Log.i("error ", e.toString());
-                            } catch(Exception e) {
-                                Log.i("error :", e.getMessage());
                             }
 
                         }
