@@ -147,6 +147,10 @@ public class PinThrowActivity extends FragmentActivity implements
     private static ImageView pinThrowImgv;
     private static ImageView gotoNextPageImgv;
 
+    private static ImageView pinFriendsImgv;
+    private static ImageView pinOnlymeImgv;
+    private static ImageView pinSpecialImgv;
+
     private static final float SHAKE_THRESHOLD = 20.0f;
     private static final int MIN_TIME_BETWEEN_SHAKES_MILLISECS = 1000;
     private long mLastShakeTime;
@@ -161,6 +165,7 @@ public class PinThrowActivity extends FragmentActivity implements
 
     private Boolean imageChangedInd = false;
     private Boolean demoThirdPageShown = false;
+    private Boolean demoFourPageShown = false;
 
     private int mWidth;
     private int mHeight;
@@ -170,6 +175,7 @@ public class PinThrowActivity extends FragmentActivity implements
     private View firstDemoLayout;
     private View secondDemoLayout;
     private View thirdDemoLayout;
+    private View fourDemoLayout;
     private View noteTextLayout;
     private View imageViewLayout;
 
@@ -405,11 +411,19 @@ public class PinThrowActivity extends FragmentActivity implements
             gotoNextPageImgv = (ImageView) findViewById(R.id.gotoNextPageImgv);
             pinThrowImgv = (ImageView) findViewById(R.id.pinThrowImgv);
 
+            pinFriendsImgv = (ImageView) findViewById(R.id.pinFriendsImgv);
+            pinOnlymeImgv = (ImageView) findViewById(R.id.pinOnlymeImgv);
+            pinSpecialImgv = (ImageView) findViewById(R.id.pinSpecialImgv);
+
             //nextButton.setOnClickListener(this);
             //pinThrowButton.setOnClickListener(this);
 
             gotoNextPageImgv.setOnClickListener(this);
             pinThrowImgv.setOnClickListener(this);
+
+            pinFriendsImgv.setOnClickListener(this);
+            pinOnlymeImgv.setOnClickListener(this);
+            pinSpecialImgv.setOnClickListener(this);
 
             mAuth = FirebaseAuth.getInstance();
             currentUser = mAuth.getCurrentUser();
@@ -689,6 +703,27 @@ public class PinThrowActivity extends FragmentActivity implements
         });
     }
 
+    public void showDemoFourPage(){
+
+        disableMapItems();
+        LayoutInflater inflater = getLayoutInflater();
+        fourDemoLayout = inflater.inflate(R.layout.default_pinthrow_demofour, mapRelativeLayout, false);
+
+        Button gotItFourButton = (Button) fourDemoLayout.findViewById(R.id.gotItFourButton);
+        mapRelativeLayout.addView(fourDemoLayout);
+
+        gotItFourButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mapRelativeLayout.removeView(fourDemoLayout);
+                pinFriendsImgv.setVisibility(View.VISIBLE);
+                pinOnlymeImgv.setVisibility(View.VISIBLE);
+                pinSpecialImgv.setVisibility(View.VISIBLE);
+                enableMapItems();
+            }
+        });
+    }
+
     /*========================================================================================*/
     public void addMarkerToMap() {
 
@@ -817,11 +852,13 @@ public class PinThrowActivity extends FragmentActivity implements
 
             case R.id.pinThrowImgv: //Pin throw button on map
                 pinThrowImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-                if (!demoThirdPageShown) {
-                    showDemoThirdPage();
-                    demoThirdPageShown = true;
-                } else
-                    addMarkerToMap();
+
+                if(!demoFourPageShown){
+                    showDemoFourPage();
+                    demoFourPageShown = true;
+                    pinThrowImgv.setEnabled(false);
+                    pinThrowImgv.setVisibility(View.GONE);
+                }
                 break;
 
             case R.id.mapRelativeLayout:  //Map framelayout layout
@@ -861,6 +898,33 @@ public class PinThrowActivity extends FragmentActivity implements
             case R.id.noteImageView:  //Note Imageview on popup window
                 noteTextImageView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
                 handleNoteText();
+                break;
+
+            case R.id.pinFriendsImgv:
+                pinFriendsImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
+                if (!demoThirdPageShown) {
+                    showDemoThirdPage();
+                    demoThirdPageShown = true;
+                } else
+                    addMarkerToMap();
+                break;
+
+            case R.id.pinOnlymeImgv:
+                pinOnlymeImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
+                if (!demoThirdPageShown) {
+                    showDemoThirdPage();
+                    demoThirdPageShown = true;
+                } else
+                    addMarkerToMap();
+                break;
+
+            case R.id.pinSpecialImgv:
+                pinSpecialImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
+                if (!demoThirdPageShown) {
+                    showDemoThirdPage();
+                    demoThirdPageShown = true;
+                } else
+                    addMarkerToMap();
                 break;
 
             default:
@@ -1291,6 +1355,9 @@ public class PinThrowActivity extends FragmentActivity implements
         gotoNextPageImgv.setEnabled(false);
         pinThrowImgv.setEnabled(false);
         mMap.getUiSettings().setScrollGesturesEnabled(false);
+        pinFriendsImgv.setEnabled(false);
+        pinOnlymeImgv.setEnabled(false);
+        pinSpecialImgv.setEnabled(false);
     }
 
     private void enableMapItems() {
@@ -1299,6 +1366,9 @@ public class PinThrowActivity extends FragmentActivity implements
         pinThrowImgv.setEnabled(true);
         mMap.getUiSettings().setScrollGesturesEnabled(true);
         mapRelativeLayout.removeView(firstDemoLayout);
+        pinFriendsImgv.setEnabled(true);
+        pinOnlymeImgv.setEnabled(true);
+        pinSpecialImgv.setEnabled(true);
     }
 
     @Override
@@ -1915,8 +1985,6 @@ public class PinThrowActivity extends FragmentActivity implements
             itemsAddedToFB = false;
             Log.i("Info", "     >>saveUserLocation Error:" + e.toString());
         }
-
-
     }
 
     @Override

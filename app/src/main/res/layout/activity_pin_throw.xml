@@ -21,41 +21,57 @@
 
 
     <LinearLayout
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-
-    </LinearLayout>
-
-    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
+        android:layout_marginBottom="90dp"
         android:orientation="horizontal"
-        android:layout_margin="100dp"
         android:weightSum="3">
 
-        <ImageView
-            android:layout_width="@dimen/notifItemsSize"
-            android:layout_height="@dimen/notifItemsSize"
-            android:src="@drawable/friends_1"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/img_border_blue"/>
+            android:gravity="right">
 
-        <ImageView
-            android:layout_width="@dimen/notifItemsSize"
-            android:layout_height="@dimen/notifItemsSize"
-            android:src="@drawable/onlyme_1"
-            android:layout_weight="1"
-            android:background="@drawable/img_border_blue"/>
+            <ImageView
+                android:layout_width="@dimen/pinImgSize"
+                android:layout_height="@dimen/pinImgSize"
+                android:id="@+id/pinFriendsImgv"
+                android:background="@drawable/img_border_blue"
+                android:src="@drawable/friends_1"
+                android:visibility="gone"/>
+        </LinearLayout>
 
-        <ImageView
-            android:layout_width="@dimen/notifItemsSize"
-            android:layout_height="@dimen/notifItemsSize"
-            android:src="@drawable/special_1"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/img_border_blue"/>
+            android:gravity="center_horizontal">
+
+            <ImageView
+                android:layout_width="@dimen/pinImgSize"
+                android:layout_height="@dimen/pinImgSize"
+                android:id="@+id/pinOnlymeImgv"
+                android:background="@drawable/img_border_blue"
+                android:src="@drawable/onlyme_1"
+                android:visibility="gone"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="left">
+
+            <ImageView
+                android:layout_width="@dimen/pinImgSize"
+                android:layout_height="@dimen/pinImgSize"
+                android:id="@+id/pinSpecialImgv"
+                android:background="@drawable/img_border_blue"
+                android:src="@drawable/special_1"
+                android:visibility="gone"/>
+        </LinearLayout>
 
     </LinearLayout>
 
