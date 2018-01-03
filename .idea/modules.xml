@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://C:\Users\ASUS\Desktop\androidTeam\Pinbook.iml" filepath="C:\Users\ASUS\Desktop\androidTeam\Pinbook.iml" />
+      <module fileurl="file://$PROJECT_DIR$/androidTeam.iml" filepath="$PROJECT_DIR$/androidTeam.iml" />
       <module fileurl="file://$PROJECT_DIR$/Pinbook.iml" filepath="$PROJECT_DIR$/Pinbook.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
