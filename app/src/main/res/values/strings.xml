@@ -47,4 +47,12 @@
     <string name="changePassword">Enter your email address below, and we will send instructions for settings a new one</string>
     <string name="title_activity_pin_throw">Map</string>
 
+    <array name="tab_name">
+        <item>Home</item>
+        <item>Search</item>
+        <item>Share</item>
+        <item>News</item>
+        <item>Profile</item>
+    </array>
+
 </resources>
