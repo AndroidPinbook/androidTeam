@@ -12,7 +12,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
@@ -24,7 +23,7 @@ import butterknife.BindArray;
 import butterknife.BindView;
 import uur.com.pinbook.R;
 import butterknife.ButterKnife;
-import uur.com.pinbook.ToolBarControllers.FragNavController;
+import uur.com.pinbook.FragmentControllers.FragNavController;
 import uur.com.pinbook.fragments.BaseFragment;
 import uur.com.pinbook.fragments.HomeFragment;
 import uur.com.pinbook.fragments.NewsFragment;

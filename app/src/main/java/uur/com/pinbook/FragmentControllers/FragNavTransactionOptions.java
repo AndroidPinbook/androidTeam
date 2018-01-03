@@ -1,4 +1,4 @@
-package uur.com.pinbook.ToolBarControllers;
+package uur.com.pinbook.FragmentControllers;
 
 import android.support.annotation.AnimRes;
 import android.support.annotation.StyleRes;
