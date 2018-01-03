@@ -39,7 +39,7 @@
             android:orientation="horizontal">
 
 
-            <android.support.design.widget.FloatingActionButton
+            <!--android.support.design.widget.FloatingActionButton
                 android:id="@+id/imageApproveFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -47,14 +47,20 @@
                 android:scaleType="center"
                 android:src="@drawable/approve_icon40"
                 app:backgroundTint="@color/background"
-                app:fabSize="mini" />
+                app:fabSize="mini" /-->
 
+            <ImageView
+                android:layout_width="@dimen/pinImgSize"
+                android:layout_height="@dimen/pinImgSize"
+                android:id="@+id/pinPictureApproveImgv"
+                android:src="@drawable/approve_icon_80"
+                android:background="@drawable/img_border"/>
 
             <LinearLayout
                 android:layout_width="20dp"
                 android:layout_height="wrap_content"></LinearLayout>
 
-            <android.support.design.widget.FloatingActionButton
+            <!--android.support.design.widget.FloatingActionButton
                 android:id="@+id/imageCancelFab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -62,7 +68,14 @@
                 android:scaleType="center"
                 android:src="@drawable/cancel_icon"
                 app:backgroundTint="@color/background"
-                app:fabSize="mini" />
+                app:fabSize="mini" /-->
+
+            <ImageView
+                android:layout_width="@dimen/pinImgSize"
+                android:layout_height="@dimen/pinImgSize"
+                android:id="@+id/pinPictureDeleteImgv"
+                android:src="@drawable/trash_icon_80"
+                android:background="@drawable/img_border"/>
 
         </LinearLayout>
 

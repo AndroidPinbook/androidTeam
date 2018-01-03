@@ -138,7 +138,14 @@ public class PinThrowActivity extends FragmentActivity implements
     LayoutInflater videoInflater = null;
     LayoutInflater imageViewInflater = null;
 
-    private static final float SHAKE_THRESHOLD = 25.0f;
+    private static ImageView pinApproveImgv;
+    private static ImageView pinDeleteImgv;
+    private static ImageView noteTextApproveImgv;
+    private static ImageView noteTextDeleteImgv;
+    private static ImageView pinPictureApproveImgv;
+    private static ImageView pinPictureDeleteImgv;
+
+    private static final float SHAKE_THRESHOLD = 20.0f;
     private static final int MIN_TIME_BETWEEN_SHAKES_MILLISECS = 1000;
     private long mLastShakeTime;
 
@@ -217,8 +224,8 @@ public class PinThrowActivity extends FragmentActivity implements
 
     private FloatingActionButton nextButton;
     private FloatingActionButton pinThrowButton;
-    private FloatingActionButton pinApproveFab;
-    private FloatingActionButton pinCancelFab;
+    //private FloatingActionButton pinApproveFab;
+    //private FloatingActionButton pinCancelFab;
 
     GoogleApiClient mGoogleApiClient;
     LocationRequest mLocationRequest;
@@ -890,8 +897,12 @@ public class PinThrowActivity extends FragmentActivity implements
             imageViewLayout = imageViewInflater.inflate(R.layout.default_image_window, mapRelativeLayout, false);
         }
 
-        FloatingActionButton imageAppOkButton = (FloatingActionButton) imageViewLayout.findViewById(R.id.imageApproveFab);
-        FloatingActionButton imageAppCancelButton = (FloatingActionButton) imageViewLayout.findViewById(R.id.imageCancelFab);
+        //FloatingActionButton imageAppOkButton = (FloatingActionButton) imageViewLayout.findViewById(R.id.imageApproveFab);
+        //FloatingActionButton imageAppCancelButton = (FloatingActionButton) imageViewLayout.findViewById(R.id.imageCancelFab);
+
+        pinPictureApproveImgv = (ImageView) imageViewLayout.findViewById(R.id.pinPictureApproveImgv);
+        pinPictureDeleteImgv = (ImageView) imageViewLayout.findViewById(R.id.pinPictureDeleteImgv);
+
         LinearLayout imageMainLayout = (LinearLayout) imageViewLayout.findViewById(R.id.imageMainLayout);
 
         pinPhotoImageView = (ImageView) imageViewLayout.findViewById(R.id.pinPhotoImageView);
@@ -925,9 +936,10 @@ public class PinThrowActivity extends FragmentActivity implements
             }
         });
 
-        imageAppCancelButton.setOnClickListener(new View.OnClickListener() {
+        pinPictureDeleteImgv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                pinPictureDeleteImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
                 imageUri = null;
                 imageRealPath = null;
                 pictureImageView.setImageResource(R.drawable.gallery_icon80);
@@ -942,9 +954,10 @@ public class PinThrowActivity extends FragmentActivity implements
             }
         });
 
-        imageAppOkButton.setOnClickListener(new View.OnClickListener() {
+        pinPictureApproveImgv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                pinPictureApproveImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
                 mapRelativeLayout.removeView(imageViewLayout);
                 showPopupWindow();
 
@@ -1020,8 +1033,14 @@ public class PinThrowActivity extends FragmentActivity implements
             noteTextLayout = noteTextInflater.inflate(R.layout.default_notetext_window, mapRelativeLayout, false);
         }
 
-        FloatingActionButton textAppOkButton = (FloatingActionButton) noteTextLayout.findViewById(R.id.textApproveFab);
-        FloatingActionButton textAppCancelButton = (FloatingActionButton) noteTextLayout.findViewById(R.id.textCancelFab);
+        //FloatingActionButton textAppOkButton = (FloatingActionButton) noteTextLayout.findViewById(R.id.textApproveFab);
+        //FloatingActionButton textAppCancelButton = (FloatingActionButton) noteTextLayout.findViewById(R.id.textCancelFab);
+
+
+        noteTextApproveImgv = (ImageView) noteTextLayout.findViewById(R.id.noteTextApproveImgv);
+        noteTextDeleteImgv = (ImageView) noteTextLayout.findViewById(R.id.noteTextDeleteImgv);
+
+
         LinearLayout noteTextMainLayout = (LinearLayout) noteTextLayout.findViewById(R.id.noteTextMainLayout);
 
         noteTextEditText = (EditText) noteTextLayout.findViewById(R.id.noteTextEditText);
@@ -1041,11 +1060,12 @@ public class PinThrowActivity extends FragmentActivity implements
             }
         });
 
-        textAppCancelButton.setOnClickListener(new View.OnClickListener() {
+        noteTextDeleteImgv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.i("Log", "  >>textAppCancelButton clicked");
 
+                noteTextDeleteImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
                 noteTextEditText.setText(null);
                 noteTextImageView.setImageResource(R.drawable.text_icon80);
                 editTextBitmap = null;
@@ -1062,11 +1082,12 @@ public class PinThrowActivity extends FragmentActivity implements
             }
         });
 
-        textAppOkButton.setOnClickListener(new View.OnClickListener() {
+        noteTextApproveImgv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.i("Log", "  >>textAppOkButton clicked");
 
+                noteTextApproveImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
                 noteText = noteTextEditText.getText().toString();
 
                 Log.i("Info", "  notetext null mu :" + noteText + ":");
@@ -1133,26 +1154,30 @@ public class PinThrowActivity extends FragmentActivity implements
         noteTextImageView = (ImageView) markerInfoLayout.findViewById(R.id.noteImageView);
         pictureImageView = (ImageView) markerInfoLayout.findViewById(R.id.pictureImageView);
 
-        pinApproveFab = (FloatingActionButton) markerInfoLayout.findViewById(R.id.approveFab);
-        pinCancelFab = (FloatingActionButton) markerInfoLayout.findViewById(R.id.cancelFab);
+        pinApproveImgv = (ImageView) markerInfoLayout.findViewById(R.id.pinApproveImgv);
+        pinDeleteImgv = (ImageView) markerInfoLayout.findViewById(R.id.pinDeleteImgv);
+
+
+        //pinApproveFab = (FloatingActionButton) markerInfoLayout.findViewById(R.id.approveFab);
+        //pinCancelFab = (FloatingActionButton) markerInfoLayout.findViewById(R.id.cancelFab);
 
 
         videoImageView.setOnClickListener(this);
         noteTextImageView.setOnClickListener(this);
         pictureImageView.setOnClickListener(this);
 
-        pinApproveFab.setOnClickListener(new View.OnClickListener() {
+        pinApproveImgv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                pinApproveImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
                 pinApproved();
             }
         });
 
-        pinCancelFab.setOnClickListener(new View.OnClickListener() {
+        pinDeleteImgv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                pinDeleteImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
                 initializeValues();
                 isCancelPinCheck = true;
                 showYesNoDialog(null, "Pin'i silmek istediginize emin misiniz?");

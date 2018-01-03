@@ -29,50 +29,55 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginBottom="20dp"
             android:layout_marginTop="40dp"
             android:src="@drawable/shake" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/gloria_hallelujah"
+                android:text="Or click the button -> "
+                android:textColor="@color/background_white"
+                android:textSize="20dp"
+                android:textStyle="normal|bold|italic" />
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/pin_throw_img" />
+
+        </LinearLayout>
+
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="20dp"
+            android:layout_marginBottom="30dp"
             android:fontFamily="@font/gloria_hallelujah"
-            android:text="Or click the button on"
+            android:text="on the next page :)"
             android:textColor="@color/background_white"
             android:textSize="20dp"
             android:textStyle="normal|bold|italic" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:fontFamily="@font/gloria_hallelujah"
-            android:text="the next page :)"
-            android:textColor="@color/background_white"
-            android:textSize="20dp"
-            android:textStyle="normal|bold|italic"/>
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="40dp"
-            android:layout_marginTop="10dp"
-            android:src="@drawable/right_drawn_arrow" />
-
-
 
         <Button
+            android:id="@+id/gotItButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/gotItButton"
             android:layout_gravity="center"
-            android:text="Got it  :)"
             android:background="@drawable/demo_ripple"
+            android:text="Got it  :)"
             android:textAllCaps="false"
             android:textColor="@color/background_white"
-            android:textStyle="normal|bold|italic"/>
+            android:textStyle="normal|bold|italic" />
 
     </LinearLayout>
 
