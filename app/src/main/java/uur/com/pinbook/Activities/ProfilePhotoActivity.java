@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -47,6 +48,7 @@ import java.util.Map;
 
 import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.Controller.FirebaseUserAdapter;
+import uur.com.pinbook.Controller.UriAdapter;
 import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
 
@@ -55,6 +57,7 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
     private FirebaseAuth mAuth;
     private DatabaseReference mDbref;
     private Uri downloadUrl = null;
+    private UriAdapter uriAdapter;
 
     private StorageReference mStorageRef;
 
@@ -73,6 +76,7 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
     private Bitmap photo = null;
     private Uri tempUri = null;
+    private String imageRealPath;
 
     private static final int  MY_PERMISSION_CAMERA = 1;
     private static final int  MY_PERMISSION_WRITE_EXTERNAL_STORAGE = 2;
@@ -92,6 +96,7 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         mAuth = FirebaseAuth.getInstance();
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
+        uriAdapter = new UriAdapter();
 
         continueWithEmailVerifButton = findViewById(R.id.continueWithEmailVerifButton);
         photoImageView = (ImageView) findViewById(R.id.photoImageView);
@@ -226,16 +231,20 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
             if(photoChoosenType == getResources().getString(R.string.camera)){
 
                 photo = (Bitmap) data.getExtras().get("data");
-                photo = BitmapConversion.getRoundedShape(photo, 600, 600);
                 tempUri = getImageUri(getApplicationContext(), photo);
+                imageRealPath = getRealPathFromCameraURI(tempUri);
+                photo = BitmapConversion.getRoundedShape(photo, 600, 600, imageRealPath);
+                photo = BitmapConversion.getBitmapOriginRotate(photo, imageRealPath);
+
+                Log.i("Info", "tempuri:" + tempUri );
 
             }else if(photoChoosenType == getResources().getString(R.string.gallery)){
 
                 tempUri = data.getData();
+                imageRealPath = UriAdapter.getPathFromGalleryUri(getApplicationContext(), tempUri);
                 profileImageStream = getContentResolver().openInputStream(tempUri);
                 photo = BitmapFactory.decodeStream(profileImageStream);
-                photo = BitmapConversion.getRoundedShape(photo, 600, 600);
-
+                photo = BitmapConversion.getRoundedShape(photo, 600, 600, imageRealPath);
             }
 
             photoImageView.setImageBitmap(photo);
@@ -245,6 +254,15 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         }catch (Exception e){
             Log.i("Info", "  >>manageProfilePicChoosen exception:" + e.toString());
         }
+    }
+
+    public String getRealPathFromCameraURI(Uri contentUri) {
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
+        int column_index = cursor
+                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
     }
 
     public void saveProfilePicToFirebase(){
@@ -396,7 +414,6 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         Intent intent = new Intent(ProfilePhotoActivity.this, EmailVerifyPageActivity.class);
         startActivity(intent);
     }
-
 
     @Override
     public void onBackPressed() {

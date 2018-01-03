@@ -53,6 +53,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:11.4.2'
     compile 'com.android.support:support-annotations:24.2.0'
     compile 'com.github.aarsy.googlemapsanimations:googlemapsanimations:1.0.5'
+    compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
 
     //implementation files('/Users/mac/Downloads/twitter4j-4.0.4/lib/twitter4j-core-4.0.4.jar')
     //implementation files('/Users/mac/Downloads/twitter4j-4.0.4/twitter4j-http2-support/twitter4j-http2-support-4.0.4.jar')
@@ -68,6 +69,8 @@ dependencies {
     }
 
 }
+
+
 
 
 

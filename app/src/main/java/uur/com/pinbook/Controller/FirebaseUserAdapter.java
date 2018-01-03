@@ -1,40 +1,20 @@
 package uur.com.pinbook.Controller;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
-
-import com.firebase.client.Firebase;
-import com.firebase.client.Query;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.ProviderQueryResult;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import uur.com.pinbook.Activities.RegisterPageActivity;
 import uur.com.pinbook.JavaFiles.User;
 
-/**
- * Created by mac on 5.12.2017.
- */
+import static uur.com.pinbook.JavaFiles.ConstValues.*;
 
 public class FirebaseUserAdapter {
 
     public static DatabaseReference mDbref;
-    public static String tag_users = "users";
-
-    FirebaseAuth mAuth = null;
-
-    public static boolean userIsDetected = false;
 
     public static void saveUserInfo(User user){
 
@@ -42,30 +22,30 @@ public class FirebaseUserAdapter {
 
         String userId = user.getUserId();
 
-        mDbref = FirebaseDatabase.getInstance().getReference().child(tag_users);
+        mDbref = FirebaseDatabase.getInstance().getReference().child(Users);
 
-        values.put("email", user.getEmail());
+        values.put(email, user.getEmail());
         setValuesToCloud(userId, values);
 
-        values.put("gender", user.getGender());
+        values.put(gender, user.getGender());
         setValuesToCloud(userId, values);
 
-        values.put("username", user.getUsername());
+        values.put(userName, user.getUsername());
         setValuesToCloud(userId, values);
 
-        values.put("name", user.getName());
+        values.put(name, user.getName());
         setValuesToCloud(userId, values);
 
-        values.put("surname", user.getSurname());
+        values.put(surname, user.getSurname());
         setValuesToCloud(userId, values);
 
-        values.put("phone", user.getPhoneNum());
+        values.put(mobilePhone, user.getPhoneNum());
         setValuesToCloud(userId, values);
 
-        values.put("birthdate", user.getBirthdate());
+        values.put(birthday, user.getBirthdate());
         setValuesToCloud(userId, values);
 
-        values.put("profImageSrc", user.getProfilePicSrc());
+        values.put(profilePictureUrl, user.getProfilePicSrc());
         setValuesToCloud(userId, values);
     }
 
@@ -82,28 +62,4 @@ public class FirebaseUserAdapter {
             Log.i("Info","  >>setValuesToCloud error:" + e.toString());
         }
     }
-
-   /* public static boolean emailIsRegistered(String email) {
-
-        userIsDetected = false;
-
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-
-        auth.fetchProvidersForEmail(email).addOnCompleteListener(new OnCompleteListener<ProviderQueryResult>() {
-
-            @Override
-            public void onComplete(@NonNull Task<ProviderQueryResult> task) {
-
-                Log.i("Info","  >>emailIsRegistered task:" + task.getResult());
-                Log.i("Info","  >>emailIsRegistered task size:" + task.getResult().getProviders().size());
-
-                if (task.getResult().getProviders().size() > 0) {
-
-                    userIsDetected = true;
-                }
-            }
-        });
-
-        return userIsDetected;
-    }*/
 }

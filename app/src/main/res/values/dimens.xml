@@ -22,6 +22,11 @@
     <dimen name="enter_page_text_size">40sp</dimen>
 
     <dimen name="floatAbSize">40dp</dimen>
+    <dimen name="thirdDemoPageTextSize">8dp</dimen>
+
+    <dimen name="notifItemsSize">35dp</dimen>
+    <dimen name="pinImgSize">40dp</dimen>
+    <dimen name="pinItemSize">60dp</dimen>
 
     <dimen name="design_fab_size_normal">56dp</dimen>
     <dimen name="design_fab_size_mini">43dp</dimen>

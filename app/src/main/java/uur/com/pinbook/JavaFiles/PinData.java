@@ -1,55 +1,70 @@
 package uur.com.pinbook.JavaFiles;
 
+import android.location.Location;
+import android.net.Uri;
+
+import com.google.android.gms.maps.model.LatLng;
+
 /**
- * Created by ASUS on 23.12.2017.
+ * Created by mac on 28.12.2017.
  */
 
 public class PinData {
 
-    String userId;
-    String locationId;
-    String pictureOnPin;
-    String videoOnPin;
-    String noteOnPin;
 
-    public String getUserId() {
-        return userId;
+    Uri pinImageUri;
+    Uri pinTextUri;
+    Uri pinVideoUri;
+    String noteText;
+
+    String videoRealPath;
+    String imageRealPath;
+
+    public String getImageRealPath() {
+        return imageRealPath;
     }
 
-    public String getLocationId() {
-        return locationId;
+    public void setImageRealPath(String imageRealPath) {
+        this.imageRealPath = imageRealPath;
     }
 
-    public String getPictureOnPin() {
-        return pictureOnPin;
+    public Uri getPinImageUri() {
+        return pinImageUri;
     }
 
-    public String getVideoOnPin() {
-        return videoOnPin;
+    public void setPinImageUri(Uri pinImageUri) {
+        this.pinImageUri = pinImageUri;
     }
 
-    public String getNoteOnPin() {
-        return noteOnPin;
+    public Uri getPinTextUri() {
+        return pinTextUri;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setPinTextUri(Uri pinTextUri) {
+        this.pinTextUri = pinTextUri;
     }
 
-    public void setLocationId(String locationId) {
-        this.locationId = locationId;
+    public String getNoteText() {
+        return noteText;
     }
 
-    public void setPictureOnPin(String pictureOnPin) {
-        this.pictureOnPin = pictureOnPin;
+    public void setNoteText(String noteText) {
+        this.noteText = noteText;
     }
 
-    public void setVideoOnPin(String videoOnPin) {
-        this.videoOnPin = videoOnPin;
+    public Uri getPinVideoUri() {
+        return pinVideoUri;
     }
 
-    public void setNoteOnPin(String noteOnPin) {
-        this.noteOnPin = noteOnPin;
+    public void setPinVideoUri(Uri pinVideoUri) {
+        this.pinVideoUri = pinVideoUri;
+    }
+
+    public String getVideoRealPath() {
+        return videoRealPath;
+    }
+
+    public void setVideoRealPath(String videoRealPath) {
+        this.videoRealPath = videoRealPath;
     }
 }
-

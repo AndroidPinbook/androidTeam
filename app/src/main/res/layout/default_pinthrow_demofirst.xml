@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparentBlack">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+
+
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="80dp"
+            android:fontFamily="@font/gloria_hallelujah"
+            android:text="Shake the phone :)"
+            android:textColor="@color/background_white"
+            android:textSize="20dp"
+            android:textStyle="normal|bold|italic" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="40dp"
+            android:src="@drawable/shake" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:fontFamily="@font/gloria_hallelujah"
+                android:text="Or click the button -> "
+                android:textColor="@color/background_white"
+                android:textSize="20dp"
+                android:textStyle="normal|bold|italic" />
+
+            <ImageView
+                android:layout_width="@dimen/pinImgSize"
+                android:layout_height="@dimen/pinImgSize"
+                android:layout_marginTop="3dp"
+                android:background="@drawable/img_border"
+                android:src="@drawable/pin_throw68" />
+
+        </LinearLayout>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="30dp"
+            android:fontFamily="@font/gloria_hallelujah"
+            android:text="on the next page :)"
+            android:textColor="@color/background_white"
+            android:textSize="20dp"
+            android:textStyle="normal|bold|italic" />
+
+
+        <Button
+            android:id="@+id/gotItButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/demo_ripple"
+            android:text="Got it  :)"
+            android:textAllCaps="false"
+            android:textColor="@color/background_white"
+            android:textStyle="normal|bold|italic" />
+
+    </LinearLayout>
+
+</RelativeLayout>

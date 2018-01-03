@@ -17,5 +17,9 @@
     <color name="mapTransparentColor">#808edbfe</color>
     <color name="popupBgColor">#F9BF3A</color>
 
+    <color name="transparentBlack">#80000000</color>
+    <color name="fullTransparentBlack">#00000000</color>
+    <color name="fullTransparentWhite">#00FFFFFF</color>
+    <color name="oceanBlue">#2B65EC</color>
 
 </resources>

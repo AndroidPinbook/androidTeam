@@ -25,8 +25,6 @@ import uur.com.pinbook.R;
 
 public class CustomDialogAdapter extends DialogFragment {
 
-
-
     public static void showErrorDialog(Context context, String errMessage){
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
@@ -176,6 +174,8 @@ public class CustomDialogAdapter extends DialogFragment {
         out.addAnimation(scale);
         return out;
     }
+
+
 
 
 }

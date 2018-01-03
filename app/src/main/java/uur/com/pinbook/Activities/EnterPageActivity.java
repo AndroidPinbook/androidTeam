@@ -730,7 +730,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
                 profileImageStream = urlConnection.getInputStream();
                 photo = BitmapFactory.decodeStream(profileImageStream);
-                photo = BitmapConversion.getRoundedShape(photo, 250, 250);
+                photo = BitmapConversion.getRoundedShape(photo, 250, 250, null);
 
                 return result;
 
