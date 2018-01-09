@@ -1,6 +1,7 @@
 package uur.com.pinbook.Activities;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -47,6 +48,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
+import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -120,7 +122,16 @@ public class PinThrowActivity extends FragmentActivity implements
         GoogleMap.OnMapClickListener,
         View.OnClickListener,
         LocationListener,
-        SensorEventListener{
+        SensorEventListener,
+        ValueAnimator.AnimatorUpdateListener{
+
+    private static Animation rightSlideAnim;
+    private static Animation leftSlideAnim;
+    private static Animation upSlideAnim;
+
+    private static Animation rightSlideDownAnim;
+    private static Animation leftSlideDownAnim;
+    private static Animation upSlideDownAnim;
 
     public GoogleMap mMap;
 
@@ -147,6 +158,10 @@ public class PinThrowActivity extends FragmentActivity implements
     private static ImageView pinThrowImgv;
     private static ImageView gotoNextPageImgv;
 
+    private static ImageView pinFriendsImgv;
+    private static ImageView pinOnlymeImgv;
+    private static ImageView pinSpecialImgv;
+
     private static final float SHAKE_THRESHOLD = 20.0f;
     private static final int MIN_TIME_BETWEEN_SHAKES_MILLISECS = 1000;
     private long mLastShakeTime;
@@ -155,12 +170,14 @@ public class PinThrowActivity extends FragmentActivity implements
 
     private boolean itemsAddedToFB = true;
     private boolean isCancelPinCheck = false;
+    private boolean pinThrowImageClicked = false;
 
     private FrameLayout mapRelativeLayout;
     private View popupMainView = null;
 
     private Boolean imageChangedInd = false;
     private Boolean demoThirdPageShown = false;
+    private Boolean demoFourPageShown = false;
 
     private int mWidth;
     private int mHeight;
@@ -170,6 +187,7 @@ public class PinThrowActivity extends FragmentActivity implements
     private View firstDemoLayout;
     private View secondDemoLayout;
     private View thirdDemoLayout;
+    private View fourDemoLayout;
     private View noteTextLayout;
     private View imageViewLayout;
 
@@ -405,11 +423,23 @@ public class PinThrowActivity extends FragmentActivity implements
             gotoNextPageImgv = (ImageView) findViewById(R.id.gotoNextPageImgv);
             pinThrowImgv = (ImageView) findViewById(R.id.pinThrowImgv);
 
+            pinFriendsImgv = (ImageView) findViewById(R.id.pinFriendsImgv);
+            pinOnlymeImgv = (ImageView) findViewById(R.id.pinOnlymeImgv);
+            pinSpecialImgv = (ImageView) findViewById(R.id.pinSpecialImgv);
+
+            defineAnimations();
+
+
+
             //nextButton.setOnClickListener(this);
             //pinThrowButton.setOnClickListener(this);
 
             gotoNextPageImgv.setOnClickListener(this);
             pinThrowImgv.setOnClickListener(this);
+
+            pinFriendsImgv.setOnClickListener(this);
+            pinOnlymeImgv.setOnClickListener(this);
+            pinSpecialImgv.setOnClickListener(this);
 
             mAuth = FirebaseAuth.getInstance();
             currentUser = mAuth.getCurrentUser();
@@ -421,6 +451,25 @@ public class PinThrowActivity extends FragmentActivity implements
         } catch (Exception e) {
             Log.i("Info", "     >>onCreate try error:" + e.toString());
         }
+    }
+
+    private void defineAnimations() {
+
+        rightSlideAnim = AnimationUtils.loadAnimation(this, R.anim.slide_right_up_anim);
+        leftSlideAnim = AnimationUtils.loadAnimation(this, R.anim.slide_left_up_anim);
+        upSlideAnim = AnimationUtils.loadAnimation(this, R.anim.slide_up_anim);
+
+        rightSlideDownAnim = AnimationUtils.loadAnimation(this, R.anim.slide_right_down_anim);
+        leftSlideDownAnim = AnimationUtils.loadAnimation(this, R.anim.slide_left_down_anim);
+        upSlideDownAnim = AnimationUtils.loadAnimation(this, R.anim.slide_down_anim);
+
+        rightSlideAnim.setFillAfter(true);
+        leftSlideAnim.setFillAfter(true);
+        upSlideAnim.setFillAfter(true);
+
+        rightSlideDownAnim.setFillAfter(true);
+        leftSlideDownAnim.setFillAfter(true);
+        upSlideDownAnim.setFillAfter(true);
     }
 
     /*========================================================================================*/
@@ -689,6 +738,31 @@ public class PinThrowActivity extends FragmentActivity implements
         });
     }
 
+    public void showDemoFourPage(){
+
+        disableMapItems();
+        LayoutInflater inflater = getLayoutInflater();
+        fourDemoLayout = inflater.inflate(R.layout.default_pinthrow_demofour, mapRelativeLayout, false);
+
+        Button gotItFourButton = (Button) fourDemoLayout.findViewById(R.id.gotItFourButton);
+        mapRelativeLayout.addView(fourDemoLayout);
+
+        gotItFourButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mapRelativeLayout.removeView(fourDemoLayout);
+
+
+
+
+                //pinFriendsImgv.setVisibility(View.VISIBLE);
+                //pinOnlymeImgv.setVisibility(View.VISIBLE);
+                //pinSpecialImgv.setVisibility(View.VISIBLE);
+                enableMapItems();
+            }
+        });
+    }
+
     /*========================================================================================*/
     public void addMarkerToMap() {
 
@@ -817,11 +891,31 @@ public class PinThrowActivity extends FragmentActivity implements
 
             case R.id.pinThrowImgv: //Pin throw button on map
                 pinThrowImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-                if (!demoThirdPageShown) {
-                    showDemoThirdPage();
-                    demoThirdPageShown = true;
-                } else
-                    addMarkerToMap();
+
+                if(!pinThrowImageClicked) {
+                    pinFriendsImgv.setVisibility(View.VISIBLE);
+                    pinOnlymeImgv.setVisibility(View.VISIBLE);
+                    pinSpecialImgv.setVisibility(View.VISIBLE);
+
+                    pinFriendsImgv.startAnimation(rightSlideDownAnim);
+                    pinOnlymeImgv.startAnimation(upSlideDownAnim);
+                    pinSpecialImgv.startAnimation(leftSlideDownAnim);
+
+                    pinThrowImageClicked = true;
+                }else{
+                    pinFriendsImgv.startAnimation(rightSlideAnim);
+                    pinOnlymeImgv.startAnimation(upSlideAnim);
+                    pinSpecialImgv.startAnimation(leftSlideAnim);
+
+                    pinThrowImageClicked = false;
+                }
+
+                if(!demoFourPageShown){
+                    showDemoFourPage();
+                    demoFourPageShown = true;
+                    //pinThrowImgv.setEnabled(false);
+                    //pinThrowImgv.setVisibility(View.GONE);
+                }
                 break;
 
             case R.id.mapRelativeLayout:  //Map framelayout layout
@@ -861,6 +955,33 @@ public class PinThrowActivity extends FragmentActivity implements
             case R.id.noteImageView:  //Note Imageview on popup window
                 noteTextImageView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
                 handleNoteText();
+                break;
+
+            case R.id.pinFriendsImgv:
+                pinFriendsImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
+                if (!demoThirdPageShown) {
+                    showDemoThirdPage();
+                    demoThirdPageShown = true;
+                } else
+                    addMarkerToMap();
+                break;
+
+            case R.id.pinOnlymeImgv:
+                pinOnlymeImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
+                if (!demoThirdPageShown) {
+                    showDemoThirdPage();
+                    demoThirdPageShown = true;
+                } else
+                    addMarkerToMap();
+                break;
+
+            case R.id.pinSpecialImgv:
+                pinSpecialImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
+                if (!demoThirdPageShown) {
+                    showDemoThirdPage();
+                    demoThirdPageShown = true;
+                } else
+                    addMarkerToMap();
                 break;
 
             default:
@@ -1291,6 +1412,9 @@ public class PinThrowActivity extends FragmentActivity implements
         gotoNextPageImgv.setEnabled(false);
         pinThrowImgv.setEnabled(false);
         mMap.getUiSettings().setScrollGesturesEnabled(false);
+        pinFriendsImgv.setEnabled(false);
+        pinOnlymeImgv.setEnabled(false);
+        pinSpecialImgv.setEnabled(false);
     }
 
     private void enableMapItems() {
@@ -1299,6 +1423,9 @@ public class PinThrowActivity extends FragmentActivity implements
         pinThrowImgv.setEnabled(true);
         mMap.getUiSettings().setScrollGesturesEnabled(true);
         mapRelativeLayout.removeView(firstDemoLayout);
+        pinFriendsImgv.setEnabled(true);
+        pinOnlymeImgv.setEnabled(true);
+        pinSpecialImgv.setEnabled(true);
     }
 
     @Override
@@ -1915,8 +2042,6 @@ public class PinThrowActivity extends FragmentActivity implements
             itemsAddedToFB = false;
             Log.i("Info", "     >>saveUserLocation Error:" + e.toString());
         }
-
-
     }
 
     @Override
@@ -1934,8 +2059,8 @@ public class PinThrowActivity extends FragmentActivity implements
                             Math.pow(y, 2) +
                             Math.pow(z, 2)) - SensorManager.GRAVITY_EARTH;
 
-                    Log.i("Info", "___________________________");
-                    Log.i("Info", "acceleration:" + acceleration);
+                    //Log.i("Info", "___________________________");
+                    //Log.i("Info", "acceleration:" + acceleration);
 
                     if (acceleration > SHAKE_THRESHOLD) {
                         mLastShakeTime = curTime;
@@ -1957,6 +2082,11 @@ public class PinThrowActivity extends FragmentActivity implements
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    @Override
+    public void onAnimationUpdate(ValueAnimator animation) {
 
     }
 }
