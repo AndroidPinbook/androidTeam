@@ -47,14 +47,20 @@
         </activity>
         <activity
             android:name=".Activities.LoginPageActivity"
-            android:theme="@style/Toolbar"></activity>
+            android:theme="@style/Toolbar">
+
+        </activity>
         <activity
             android:name=".Activities.RegisterPageActivity"
             android:exported="true"
-            android:theme="@style/Toolbar"></activity>
+            android:theme="@style/Toolbar">
+
+        </activity>
         <activity
             android:name=".Activities.ProfilePageActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/Toolbar">
+
+        </activity>
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
@@ -104,7 +110,9 @@
 
         <activity
             android:name=".Activities.PinThrowActivity"
-            android:label="@string/title_activity_pin_throw"></activity>
+            android:label="@string/title_activity_pin_throw">
+
+        </activity>
     </application>
 
 </manifest>
