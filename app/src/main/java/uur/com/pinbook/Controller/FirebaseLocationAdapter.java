@@ -10,7 +10,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
-import uur.com.pinbook.JavaFiles.UserLocation;
+import uur.com.pinbook.JavaFiles.LocationDb;
+
 import static uur.com.pinbook.JavaFiles.ConstValues.*;
 
 public class FirebaseLocationAdapter {
@@ -53,7 +54,7 @@ public class FirebaseLocationAdapter {
         addUserItemLocation(FBUserId, values, getLocationId());
     }
 
-    public static void saveLocationInfo(UserLocation userLocation) {
+    public static void saveLocationInfo(LocationDb LocationDb) {
 
         mDbref = null;
         Map<String, String> values = new HashMap<>();
@@ -62,31 +63,31 @@ public class FirebaseLocationAdapter {
 
         setLocationId(locItemId);
 
-        values.put(userID, userLocation.getUserId());
+        values.put(userID, LocationDb.getUserId());
         addItemLocation(values, locItemId);
 
-        values.put(countryCode, userLocation.getCountryCode());
+        values.put(countryCode, LocationDb.getCountryCode());
         addItemLocation(values, locItemId);
 
-        values.put(countryName, userLocation.getCountryName());
+        values.put(countryName, LocationDb.getCountryName());
         addItemLocation(values, locItemId);
 
-        values.put(timestamp, userLocation.getLocTimestamp());
+        values.put(timestamp, LocationDb.getLocTimestamp());
         addItemLocation(values, locItemId);
 
-        values.put(postalCode, userLocation.getPostalCode());
+        values.put(postalCode, LocationDb.getPostalCode());
         addItemLocation(values, locItemId);
 
-        values.put(thorough, userLocation.getThoroughFare());
+        values.put(thorough, LocationDb.getThoroughFare());
         addItemLocation(values, locItemId);
 
-        values.put(subThorough, userLocation.getSubThoroughfare());
+        values.put(subThorough, LocationDb.getSubThoroughfare());
         addItemLocation(values, locItemId);
 
-        values.put(latitude, userLocation.getLatitude());
+        values.put(latitude, LocationDb.getLatitude());
         addItemLocation(values, locItemId);
 
-        values.put(longitude, userLocation.getLongitude());
+        values.put(longitude, LocationDb.getLongitude());
         addItemLocation(values, locItemId);
     }
 

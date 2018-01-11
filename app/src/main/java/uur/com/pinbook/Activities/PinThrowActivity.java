@@ -5,7 +5,6 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,13 +22,10 @@ import android.location.Criteria;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Environment;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.support.design.widget.FloatingActionButton;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.location.Geocoder;
@@ -46,9 +42,6 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
-import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -81,7 +74,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.arsy.maps_library.MapRipple;
 
 import java.io.BufferedInputStream;
@@ -105,8 +97,8 @@ import uur.com.pinbook.Controller.FirebaseLocationAdapter;
 import uur.com.pinbook.Controller.FirebasePinItemsAdapter;
 import uur.com.pinbook.Controller.LocationTrackerAdapter;
 import uur.com.pinbook.Controller.UriAdapter;
+import uur.com.pinbook.JavaFiles.LocationDb;
 import uur.com.pinbook.JavaFiles.PinData;
-import uur.com.pinbook.JavaFiles.UserLocation;
 import uur.com.pinbook.R;
 import static uur.com.pinbook.JavaFiles.ConstValues.*;
 
@@ -143,7 +135,7 @@ public class PinThrowActivity extends FragmentActivity implements
 
     private static FirebaseLocationAdapter firebaseLocationAdapter;
     private static FirebasePinItemsAdapter firebasePinItemsAdapter;
-    private static UserLocation userLocation;
+    private static LocationDb LocationDb;
 
     LayoutInflater noteTextInflater = null;
     LayoutInflater videoInflater = null;
@@ -357,11 +349,11 @@ public class PinThrowActivity extends FragmentActivity implements
 
         Location currentLocation = getLastKnownLocation();
 
-        //LatLng userLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        //LatLng LocationDb = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
         if (mMap != null) {
             mMap.clear();
-            //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18));
+            //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LocationDb, 18));
 
             mapRipple = new MapRipple(mMap, latLng, context);
 
@@ -372,8 +364,8 @@ public class PinThrowActivity extends FragmentActivity implements
                     currentLocation.getLongitude()), zoom));
 
             //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new
-            //                                LatLng(userLocation.latitude,
-            //                                userLocation.longitude), 14));
+            //                                LatLng(LocationDb.latitude,
+            //                                LocationDb.longitude), 14));
         }
     }
 
@@ -395,7 +387,7 @@ public class PinThrowActivity extends FragmentActivity implements
 
             firebaseLocationAdapter = new FirebaseLocationAdapter();
             firebasePinItemsAdapter = new FirebasePinItemsAdapter();
-            userLocation = new UserLocation();
+            LocationDb = new LocationDb();
             uriAdapter = new UriAdapter();
 
             locationTrackObj = new LocationTrackerAdapter(PinThrowActivity.this);
@@ -1977,10 +1969,10 @@ public class PinThrowActivity extends FragmentActivity implements
         Log.i("Info", "     >>Latlng longitude:" + markerLatlng.longitude);
 
         try {
-            userLocation.setUserId(FBuserId);
-            userLocation.setLatitude(String.valueOf(markerLatlng.latitude));
-            userLocation.setLongitude(String.valueOf(markerLatlng.longitude));
-            userLocation.setLocation(markerLocation);
+            LocationDb.setUserId(FBuserId);
+            LocationDb.setLatitude(String.valueOf(markerLatlng.latitude));
+            LocationDb.setLongitude(String.valueOf(markerLatlng.longitude));
+            LocationDb.setLocation(markerLocation);
 
             Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
             List<Address> listAddresses = geocoder.getFromLocation(markerLatlng.latitude, markerLatlng.longitude, 1);
@@ -1988,25 +1980,25 @@ public class PinThrowActivity extends FragmentActivity implements
             if (listAddresses != null && listAddresses.size() > 0) {
 
                 if (listAddresses.get(0).getThoroughfare() != null)
-                    userLocation.setThoroughFare(listAddresses.get(0).getThoroughfare());
+                    LocationDb.setThoroughFare(listAddresses.get(0).getThoroughfare());
 
                 if (listAddresses.get(0).getSubThoroughfare() != null)
-                    userLocation.setSubThoroughfare(listAddresses.get(0).getSubThoroughfare());
+                    LocationDb.setSubThoroughfare(listAddresses.get(0).getSubThoroughfare());
 
                 if (listAddresses.get(0).getPostalCode() != null)
-                    userLocation.setPostalCode(listAddresses.get(0).getPostalCode());
+                    LocationDb.setPostalCode(listAddresses.get(0).getPostalCode());
 
                 if (listAddresses.get(0).getCountryName() != null)
-                    userLocation.setCountryName(listAddresses.get(0).getCountryName());
+                    LocationDb.setCountryName(listAddresses.get(0).getCountryName());
 
                 if (listAddresses.get(0).getCountryCode() != null)
-                    userLocation.setCountryCode(listAddresses.get(0).getCountryCode());
+                    LocationDb.setCountryCode(listAddresses.get(0).getCountryCode());
             }
 
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm yyyy-MM-dd");
-            userLocation.setLocTimestamp(sdf.format(new Date()));
+            LocationDb.setLocTimestamp(sdf.format(new Date()));
 
-            firebaseLocationAdapter.saveLocationInfo(userLocation);
+            firebaseLocationAdapter.saveLocationInfo(LocationDb);
 
         } catch (Exception e) {
             itemsAddedToFB = false;
@@ -2035,8 +2027,8 @@ public class PinThrowActivity extends FragmentActivity implements
             return;
 
         try {
-            userLocation.setLocationId(firebaseLocationAdapter.getLocationId());
-            firebasePinItemsAdapter.savePinItems(userLocation, pinData);
+            LocationDb.setLocationId(firebaseLocationAdapter.getLocationId());
+            firebasePinItemsAdapter.savePinItems(LocationDb, pinData);
 
         } catch (Exception e) {
             itemsAddedToFB = false;

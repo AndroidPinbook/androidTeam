@@ -14,8 +14,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import uur.com.pinbook.JavaFiles.LocationDb;
 import uur.com.pinbook.JavaFiles.PinData;
-import uur.com.pinbook.JavaFiles.UserLocation;
 
 import static uur.com.pinbook.JavaFiles.ConstValues.*;
 
@@ -25,30 +25,30 @@ public class FirebasePinItemsAdapter extends AppCompatActivity{
     private StorageReference mStorageRef;
 
     private DatabaseReference mDbref;
-    public static UserLocation tempUserLocation = null;
+    public static LocationDb tempLocationDb = null;
     public static PinData tempPinData = null;
 
     private Uri downloadImageUri;
     private Uri downloadTextUri;
     private Uri downloadVideoUri;
 
-    public void savePinItems(UserLocation userLocation, PinData pinData){
+    public void savePinItems(LocationDb LocationDb, PinData pinData){
 
         riversRef = null;
         mDbref = null;
 
-        tempUserLocation = userLocation;
+        tempLocationDb = LocationDb;
         tempPinData = pinData;
 
-        mDbref = FirebaseDatabase.getInstance().getReference().child(PinItems).child(userLocation.getUserId())
-                .child(userLocation.getLocationId());
+        mDbref = FirebaseDatabase.getInstance().getReference().child(PinItems).child(LocationDb.getUserId())
+                .child(LocationDb.getLocationId());
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
         //Video datasini atalim
         if(pinData.getPinVideoUri() != null){
-            riversRef = mStorageRef.child(PinItems).child(userLocation.getUserId())
-                    .child(userLocation.getLocationId()).child(video).child(pinVideoImage + ".mp4");
+            riversRef = mStorageRef.child(PinItems).child(LocationDb.getUserId())
+                    .child(LocationDb.getLocationId()).child(video).child(pinVideoImage + ".mp4");
 
             riversRef.putFile(pinData.getPinVideoUri())
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -73,8 +73,8 @@ public class FirebasePinItemsAdapter extends AppCompatActivity{
 
         //Text datasini atalim
         if(pinData.getPinTextUri() != null){
-            riversRef = mStorageRef.child(PinItems).child(userLocation.getUserId())
-                    .child(userLocation.getLocationId()).child(text).child(pinTextImage + ".jpg");
+            riversRef = mStorageRef.child(PinItems).child(LocationDb.getUserId())
+                    .child(LocationDb.getLocationId()).child(text).child(pinTextImage + ".jpg");
 
             riversRef.putFile(pinData.getPinTextUri())
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -103,8 +103,8 @@ public class FirebasePinItemsAdapter extends AppCompatActivity{
 
         //Image datasini atalim
         if(pinData.getPinImageUri() != null){
-            riversRef = mStorageRef.child(PinItems).child(userLocation.getUserId())
-                    .child(userLocation.getLocationId()).child(picture).child(pinPictureImage + ".jpg");
+            riversRef = mStorageRef.child(PinItems).child(LocationDb.getUserId())
+                    .child(LocationDb.getLocationId()).child(picture).child(pinPictureImage + ".jpg");
 
             riversRef.putFile(pinData.getPinImageUri())
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
