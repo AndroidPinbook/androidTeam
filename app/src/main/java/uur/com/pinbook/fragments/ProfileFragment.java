@@ -52,6 +52,7 @@ public class ProfileFragment extends BaseFragment
     View mView;
 
     DatabaseReference mDbref;
+    DatabaseReference tempRef;
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
     private String FBuserId;
@@ -59,6 +60,9 @@ public class ProfileFragment extends BaseFragment
     List<LocationDb> locationDbsList;
     Map <String,String> mp;
     LocationDb locationDb;
+
+    private ValueEventListener mDbRefListener;
+    private ValueEventListener tempRefListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -88,7 +92,6 @@ public class ProfileFragment extends BaseFragment
         currentUser = mAuth.getCurrentUser();
         FBuserId = currentUser.getUid();
 
-
         mDbref = FirebaseDatabase.getInstance().getReference(UserLocations).child(FBuserId);
 
         mapView = (MapView) mView.findViewById(R.id.map);
@@ -97,12 +100,34 @@ public class ProfileFragment extends BaseFragment
             mapView.onCreate(null);
             mapView.onResume();
             mapView.getMapAsync(this);
-
         }
 
         locationList = new ArrayList<>();
         locationDbsList = new ArrayList<>();
         mp =  new HashMap<String,String>();
+
+        Log.i("info ", "==========================================");
+        Log.i("", "xx'e gidiyoruz. ");
+        xx();
+        Log.i("", "xx'ten döndük. ");
+        String p;
+        printLocations();
+
+    }
+
+    private void printLocations() {
+
+        Log.i("", "=========================================");
+        Log.i("", "printteyiz..");
+        Log.i("locationDbsList.size() ", ((Integer) locationDbsList.size()).toString());
+        for (int i=0; i<locationDbsList.size(); i++) {
+
+            Log.i("", "=========================================");
+            Log.i("Location  "  ,locationDbsList.get(i).getLocationId() );
+            Log.i("latitude  ", locationDbsList.get(i).getLatitude());
+            Log.i("timestamp ", locationDbsList.get(i).getLocTimestamp());
+        }
+
     }
 
     @Override
@@ -124,12 +149,21 @@ public class ProfileFragment extends BaseFragment
         googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(liberty));
     }
 
-    String f;
-    @Override
-    public void onStart() {
-        super.onStart();
+    private void setLocationProperties(String userId, String locationId) {
+        locationDb.setLocationId(locationId);
+        locationDb.setCountryCode(mp.get("countryCode"));
+        locationDb.setCountryName(mp.get("countryName"));
+        locationDb.setLatitude(mp.get("latitude"));
+        locationDb.setLongitude(mp.get("longitude"));
+        locationDb.setLocTimestamp(mp.get("timestamp"));
+        locationDb.setUserId(userId);
+    }
 
-        mDbref.addValueEventListener(new ValueEventListener() {
+    public void xx(){
+
+        Log.i("", "=======================================>> xx start ");
+
+        mDbRefListener = mDbref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -144,39 +178,40 @@ public class ProfileFragment extends BaseFragment
 
                     locationList.add(userLocation);
 
-                    DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference(Locations).child(locationId);
+                    tempRef = FirebaseDatabase.getInstance().getReference(Locations).child(locationId);
+                    Log.i("tempRef", tempRef.toString());
+                    if(tempRef != null){
 
-                    tempRef.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
+                    }
+                    tempRefListener= tempRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
 
-                                    locationDb = new LocationDb();
+                            if(dataSnapshot.getValue() != null){
+                                locationDb = new LocationDb();
 
-                                    Log.i("dataSnapshot ", dataSnapshot.toString());
+                                Log.i("dataSnapshot ", dataSnapshot.toString());
 
-                                    mp = ((Map) dataSnapshot.getValue());
-                                    Log.i("map", mp.toString());
-                                    Log.i("--> ", mp.get("countryCode"));
+                                mp = ((Map) dataSnapshot.getValue());
+                                Log.i("map", mp.toString());
+                                Log.i("--> ", mp.get("countryCode"));
 
-                                    setLocationProperties(FBuserId, locationId);
+                                setLocationProperties(FBuserId, locationId);
 
-                                    locationDbsList.add(locationDb);
-                                    for (int i=0; i<locationDbsList.size(); i++) {
+                                locationDbsList.add(locationDb);
 
-                                        Log.i("", "=========================================");
-                                        Log.i("Location  "  ,locationDbsList.get(i).getLocationId() );
-                                        Log.i("latitude  ", locationDbsList.get(i).getLatitude());
-                                        Log.i("timestamp ", locationDbsList.get(i).getLocTimestamp());
+                                addMarkerToLocation(locationDb);
+                            }
 
-                                    }
 
-                                }
 
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
+                        }
 
-                                }
-                            });
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
 
 
 
@@ -193,27 +228,30 @@ public class ProfileFragment extends BaseFragment
             }
         });
 
+
+        Log.i("", "=======================================>> xx finish ");
     }
 
-    private void setLocationProperties(String userId, String locationId) {
+    private void addMarkerToLocation(LocationDb lb) {
 
-        locationDb.setLocationId(locationId);
-        locationDb.setCountryCode(mp.get("countryCode"));
-        locationDb.setCountryName(mp.get("countryName"));
-        locationDb.setLatitude(mp.get("latitude"));
-        locationDb.setLongitude(mp.get("longitude"));
-        locationDb.setLocTimestamp(mp.get("timestamp"));
-        locationDb.setUserId(userId);
+
+        Log.i("-----> locationId ", lb.getLocationId().toString());
+
+        double lat=Double.parseDouble(lb.getLatitude());
+        double lng=Double.parseDouble(lb.getLongitude());
+
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(lat, lng))
+                .title(lb.getLocationId()));
 
     }
 
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onDestroy() {
+        super.onDestroy();
 
-
-
-
+        mDbref.removeEventListener(mDbRefListener);
+        tempRef.removeEventListener(tempRefListener);
     }
 }
