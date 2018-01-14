@@ -19,6 +19,15 @@ public class UserLocation {
     String longitude;
     Location location;
     String locationId;
+    String city;
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
 
     public String getLocationId() {
         return locationId;

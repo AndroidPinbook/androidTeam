@@ -43,9 +43,9 @@ import com.google.firebase.auth.FirebaseUser;
 
 
 import cn.refactor.lib.colordialog.ColorDialog;
-import uur.com.pinbook.Controller.CustomDialogAdapter;
-import uur.com.pinbook.Controller.ErrorMessageAdapter;
-import uur.com.pinbook.Controller.ValidationAdapter;
+import uur.com.pinbook.Adapters.CustomDialogAdapter;
+import uur.com.pinbook.Adapters.ErrorMessageAdapter;
+import uur.com.pinbook.Adapters.ValidationAdapter;
 import uur.com.pinbook.R;
 
 

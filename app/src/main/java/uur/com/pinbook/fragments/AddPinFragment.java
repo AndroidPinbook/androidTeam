@@ -1,7 +1,6 @@
-package uur.com.pinbook.Activities;
+package uur.com.pinbook.fragments;
 
 import android.Manifest;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -19,27 +18,30 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Criteria;
-import android.media.MediaMetadataRetriever;
-import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.provider.Settings;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.MediaStore;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
@@ -50,66 +52,70 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.firebase.geofire.GeoFire;
+import com.arsy.maps_library.MapRipple;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.arsy.maps_library.MapRipple;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import uur.com.pinbook.Activities.PinThrowActivity;
+import uur.com.pinbook.Activities.PlayVideoActivity;
+import uur.com.pinbook.Activities.ProfilePageActivity;
+import uur.com.pinbook.Adapters.SpecialSelectTabAdapter;
 import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.Adapters.CustomDialogAdapter;
 import uur.com.pinbook.FirebaseAdapters.FirebaseLocationAdapter;
 import uur.com.pinbook.FirebaseAdapters.FirebasePinItemsAdapter;
+import uur.com.pinbook.FirebaseAdapters.FirebasePinModelAdapter;
 import uur.com.pinbook.Adapters.LocationTrackerAdapter;
 import uur.com.pinbook.Adapters.UriAdapter;
 import uur.com.pinbook.JavaFiles.PinData;
+import uur.com.pinbook.JavaFiles.PinModels;
 import uur.com.pinbook.JavaFiles.RegionBasedLocation;
 import uur.com.pinbook.JavaFiles.UserLocation;
 import uur.com.pinbook.R;
+import butterknife.ButterKnife;
+import uur.com.pinbook.SpecialFragments.GroupFragment;
+import uur.com.pinbook.SpecialFragments.PersonFragment;
+
+import static android.app.Activity.RESULT_OK;
+import static android.content.Context.LOCATION_SERVICE;
+import static android.content.Context.SENSOR_SERVICE;
+import static com.facebook.FacebookSdk.getApplicationContext;
 import static uur.com.pinbook.JavaFiles.ConstValues.*;
 
-public class PinThrowActivity extends FragmentActivity implements
+public class AddPinFragment extends BaseFragment implements
         OnMapReadyCallback,
-        GoogleMap.OnMapLongClickListener,
         GoogleMap.OnMarkerClickListener,
-        GeoFire.CompletionListener,
         GoogleMap.OnCameraChangeListener,
         GoogleMap.OnMapClickListener,
         View.OnClickListener,
         LocationListener,
-        SensorEventListener,
-        ValueAnimator.AnimatorUpdateListener{
+        SensorEventListener{
 
     private static Animation rightSlideAnim;
     private static Animation leftSlideAnim;
@@ -127,13 +133,27 @@ public class PinThrowActivity extends FragmentActivity implements
 
     private SensorManager mSensorMgr;
 
+    private ViewPager viewPager;
+    private TabLayout tabLayout;
+
+    // Test iconlari
+    private int[] tabIcons = {android.R.drawable.ic_menu_camera,
+            android.R.drawable.ic_menu_agenda};
+
+    private LinearLayout profilePageMainLinearLayout;
+
+    private View defaultSpecialChoosenPage;
+
+    //Firebase adapters
     private static FirebaseLocationAdapter firebaseLocationAdapter;
     private static FirebasePinItemsAdapter firebasePinItemsAdapter;
+    private static FirebasePinModelAdapter firebasePinModelAdapter;
+
     private static UserLocation userLocation;
     private static RegionBasedLocation regionBasedLocation;
+    private static PinModels pinModels;
 
     LayoutInflater noteTextInflater = null;
-    LayoutInflater videoInflater = null;
     LayoutInflater imageViewInflater = null;
 
     private static ImageView pinApproveImgv;
@@ -143,36 +163,39 @@ public class PinThrowActivity extends FragmentActivity implements
     private static ImageView pinPictureApproveImgv;
     private static ImageView pinPictureDeleteImgv;
     private static ImageView pinThrowImgv;
-    private static ImageView gotoNextPageImgv;
 
     private static ImageView pinFriendsImgv;
     private static ImageView pinOnlymeImgv;
     private static ImageView pinSpecialImgv;
 
+    private MapView mapView;
+    private View mView;
+
     private long mLastShakeTime;
 
     private GeoLocation geoLocation;
 
-    private boolean itemsAddedToFB = true;
+    private boolean itemsAddedToFB;
     private boolean isCancelPinCheck = false;
+    private boolean isFriendsNotifCheck = false;
+    private boolean isSpecialNotifCheck = false;
     private boolean pinThrowImageClicked = false;
 
-    private FrameLayout mapRelativeLayout;
+    //pin notify values for properties
+    private boolean pinFriendsNotifyValue = false;
+    private boolean pinSpecialsNotifyValue = false;
+    private boolean pinGroupsNotifyValue = false;
+
+    private RelativeLayout mapRelativeLayout;
     private View popupMainView = null;
 
     private Boolean imageChangedInd = false;
-    private Boolean demoThirdPageShown = false;
-    private Boolean demoFourPageShown = false;
 
     private int mWidth;
     private int mHeight;
     private String videoRealPath;
     private String imageRealPath;
 
-    private View firstDemoLayout;
-    private View secondDemoLayout;
-    private View thirdDemoLayout;
-    private View fourDemoLayout;
     private View noteTextLayout;
     private View imageViewLayout;
 
@@ -245,6 +268,100 @@ public class PinThrowActivity extends FragmentActivity implements
     private static Location markerLocation = null;
     private static LatLng markerLatlng = null;
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+
+        mView = inflater.inflate(R.layout.fragment_add_pin, container, false);
+
+        ButterKnife.bind(this, mView);
+
+        ((ProfilePageActivity)getActivity()).updateToolbarTitle("Share");
+
+        profilePageMainLinearLayout = (LinearLayout) ((ProfilePageActivity)getActivity()).findViewById(R.id.profilePageMainLayout);
+
+        return mView;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        try {
+            //SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+            //        .findFragmentById(R.id.map);
+
+            mapView = (MapView) mView.findViewById(R.id.map);
+
+            if(mapView != null){
+                mapView.onCreate(null);
+                mapView.onResume();
+                mapView.getMapAsync(this);
+            }
+
+            Log.i("Info", "onCreate============");
+
+            context = getActivity();
+            imageUri = null;
+
+            firebaseLocationAdapter = new FirebaseLocationAdapter();
+            firebasePinItemsAdapter = new FirebasePinItemsAdapter();
+            firebasePinModelAdapter = new FirebasePinModelAdapter();
+
+            userLocation = new UserLocation();
+            regionBasedLocation = new RegionBasedLocation();
+            uriAdapter = new UriAdapter();
+            pinModels = new PinModels();
+
+            locationTrackObj = new LocationTrackerAdapter(context);
+
+            if (!locationTrackObj.canGetLocation()) {
+                locationTrackObj.showSettingsAlert();
+            } else {
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    checkLocationPermission();
+                }
+            }
+
+            mSensorMgr = (SensorManager) context.getSystemService(SENSOR_SERVICE);
+            Sensor accelerometer = mSensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+            if (accelerometer != null)
+                mSensorMgr.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+            mapRelativeLayout = (RelativeLayout) mView.findViewById(R.id.mapRelativeLayout);
+            mapRelativeLayout.setOnClickListener(this);
+
+            pinThrowImgv = (ImageView) mView.findViewById(R.id.pinThrowImgv);
+            pinFriendsImgv = (ImageView) mView.findViewById(R.id.pinFriendsImgv);
+            pinOnlymeImgv = (ImageView) mView.findViewById(R.id.pinOnlymeImgv);
+            pinSpecialImgv = (ImageView) mView.findViewById(R.id.pinSpecialImgv);
+
+            defineAnimations();
+
+            pinThrowImgv.setOnClickListener(this);
+
+            pinFriendsImgv.setOnClickListener(this);
+            pinOnlymeImgv.setOnClickListener(this);
+            pinSpecialImgv.setOnClickListener(this);
+
+            mAuth = FirebaseAuth.getInstance();
+            currentUser = mAuth.getCurrentUser();
+            FBuserId = currentUser.getUid();
+
+
+        } catch (Exception e) {
+            Log.i("Info", "     >>onCreate try error:" + e.toString());
+        }
+
+    }
+
     /*========================================================================================*/
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -253,7 +370,6 @@ public class PinThrowActivity extends FragmentActivity implements
         try {
 
             switch (requestCode) {
-
                 case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
                     if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         mLocationPermissionGranted = true;
@@ -285,7 +401,6 @@ public class PinThrowActivity extends FragmentActivity implements
     @SuppressLint("MissingPermission")
     public void centerMapOnLocation() {
 
-
         if (!pinMarkedApproved) return;
 
         Log.i("Info", "centerMapOnLocation============");
@@ -305,8 +420,6 @@ public class PinThrowActivity extends FragmentActivity implements
 
         Location currentLocation = getLastKnownLocation();
 
-        //LatLng userLocation = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-
         if (mMap != null) {
             mMap.clear();
             //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18));
@@ -318,98 +431,19 @@ public class PinThrowActivity extends FragmentActivity implements
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new
                     LatLng(currentLocation.getLatitude(),
                     currentLocation.getLongitude()), zoom));
-
-            //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new
-            //                                LatLng(userLocation.latitude,
-            //                                userLocation.longitude), 14));
         }
     }
 
-    /*========================================================================================*/
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pin_throw);
-
-        try {
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.map);
-
-            Log.i("Info", "onCreate============");
-
-            mapFragment.getMapAsync(this);
-
-            context = this;
-            imageUri = null;
-
-            firebaseLocationAdapter = new FirebaseLocationAdapter();
-            firebasePinItemsAdapter = new FirebasePinItemsAdapter();
-            userLocation = new UserLocation();
-            regionBasedLocation = new RegionBasedLocation();
-            uriAdapter = new UriAdapter();
-
-            locationTrackObj = new LocationTrackerAdapter(PinThrowActivity.this);
-
-            if (!locationTrackObj.canGetLocation()) {
-                locationTrackObj.showSettingsAlert();
-            } else {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    checkLocationPermission();
-                }
-            }
-
-            mSensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
-            Sensor accelerometer = mSensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
-            if (accelerometer != null)
-                mSensorMgr.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-
-            mapRelativeLayout = (FrameLayout) findViewById(R.id.mapRelativeLayout);
-            mapRelativeLayout.setOnClickListener(this);
-
-            //nextButton = (FloatingActionButton) findViewById(R.id.nextButton);
-            //pinThrowButton = (FloatingActionButton) findViewById(R.id.pinThrowButton);
-
-            gotoNextPageImgv = (ImageView) findViewById(R.id.gotoNextPageImgv);
-            pinThrowImgv = (ImageView) findViewById(R.id.pinThrowImgv);
-
-            pinFriendsImgv = (ImageView) findViewById(R.id.pinFriendsImgv);
-            pinOnlymeImgv = (ImageView) findViewById(R.id.pinOnlymeImgv);
-            pinSpecialImgv = (ImageView) findViewById(R.id.pinSpecialImgv);
-
-            defineAnimations();
-
-
-
-            //nextButton.setOnClickListener(this);
-            //pinThrowButton.setOnClickListener(this);
-
-            gotoNextPageImgv.setOnClickListener(this);
-            pinThrowImgv.setOnClickListener(this);
-
-            pinFriendsImgv.setOnClickListener(this);
-            pinOnlymeImgv.setOnClickListener(this);
-            pinSpecialImgv.setOnClickListener(this);
-
-            mAuth = FirebaseAuth.getInstance();
-            currentUser = mAuth.getCurrentUser();
-            FBuserId = currentUser.getUid();
-
-
-        } catch (Exception e) {
-            Log.i("Info", "     >>onCreate try error:" + e.toString());
-        }
-    }
 
     private void defineAnimations() {
 
-        rightSlideAnim = AnimationUtils.loadAnimation(this, R.anim.slide_right_up_anim);
-        leftSlideAnim = AnimationUtils.loadAnimation(this, R.anim.slide_left_up_anim);
-        upSlideAnim = AnimationUtils.loadAnimation(this, R.anim.slide_up_anim);
+        rightSlideAnim = AnimationUtils.loadAnimation(context, R.anim.slide_right_up_anim);
+        leftSlideAnim = AnimationUtils.loadAnimation(context, R.anim.slide_left_up_anim);
+        upSlideAnim = AnimationUtils.loadAnimation(context, R.anim.slide_up_anim);
 
-        rightSlideDownAnim = AnimationUtils.loadAnimation(this, R.anim.slide_right_down_anim);
-        leftSlideDownAnim = AnimationUtils.loadAnimation(this, R.anim.slide_left_down_anim);
-        upSlideDownAnim = AnimationUtils.loadAnimation(this, R.anim.slide_down_anim);
+        rightSlideDownAnim = AnimationUtils.loadAnimation(context, R.anim.slide_right_down_anim);
+        leftSlideDownAnim = AnimationUtils.loadAnimation(context, R.anim.slide_left_down_anim);
+        upSlideDownAnim = AnimationUtils.loadAnimation(context, R.anim.slide_down_anim);
 
         rightSlideAnim.setFillAfter(true);
         leftSlideAnim.setFillAfter(true);
@@ -428,13 +462,12 @@ public class PinThrowActivity extends FragmentActivity implements
 
             Log.i("Info", "onMapReady============");
 
-            mMap.setOnMapLongClickListener(this);
             mMap.setOnMarkerClickListener(this);
             mMap.setOnMapClickListener(this);
             mMap.setOnCameraChangeListener(this);
 
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (ActivityCompat.checkSelfPermission(this,
+                if (ActivityCompat.checkSelfPermission(context,
                         android.Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
                     initializeMap(mMap);
@@ -442,8 +475,6 @@ public class PinThrowActivity extends FragmentActivity implements
             } else {
                 initializeMap(mMap);
             }
-
-            showDemoPageSecond();
 
         } catch (Exception e) {
             Log.i("Info", "     >>onMapReadyException Error:" + e.toString());
@@ -456,7 +487,7 @@ public class PinThrowActivity extends FragmentActivity implements
             mMap.getUiSettings().setScrollGesturesEnabled(true);
             mMap.getUiSettings().setAllGesturesEnabled(true);
 
-            if (ContextCompat.checkSelfPermission(this,
+            if (ContextCompat.checkSelfPermission(context,
                     android.Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
                 mMap.setMyLocationEnabled(true);
@@ -486,12 +517,12 @@ public class PinThrowActivity extends FragmentActivity implements
 
     /*========================================================================================*/
     public boolean checkLocationPermission() {
-        if (ActivityCompat.checkSelfPermission(this,
+        if (ActivityCompat.checkSelfPermission(context,
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
             // Asking user if explanation is needed
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                     android.Manifest.permission.ACCESS_FINE_LOCATION)) {
 
                 // Show an explanation to the user *asynchronously* -- don't block
@@ -499,14 +530,14 @@ public class PinThrowActivity extends FragmentActivity implements
                 // sees the explanation, try again to request the permission.
 
                 //Prompt the user once explanation has been shown
-                ActivityCompat.requestPermissions(this,
+                ActivityCompat.requestPermissions(getActivity(),
                         new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                         PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
 
 
             } else {
                 // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
+                ActivityCompat.requestPermissions(getActivity(),
                         new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                         PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
             }
@@ -522,7 +553,7 @@ public class PinThrowActivity extends FragmentActivity implements
     private void isLocationEnabled() {
 
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
             alertDialog.setTitle("Enable Location");
             alertDialog.setMessage("Your locations setting is not enabled. Please enabled it in settings menu.");
 
@@ -542,7 +573,7 @@ public class PinThrowActivity extends FragmentActivity implements
             AlertDialog alert = alertDialog.create();
             alert.show();
         } else {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
             alertDialog.setTitle("Confirm Location");
             alertDialog.setMessage("Your Location is enabled, please enjoy");
 
@@ -624,11 +655,14 @@ public class PinThrowActivity extends FragmentActivity implements
 
             Location location = null;
 
-            if (mLocationPermissionGranted)
+            if (mLocationPermissionGranted) {
+
                 location = locationManager.getLastKnownLocation(provider);
-            else
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+
+            } else {
+
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            }
 
             if (location == null) {
                 continue;
@@ -641,78 +675,10 @@ public class PinThrowActivity extends FragmentActivity implements
     }
 
     /*========================================================================================*/
-    @Override
-    public void onMapLongClick(LatLng latLng) {
-
-
-        //displaySelectionWindow();
-    }
-
-    public void showDemoThirdPage() {
-
-        disableMapItems();
-        LayoutInflater inflater = getLayoutInflater();
-        thirdDemoLayout = inflater.inflate(R.layout.default_pinthrow_demothird, mapRelativeLayout, false);
-
-        Button gotItThirdButton = (Button) thirdDemoLayout.findViewById(R.id.gotItThirdButton);
-        gotItThirdButton.setOnClickListener(PinThrowActivity.this);
-
-        final ImageView demo3textImgView = (ImageView) thirdDemoLayout.findViewById(R.id.demo3textImgView);
-        final ImageView demo3videoImgView = (ImageView) thirdDemoLayout.findViewById(R.id.demo3videoImgView);
-        final ImageView demo3pictureImgView = (ImageView) thirdDemoLayout.findViewById(R.id.demo3pictureImgView);
-
-        mapRelativeLayout.addView(thirdDemoLayout);
-
-        demo3pictureImgView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                demo3pictureImgView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-            }
-        });
-        demo3textImgView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                demo3textImgView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-            }
-        });
-        demo3videoImgView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                demo3videoImgView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-            }
-        });
-    }
-
-    public void showDemoFourPage(){
-
-        disableMapItems();
-        LayoutInflater inflater = getLayoutInflater();
-        fourDemoLayout = inflater.inflate(R.layout.default_pinthrow_demofour, mapRelativeLayout, false);
-
-        Button gotItFourButton = (Button) fourDemoLayout.findViewById(R.id.gotItFourButton);
-        mapRelativeLayout.addView(fourDemoLayout);
-
-        gotItFourButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mapRelativeLayout.removeView(fourDemoLayout);
-
-
-
-
-                //pinFriendsImgv.setVisibility(View.VISIBLE);
-                //pinOnlymeImgv.setVisibility(View.VISIBLE);
-                //pinSpecialImgv.setVisibility(View.VISIBLE);
-                enableMapItems();
-            }
-        });
-    }
-
-    /*========================================================================================*/
     public void addMarkerToMap() {
 
         if (marker != null) {
-            CustomDialogAdapter.showDialogWarning(this,
+            CustomDialogAdapter.showDialogWarning(context,
                     "Yeni PIN birakmak icin ekrandaki pini onaylayiniz veya siliniz");
             return;
         }
@@ -725,15 +691,24 @@ public class PinThrowActivity extends FragmentActivity implements
         markerLocation = getLastKnownLocation();
         markerLatlng = new LatLng(markerLocation.getLatitude(), markerLocation.getLongitude());
 
+        checkCurrLocRadius();
+
         MarkerOptions markerOptions = new MarkerOptions()
                 .position(markerLatlng)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
 
         marker = mMap.addMarker(markerOptions);
 
-        //Toast.makeText(this, "Location Saved", Toast.LENGTH_SHORT).show();
-
         createPopupWindow();
+    }
+
+    private void checkCurrLocRadius() {
+
+        CircleOptions circleOptions = new CircleOptions()
+                .center(markerLatlng)
+                .radius(8);
+
+
     }
 
     /*========================================================================================*/
@@ -754,11 +729,6 @@ public class PinThrowActivity extends FragmentActivity implements
 
     }
 
-    /*========================================================================================*/
-    @Override
-    public void onComplete(String key, DatabaseError error) {
-
-    }
 
     /*========================================================================================*/
     @Override
@@ -805,7 +775,7 @@ public class PinThrowActivity extends FragmentActivity implements
 
     /*========================================================================================*/
     @Override
-    protected void onStop() {
+    public void onStop() {
         //handler.removeCallbacks(runnable);
 
         try {
@@ -819,7 +789,7 @@ public class PinThrowActivity extends FragmentActivity implements
 
     /*========================================================================================*/
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
     }
 
@@ -829,11 +799,6 @@ public class PinThrowActivity extends FragmentActivity implements
         int i = v.getId();
 
         switch (i) {
-            case R.id.gotoNextPageImgv:  //Next button on map
-                gotoNextPageImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-                startProfilePage();
-                break;
-
             case R.id.pinThrowImgv: //Pin throw button on map
                 pinThrowImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
 
@@ -855,36 +820,10 @@ public class PinThrowActivity extends FragmentActivity implements
                     pinThrowImageClicked = false;
                 }
 
-                if(!demoFourPageShown){
-                    showDemoFourPage();
-                    demoFourPageShown = true;
-                    //pinThrowImgv.setEnabled(false);
-                    //pinThrowImgv.setVisibility(View.GONE);
-                }
                 break;
 
             case R.id.mapRelativeLayout:  //Map framelayout layout
                 checkPopupShown();
-                break;
-
-            case R.id.gotItButton:  //Second demo page got it button
-                //Toast.makeText(context, "got it button clicked", Toast.LENGTH_SHORT).show();
-                enableMapItems();
-                pinMarkedApproved = true;
-                break;
-
-            case R.id.gotItThirdButton:
-                mapRelativeLayout.removeView(thirdDemoLayout);
-                enableMapItems();
-                addMarkerToMap();
-                break;
-
-            case R.id.appOkButton:  //First demo page yes button
-                showDemoPageFirst();
-                break;
-
-            case R.id.appCancelButton: //First demo page no button
-                startProfilePage();
                 break;
 
             case R.id.videoImageView: //Video Imageview on popup window
@@ -904,34 +843,68 @@ public class PinThrowActivity extends FragmentActivity implements
 
             case R.id.pinFriendsImgv:
                 pinFriendsImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-                if (!demoThirdPageShown) {
-                    showDemoThirdPage();
-                    demoThirdPageShown = true;
-                } else
-                    addMarkerToMap();
+                handlePinThrowForFriends();
                 break;
 
             case R.id.pinOnlymeImgv:
                 pinOnlymeImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-                if (!demoThirdPageShown) {
-                    showDemoThirdPage();
-                    demoThirdPageShown = true;
-                } else
-                    addMarkerToMap();
+                handlePinThrowForOnlyMe();
                 break;
 
             case R.id.pinSpecialImgv:
                 pinSpecialImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-                if (!demoThirdPageShown) {
-                    showDemoThirdPage();
-                    demoThirdPageShown = true;
-                } else
-                    addMarkerToMap();
+                handlePinThrowForSpecial();
                 break;
 
             default:
                 break;
         }
+    }
+
+
+
+    public void handlePinThrowForFriends(){
+
+        pinModels.initializePinModel();
+        initializeValues();
+        isFriendsNotifCheck = true;
+        pinModels.setProperty(propFriends);
+        pinModels.setOwner(FBuserId);
+        pinModels.setToWhom(toWhomAll);
+        pinModels.setGroupList(null);
+        pinModels.setUsersList(null);
+        showYesNoDialog(null, "Pininiz bildirimli birakilsin mi?");
+        addMarkerToMap();
+    }
+
+    private void handlePinThrowForOnlyMe() {
+
+        pinModels.initializePinModel();
+        initializeValues();
+        pinModels.setProperty(propOnlyMe);
+        pinModels.setOwner(FBuserId);
+        pinModels.setToWhom(FBuserId);
+        pinModels.setGroupList(null);
+        pinModels.setUsersList(null);
+        pinModels.setNotifiedFlag(notifyNo);
+        addMarkerToMap();
+    }
+
+    private void handlePinThrowForSpecial() {
+
+        pinModels.initializePinModel();
+        initializeValues();
+        isSpecialNotifCheck = true;
+        pinModels.setProperty(propPersons);
+        pinModels.setOwner(FBuserId);
+        pinModels.setToWhom(toWhomSpecial);
+        pinModels.setNotifiedFlag(notifyYes);
+
+        openSpecialChoosenPage();
+
+
+        //pinModels.setGroupList(xxxxx);
+        //pinModels.setUsersList(xxxxx);
     }
 
     private void addPinImage() {
@@ -971,9 +944,6 @@ public class PinThrowActivity extends FragmentActivity implements
             imageViewLayout = imageViewInflater.inflate(R.layout.default_image_window, mapRelativeLayout, false);
         }
 
-        //FloatingActionButton imageAppOkButton = (FloatingActionButton) imageViewLayout.findViewById(R.id.imageApproveFab);
-        //FloatingActionButton imageAppCancelButton = (FloatingActionButton) imageViewLayout.findViewById(R.id.imageCancelFab);
-
         pinPictureApproveImgv = (ImageView) imageViewLayout.findViewById(R.id.pinPictureApproveImgv);
         pinPictureDeleteImgv = (ImageView) imageViewLayout.findViewById(R.id.pinPictureDeleteImgv);
 
@@ -983,7 +953,7 @@ public class PinThrowActivity extends FragmentActivity implements
 
         InputStream profileImageStream = null;
         try {
-            profileImageStream = getContentResolver().openInputStream(pinData.getPinImageUri());
+            profileImageStream = context.getContentResolver().openInputStream(pinData.getPinImageUri());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -1060,11 +1030,11 @@ public class PinThrowActivity extends FragmentActivity implements
 
         Log.i("Info", "chooseImageProperty");
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1);
         adapter.add("  Open Camera");
         adapter.add("  Open Galery");
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
         builder.setTitle("How to upload your Picture?");
 
         builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
@@ -1081,7 +1051,7 @@ public class PinThrowActivity extends FragmentActivity implements
                     startGalleryProcess("image");
 
                 } else {
-                    Toast.makeText(PinThrowActivity.this, "Item Selected Error!!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Item Selected Error!!", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -1107,13 +1077,8 @@ public class PinThrowActivity extends FragmentActivity implements
             noteTextLayout = noteTextInflater.inflate(R.layout.default_notetext_window, mapRelativeLayout, false);
         }
 
-        //FloatingActionButton textAppOkButton = (FloatingActionButton) noteTextLayout.findViewById(R.id.textApproveFab);
-        //FloatingActionButton textAppCancelButton = (FloatingActionButton) noteTextLayout.findViewById(R.id.textCancelFab);
-
-
         noteTextApproveImgv = (ImageView) noteTextLayout.findViewById(R.id.noteTextApproveImgv);
         noteTextDeleteImgv = (ImageView) noteTextLayout.findViewById(R.id.noteTextDeleteImgv);
-
 
         LinearLayout noteTextMainLayout = (LinearLayout) noteTextLayout.findViewById(R.id.noteTextMainLayout);
 
@@ -1231,11 +1196,6 @@ public class PinThrowActivity extends FragmentActivity implements
         pinApproveImgv = (ImageView) markerInfoLayout.findViewById(R.id.pinApproveImgv);
         pinDeleteImgv = (ImageView) markerInfoLayout.findViewById(R.id.pinDeleteImgv);
 
-
-        //pinApproveFab = (FloatingActionButton) markerInfoLayout.findViewById(R.id.approveFab);
-        //pinCancelFab = (FloatingActionButton) markerInfoLayout.findViewById(R.id.cancelFab);
-
-
         videoImageView.setOnClickListener(this);
         noteTextImageView.setOnClickListener(this);
         pictureImageView.setOnClickListener(this);
@@ -1268,6 +1228,7 @@ public class PinThrowActivity extends FragmentActivity implements
     /* Pin approved and items saved to Firebase database*/
     public void pinApproved() {
 
+        itemsAddedToFB = true;
         addItemsToFirebaseDatabase();
 
         if (!itemsAddedToFB)
@@ -1275,21 +1236,7 @@ public class PinThrowActivity extends FragmentActivity implements
 
         checkPopupShown();
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
-        builder.setTitle("Tebrikler :)");
-        builder.setIcon(R.drawable.approve_icon);
-        builder.setMessage("Ilk pininizi biraktiniz. Simdi bir sonraki sayfaya yonlendirileceksiniz");
-        final AlertDialog alert = builder.create();
-        alert.show();
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //do your work here after 60 second
-                alert.dismiss();
-                startProfilePage();
-            }
-        }, 2000);
+        CustomDialogAdapter.showDialogSuccess(context, "Pin Birakildi");
     }
 
     public void showPopupWindow() {
@@ -1308,74 +1255,7 @@ public class PinThrowActivity extends FragmentActivity implements
         mWidth = popupMainView.getMeasuredWidth();
         mHeight = popupMainView.getMeasuredHeight();
 
-        showPinPopupWindow(findViewById(R.id.map), p);
-    }
-
-    public void showPinPopupWindow(View view, Point p){
-
-        popupWindow.showAtLocation(popupMainView, Gravity.NO_GRAVITY, p.x - mWidth / 2,
-                p.y - mHeight - singlePinThrowVal);
-    }
-
-    public void showDemoPageFirst() {
-
-        mapRelativeLayout.removeView(secondDemoLayout);
-
-        // inflate (create) another copy of our custom layout
-        LayoutInflater inflater = getLayoutInflater();
-        firstDemoLayout = inflater.inflate(R.layout.default_pinthrow_demofirst, mapRelativeLayout, false);
-
-        Button gotItButton = (Button) firstDemoLayout.findViewById(R.id.gotItButton);
-        // final FloatingActionButton demo1fabButton = (FloatingActionButton) firstDemoLayout.findViewById(R.id.demo1fabButton);
-
-        gotItButton.setOnClickListener(PinThrowActivity.this);
-
-        mapRelativeLayout.addView(firstDemoLayout);
-
-        //demo1fabButton.setOnClickListener(new View.OnClickListener() {
-        //    @Override
-        //    public void onClick(View v) {
-        //        demo1fabButton.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-        //    }
-        //});
-
-    }
-
-    private void showDemoPageSecond() {
-
-        disableMapItems();
-
-        LayoutInflater inflater = getLayoutInflater();
-        secondDemoLayout = inflater.inflate(R.layout.default_pinthrow_demosec, mapRelativeLayout, false);
-
-        Button appOkButton = (Button) secondDemoLayout.findViewById(R.id.appOkButton);
-        Button appCancelButton = (Button) secondDemoLayout.findViewById(R.id.appCancelButton);
-
-        appOkButton.setOnClickListener(PinThrowActivity.this);
-        appCancelButton.setOnClickListener(PinThrowActivity.this);
-
-        mapRelativeLayout.addView(secondDemoLayout);
-    }
-
-    private void disableMapItems() {
-
-        gotoNextPageImgv.setEnabled(false);
-        pinThrowImgv.setEnabled(false);
-        mMap.getUiSettings().setScrollGesturesEnabled(false);
-        pinFriendsImgv.setEnabled(false);
-        pinOnlymeImgv.setEnabled(false);
-        pinSpecialImgv.setEnabled(false);
-    }
-
-    private void enableMapItems() {
-
-        gotoNextPageImgv.setEnabled(true);
-        pinThrowImgv.setEnabled(true);
-        mMap.getUiSettings().setScrollGesturesEnabled(true);
-        mapRelativeLayout.removeView(firstDemoLayout);
-        pinFriendsImgv.setEnabled(true);
-        pinOnlymeImgv.setEnabled(true);
-        pinSpecialImgv.setEnabled(true);
+        showPinPopupWindow(mView.findViewById(R.id.map), p);
     }
 
     @Override
@@ -1407,7 +1287,7 @@ public class PinThrowActivity extends FragmentActivity implements
                     showPinPopupWindow(popupMainView, p);
                 }
 
-                popupWindow.update(p.x - mWidth / 2, p.y - mHeight - singlePinThrowVal, -1, -1);
+                popupWindow.update(p.x - mWidth / 2, p.y - mHeight + multiPinThrowVal, -1, -1);
 
             } else { // marker outside screen
                 popupWindow.dismiss();
@@ -1415,8 +1295,14 @@ public class PinThrowActivity extends FragmentActivity implements
         }
     }
 
+    public void showPinPopupWindow(View view, Point p){
+
+        popupWindow.showAtLocation(view, Gravity.NO_GRAVITY, p.x - mWidth / 2,
+                p.y - mHeight + multiPinThrowVal);
+    }
+
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         try {
             if (mapRipple.isAnimationRunning()) {
@@ -1435,12 +1321,6 @@ public class PinThrowActivity extends FragmentActivity implements
 
     }
 
-    public void startProfilePage() {
-
-        Intent intent = new Intent(getApplicationContext(), ProfilePageActivity.class);
-        finish();
-        startActivity(intent);
-    }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -1497,11 +1377,14 @@ public class PinThrowActivity extends FragmentActivity implements
     private void initializeValues() {
 
         isCancelPinCheck = false;
+        isFriendsNotifCheck = false;
+        pinFriendsNotifyValue = false;
+        isSpecialNotifCheck = false;
     }
 
     public void showYesNoDialog(String title, String message) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
 
         builder.setIcon(R.drawable.warning_icon40);
         builder.setMessage(message);
@@ -1513,15 +1396,20 @@ public class PinThrowActivity extends FragmentActivity implements
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                if (isCancelPinCheck) {
+                if (isCancelPinCheck)
                     deletePin();
-                }
+                else if(isFriendsNotifCheck)
+                    pinModels.setNotifiedFlag(notifyYes);
             }
         });
 
         builder.setNegativeButton("KAPAT", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
+                if(isFriendsNotifCheck)
+                    pinModels.setNotifiedFlag(notifyNo);
+
                 dialog.dismiss();
             }
         });
@@ -1530,14 +1418,40 @@ public class PinThrowActivity extends FragmentActivity implements
         alert.show();
     }
 
+    public void openSpecialChoosenPage(){
+
+        LayoutInflater inflater = getLayoutInflater();
+        defaultSpecialChoosenPage = (CoordinatorLayout) inflater.inflate(R.layout.activity_select_person,
+                profilePageMainLinearLayout, false);
+
+        viewPager = (ViewPager) defaultSpecialChoosenPage.findViewById(R.id.viewpager);
+        setupViewPager(viewPager);
+
+        tabLayout = (TabLayout) defaultSpecialChoosenPage.findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
+
+        //tabLayout.getTabAt(0).setIcon(tabIcons[0]);
+        //tabLayout.getTabAt(1).setIcon(tabIcons[1]);
+
+        ((ProfilePageActivity)getActivity()).updateToolbarTitle("Kisi veya Gruplari Secin");
+
+        profilePageMainLinearLayout.addView(defaultSpecialChoosenPage);
+    }
+
+    private void setupViewPager(ViewPager viewPager) {
+
+        SpecialSelectTabAdapter adapter = new SpecialSelectTabAdapter(getActivity().getSupportFragmentManager());
+        adapter.addFragment(new PersonFragment(FBuserId),"Kisiler");
+        adapter.addFragment(new GroupFragment(), "Gruplar");
+        viewPager.setAdapter(adapter);
+    }
+
     public boolean hideKeyBoard() {
 
-        Log.i("Info", "hideKeyBoard");
+        InputMethodManager inputMethodManager = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
 
-        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-
-        if (getCurrentFocus() != null) {
-            inputMethodManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        if (getActivity().getCurrentFocus() != null) {
+            inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             return true;
         }
 
@@ -1562,7 +1476,6 @@ public class PinThrowActivity extends FragmentActivity implements
             }
         } else {
             dispatchTakeVideoIntent();
-
         }
     }
 
@@ -1585,7 +1498,7 @@ public class PinThrowActivity extends FragmentActivity implements
 
         Log.i("Info", "chooseVideoProperty");
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1);
         adapter.add("  Open Camera");
         adapter.add("  Open Galery");
 
@@ -1595,7 +1508,7 @@ public class PinThrowActivity extends FragmentActivity implements
             adapter.add("  Delete Video");
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
         builder.setTitle("How to upload your video?");
 
         builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
@@ -1626,9 +1539,8 @@ public class PinThrowActivity extends FragmentActivity implements
                     Log.i("Info", "    -->pinData.getPinVideoRealPath:" + pinData.getVideoRealPath());
 
                 } else {
-                    Toast.makeText(PinThrowActivity.this, "Item Selected Error!!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Item Selected Error!!", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
 
@@ -1641,7 +1553,7 @@ public class PinThrowActivity extends FragmentActivity implements
         Log.i("Info", "    -->pinData.getPinVideoUri     :" + pinData.getPinVideoUri());
         Log.i("Info", "    -->pinData.getPinVideoRealPath:" + pinData.getVideoRealPath());
 
-        Intent intent = new Intent(PinThrowActivity.this, PlayVideoActivity.class);
+        Intent intent = new Intent(context, PlayVideoActivity.class);
         intent.putExtra("videoUri", pinData.getPinVideoUri().toString());
         startActivity(intent);
     }
@@ -1651,14 +1563,14 @@ public class PinThrowActivity extends FragmentActivity implements
         Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
         takeVideoIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, videoDuration);
 
-        if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+        if (takeVideoIntent.resolveActivity(context.getPackageManager()) != null) {
 
             startActivityForResult(takeVideoIntent, MY_PERMISSION_GET_VIDEO_CAMERA);
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
         if (requestCode == MY_PERMISSION_GET_IMAGE_GALLERY && resultCode == RESULT_OK) {
 
@@ -1675,7 +1587,6 @@ public class PinThrowActivity extends FragmentActivity implements
         } else if (requestCode == MY_PERMISSION_GET_VIDEO_CAMERA && resultCode == RESULT_OK) {
 
             manageVideoFromCamera(intent);
-
         }
     }
 
@@ -1708,7 +1619,7 @@ public class PinThrowActivity extends FragmentActivity implements
             pinData.setPinImageUri(imageUri);
             pinData.setImageRealPath(imageRealPath);
             InputStream pinImageStream = null;
-            pinImageStream = getContentResolver().openInputStream(imageUri);
+            pinImageStream = context.getContentResolver().openInputStream(imageUri);
             Bitmap photo = BitmapFactory.decodeStream(pinImageStream);
             photo = BitmapConversion.getRoundedShape(photo, 600, 600, imageRealPath);
             pictureImageView.setImageBitmap(photo);
@@ -1728,7 +1639,7 @@ public class PinThrowActivity extends FragmentActivity implements
 
     public String getRealPathFromCameraURI(Uri contentUri) {
         String[] proj = {MediaStore.Images.Media.DATA};
-        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
+        Cursor cursor = getActivity().managedQuery(contentUri, proj, null, null, null);
         int column_index = cursor
                 .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
@@ -1778,89 +1689,6 @@ public class PinThrowActivity extends FragmentActivity implements
 
     }
 
-
-    // UPDATED!
-    public String getPath(Uri uri) {
-        String[] projection = {MediaStore.Video.Media.DATA};
-        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-        if (cursor != null) {
-            // HERE YOU WILL GET A NULLPOINTER IF CURSOR IS NULL
-            // THIS CAN BE, IF YOU USED OI FILE MANAGER FOR PICKING THE MEDIA
-            int column_index = cursor
-                    .getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } else
-            return null;
-    }
-
-
-    void savefile(Uri sourceuri) {
-        String sourceFilename = sourceuri.getPath();
-        String destinationFilename = android.os.Environment.getExternalStorageDirectory().getPath() + File.separatorChar + "abc.mp4";
-
-        BufferedInputStream bis = null;
-        BufferedOutputStream bos = null;
-
-        try {
-            bis = new BufferedInputStream(new FileInputStream(sourceFilename));
-            bos = new BufferedOutputStream(new FileOutputStream(destinationFilename, false));
-            byte[] buf = new byte[1024];
-            bis.read(buf);
-            do {
-                bos.write(buf);
-            } while (bis.read(buf) != -1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (bis != null) bis.close();
-                if (bos != null) bos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void createDirectoryFolder() {
-
-        String folder = Environment.getExternalStorageDirectory().toString();
-        File saveFolder = new File(folder + "/Movies/new /");
-        if (!saveFolder.exists()) {
-            saveFolder.mkdirs();
-        }
-    }
-
-    public void saveFrames(ArrayList<Bitmap> saveBitmapList) throws IOException {
-
-        String folder = Environment.getExternalStorageDirectory().toString();
-        File saveFolder = new File(folder + "/Movies/new /");
-        if (!saveFolder.exists()) {
-            saveFolder.mkdirs();
-        }
-
-
-        int i = 1;
-        for (Bitmap b : saveBitmapList) {
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            b.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
-
-            File f = new File(saveFolder, "frame" + i + ".jpg");
-
-            f.createNewFile();
-
-            FileOutputStream fo = new FileOutputStream(f);
-            fo.write(bytes.toByteArray());
-
-            fo.flush();
-            fo.close();
-
-            i++;
-        }
-
-    }
-
-
     private boolean setBitmapFromUriForVideo(String chosenType) {
 
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
@@ -1875,7 +1703,7 @@ public class PinThrowActivity extends FragmentActivity implements
                 long timeInMillisec = Long.parseLong(time );
 
                 if(timeInMillisec > (videoDuration * 1000)) {
-                    CustomDialogAdapter.showDialogWarning(this,
+                    CustomDialogAdapter.showDialogWarning(context,
                             "Video suresi 20 saniyeden buyuk olamaz!");
                     videoUri = null;
                     videoRealPath = null;
@@ -1899,7 +1727,7 @@ public class PinThrowActivity extends FragmentActivity implements
     }
 
     private boolean hasCamera() {
-        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             return true;
         } else {
             return false;
@@ -1909,9 +1737,15 @@ public class PinThrowActivity extends FragmentActivity implements
     private void addItemsToFirebaseDatabase() {
 
         saveCurrLocation();
+
+        regionBasedLocation.setLocationId(firebaseLocationAdapter.getLocationId());
+        pinModels.setLocationID(firebaseLocationAdapter.getLocationId());
+        userLocation.setLocationId(firebaseLocationAdapter.getLocationId());
+
         saveLocationIDToUserLocations();
         saveRegionBasedLocation();
         savePinItems();
+        savePinModel();
     }
 
 
@@ -1970,6 +1804,7 @@ public class PinThrowActivity extends FragmentActivity implements
         } catch (Exception e) {
             itemsAddedToFB = false;
             Log.i("Info", "     >>SaveCurrLocation Error:" + e.toString());
+            CustomDialogAdapter.showErrorDialog(context, e.toString());
         }
     }
 
@@ -1985,6 +1820,7 @@ public class PinThrowActivity extends FragmentActivity implements
         } catch (Exception e) {
             itemsAddedToFB = false;
             Log.i("Info", "     >>saveUserLocation Error:" + e.toString());
+            CustomDialogAdapter.showErrorDialog(context, e.toString());
         }
     }
 
@@ -1994,12 +1830,13 @@ public class PinThrowActivity extends FragmentActivity implements
             return;
 
         try {
-            regionBasedLocation.setLocationId(firebaseLocationAdapter.getLocationId());
+
             firebaseLocationAdapter.saveRegionBasedLocation(FBuserId, regionBasedLocation);
 
         } catch (Exception e) {
             itemsAddedToFB = false;
             Log.i("Info", "     >>saveUserLocation Error:" + e.toString());
+            CustomDialogAdapter.showErrorDialog(context, e.toString());
         }
     }
 
@@ -2009,12 +1846,29 @@ public class PinThrowActivity extends FragmentActivity implements
             return;
 
         try {
-            userLocation.setLocationId(firebaseLocationAdapter.getLocationId());
+
             firebasePinItemsAdapter.savePinItems(userLocation, pinData);
 
         } catch (Exception e) {
             itemsAddedToFB = false;
             Log.i("Info", "     >>saveUserLocation Error:" + e.toString());
+            CustomDialogAdapter.showErrorDialog(context, e.toString());
+        }
+    }
+
+    private void savePinModel() {
+
+        if (!itemsAddedToFB)
+            return;
+
+        try {
+            firebasePinModelAdapter.setPinModels(pinModels);
+            firebasePinModelAdapter.savePinModel();
+
+        } catch (Exception e) {
+            itemsAddedToFB = false;
+            Log.i("Info", "     >>savePinModel Error:" + e.toString());
+            CustomDialogAdapter.showErrorDialog(context, e.toString());
         }
     }
 
@@ -2041,11 +1895,7 @@ public class PinThrowActivity extends FragmentActivity implements
 
                         Log.i("Info", "Shake, Rattle, and Roll");
 
-                        if (!demoThirdPageShown) {
-                            showDemoThirdPage();
-                            demoThirdPageShown = true;
-                        } else
-                            addMarkerToMap();
+                        addMarkerToMap();
                     }
                 }
             }
@@ -2056,11 +1906,6 @@ public class PinThrowActivity extends FragmentActivity implements
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
-
-    @Override
-    public void onAnimationUpdate(ValueAnimator animation) {
 
     }
 }

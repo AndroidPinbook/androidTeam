@@ -1,4 +1,4 @@
-package uur.com.pinbook.Controller;
+package uur.com.pinbook.FirebaseAdapters;
 
 import android.net.Uri;
 import android.support.annotation.NonNull;

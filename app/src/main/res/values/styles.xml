@@ -9,7 +9,9 @@
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
     <style name="WelcomePageTheme" parent="Theme.AppCompat.NoActionBar" />
 
 
@@ -38,6 +40,7 @@
     <style name="ToastMessageBackground" parent="Theme.AppCompat.DayNight.Dialog.Alert">
 
     </style>
+
     <style name="ButtonColor" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/button_color</item>
     </style>

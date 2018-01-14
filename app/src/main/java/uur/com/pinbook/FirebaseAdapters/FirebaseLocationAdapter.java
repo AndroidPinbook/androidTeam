@@ -1,4 +1,4 @@
-package uur.com.pinbook.Controller;
+package uur.com.pinbook.FirebaseAdapters;
 
 import android.util.Log;
 
@@ -10,6 +10,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
+import uur.com.pinbook.JavaFiles.RegionBasedLocation;
 import uur.com.pinbook.JavaFiles.UserLocation;
 import static uur.com.pinbook.JavaFiles.ConstValues.*;
 
@@ -49,8 +50,34 @@ public class FirebaseLocationAdapter {
         mDbref = null;
         mDbref = FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_DB_USER_LOCATIONS);
 
-        Map<String, String> values = new HashMap<>();
-        addUserItemLocation(FBUserId, values, getLocationId());
+        String locId = getLocationId();
+
+        mDbref.child(FBUserId).child(locId).setValue(" ", new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                Log.i("Info", "     >>databaseError:" + databaseError);
+            }
+        });
+    }
+
+    public static void saveRegionBasedLocation(String FBUserId, RegionBasedLocation regionBasedLocation){
+
+
+        mDbref = null;
+        mDbref = FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_DB_REG_BASED_LOCATION);
+
+        String countryCode = regionBasedLocation.getCountryCode();
+        String cityName = regionBasedLocation.getCity();
+        String locId = regionBasedLocation.getLocationId();
+
+        mDbref.child(countryCode)
+                .child(cityName)
+                .child(locId).setValue(" ", new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                Log.i("Info", "     >>databaseError:" + databaseError);
+            }
+        });
     }
 
     public static void saveLocationInfo(UserLocation userLocation) {
@@ -88,6 +115,9 @@ public class FirebaseLocationAdapter {
 
         values.put(longitude, userLocation.getLongitude());
         addItemLocation(values, locItemId);
+
+        values.put(city, userLocation.getCity());
+        addItemLocation(values, locItemId);
     }
 
     /*========================================================================================*/
@@ -96,18 +126,6 @@ public class FirebaseLocationAdapter {
         Log.i("Info", "FBLocationAdapter addItemLocation starts");
 
         mDbref.child(itemId).setValue(values, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                Log.i("Info", "     >>databaseError:" + databaseError);
-            }
-        });
-    }
-
-    public static void addUserItemLocation(String FBUserId, Map values, String locId){
-
-        Log.i("Info", "FBLocationAdapter addItemLocation starts");
-
-        mDbref.child(FBUserId).child(locId).setValue(" ", new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 Log.i("Info", "     >>databaseError:" + databaseError);

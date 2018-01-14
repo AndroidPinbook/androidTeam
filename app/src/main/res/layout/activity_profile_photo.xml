@@ -13,16 +13,6 @@
         android:layout_height="match_parent"
         android:id="@+id/galleryOrPhotoLayout">
 
-        <!--<TextView
-            android:id="@+id/pinbookTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/pacifico"
-            android:gravity="center"
-            android:text="PinBook"
-            android:textColor="@color/button_color"
-            android:textSize="@dimen/enter_page_text_size" />-->
-
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar_top"
             android:layout_width="match_parent"

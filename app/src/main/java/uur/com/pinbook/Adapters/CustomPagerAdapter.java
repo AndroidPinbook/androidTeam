@@ -1,4 +1,4 @@
-package uur.com.pinbook.Controller;
+package uur.com.pinbook.Adapters;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import uur.com.pinbook.Controller.EnterPageDataModel;
 import uur.com.pinbook.R;
 
 /**

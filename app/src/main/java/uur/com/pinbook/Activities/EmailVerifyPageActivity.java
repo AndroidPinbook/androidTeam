@@ -1,34 +1,22 @@
 package uur.com.pinbook.Activities;
 
-import android.app.AlertDialog;
 import android.content.Intent;
-import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.dynamiclinks.DynamicLink;
-import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
-import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 
-import java.net.URL;
-
-import retrofit2.http.Url;
-import uur.com.pinbook.Controller.CustomDialogAdapter;
-import uur.com.pinbook.Controller.ErrorMessageAdapter;
+import uur.com.pinbook.Adapters.CustomDialogAdapter;
+import uur.com.pinbook.Adapters.ErrorMessageAdapter;
 import uur.com.pinbook.R;
 
 public class EmailVerifyPageActivity extends AppCompatActivity implements View.OnClickListener{

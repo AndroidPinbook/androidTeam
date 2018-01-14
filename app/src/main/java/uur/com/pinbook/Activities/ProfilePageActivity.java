@@ -1,12 +1,16 @@
 package uur.com.pinbook.Activities;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -21,6 +25,7 @@ import com.twitter.sdk.android.core.TwitterCore;
 
 import butterknife.BindArray;
 import butterknife.BindView;
+import uur.com.pinbook.Manifest;
 import uur.com.pinbook.R;
 import butterknife.ButterKnife;
 import uur.com.pinbook.FragmentControllers.FragNavController;
@@ -29,16 +34,17 @@ import uur.com.pinbook.fragments.HomeFragment;
 import uur.com.pinbook.fragments.NewsFragment;
 import uur.com.pinbook.fragments.ProfileFragment;
 import uur.com.pinbook.fragments.SearchFragment;
-import uur.com.pinbook.fragments.ShareFragment;
+import uur.com.pinbook.fragments.AddPinFragment;
 import uur.com.pinbook.utils.FragmentHistory;
 import uur.com.pinbook.utils.Utils;
 
-public class ProfilePageActivity extends AppCompatActivity implements View.OnClickListener, BaseFragment.FragmentNavigation,
-        FragNavController.TransactionListener, FragNavController.RootFragmentListener {
+public class ProfilePageActivity extends AppCompatActivity implements
+        BaseFragment.FragmentNavigation,
+        FragNavController.TransactionListener,
+        FragNavController.RootFragmentListener {
 
 
     private FirebaseAuth firebaseAuth;
-    private Button buttonLogout;
 
     private CallbackManager mCallbackManager;
 
@@ -52,7 +58,7 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
     private int[] mTabIconsSelected = {
             R.drawable.tab_home,
             R.drawable.tab_search,
-            R.drawable.tab_share,
+            R.drawable.tab_pin,
             R.drawable.tab_news,
             R.drawable.tab_profile};
 
@@ -85,12 +91,6 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
 
         firebaseAuth = FirebaseAuth.getInstance();
 
-        buttonLogout = (Button) findViewById(R.id.buttonLogout);
-        buttonLogout.setOnClickListener(this);
-
-
-        //==================
-
         ButterKnife.bind(this);
 
         initToolbar();
@@ -115,8 +115,6 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
                 fragmentHistory.push(tab.getPosition());
 
                 switchTab(tab.getPosition());
-
-
             }
 
             @Override
@@ -130,24 +128,9 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
                 mNavController.clearStack();
 
                 switchTab(tab.getPosition());
-
-
             }
         });
 
-
-    }
-
-    public void onClick(View v) {
-
-        if (v == buttonLogout) {
-            firebaseAuth.signOut();
-
-            LoginManager.getInstance().logOut();
-            TwitterCore.getInstance().getSessionManager().clearActiveSession();
-            finish();
-            startActivity(new Intent(this, EnterPageActivity.class));
-        }
 
     }
 
@@ -182,16 +165,12 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onStop() {
-
         super.onStop();
     }
 
 
     private void switchTab(int position) {
         mNavController.switchTab(position);
-
-
-//        updateToolbarTitle(position);
     }
 
 
@@ -204,25 +183,6 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
     @Override
     protected void onPause() {
         super.onPause();
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-
-
-            case android.R.id.home:
-
-
-                onBackPressed();
-                return true;
-        }
-
-
-        return super.onOptionsItemSelected(item);
-
     }
 
     @Override
@@ -254,7 +214,6 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
                     fragmentHistory.emptyStack();
                 }
             }
-
         }
     }
 
@@ -292,9 +251,7 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
         // If we have a backstack, show the back button
         if (getSupportActionBar() != null && mNavController != null) {
 
-
             updateToolbar();
-
         }
     }
 
@@ -312,7 +269,6 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
         if (getSupportActionBar() != null && mNavController != null) {
 
             updateToolbar();
-
         }
     }
 
@@ -325,31 +281,42 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
             case FragNavController.TAB2:
                 return new SearchFragment();
             case FragNavController.TAB3:
-                return new ShareFragment();
+                return new AddPinFragment();
             case FragNavController.TAB4:
                 return new NewsFragment();
             case FragNavController.TAB5:
                 return new ProfileFragment();
-
-
         }
         throw new IllegalStateException("Need to send an index that we know");
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
 
-//    private void updateToolbarTitle(int position){
-//
-//
-//        getSupportActionBar().setTitle(TABS[position]);
-//
-//    }
+        MenuInflater menuInflater = getMenuInflater();
 
+        menuInflater.inflate(R.menu.menu_profile_page, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.logOut) {
+
+            LoginManager.getInstance().logOut();
+            TwitterCore.getInstance().getSessionManager().clearActiveSession();
+            finish();
+            startActivity(new Intent(this, EnterPageActivity.class));
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     public void updateToolbarTitle(String title) {
 
-
         getSupportActionBar().setTitle(title);
-
     }
 
 }

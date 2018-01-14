@@ -1,4 +1,4 @@
-package uur.com.pinbook.Controller;
+package uur.com.pinbook.Adapters;
 
 import android.os.Build;
 import android.telephony.PhoneNumberUtils;

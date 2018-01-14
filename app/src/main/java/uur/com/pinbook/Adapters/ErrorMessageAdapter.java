@@ -1,4 +1,4 @@
-package uur.com.pinbook.Controller;
+package uur.com.pinbook.Adapters;
 
 /**
  * Created by mac on 4.12.2017.

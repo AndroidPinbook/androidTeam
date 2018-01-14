@@ -1,14 +1,24 @@
-package uur.com.pinbook.Controller;
+package uur.com.pinbook.Adapters;
 
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class UriAdapter extends AppCompatActivity{
 
@@ -136,5 +146,84 @@ public class UriAdapter extends AppCompatActivity{
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
 
+    void savefile(Uri sourceuri) {
+        String sourceFilename = sourceuri.getPath();
+        String destinationFilename = android.os.Environment.getExternalStorageDirectory().getPath() + File.separatorChar + "abc.mp4";
+
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+
+        try {
+            bis = new BufferedInputStream(new FileInputStream(sourceFilename));
+            bos = new BufferedOutputStream(new FileOutputStream(destinationFilename, false));
+            byte[] buf = new byte[1024];
+            bis.read(buf);
+            do {
+                bos.write(buf);
+            } while (bis.read(buf) != -1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (bis != null) bis.close();
+                if (bos != null) bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void createDirectoryFolder() {
+
+        String folder = Environment.getExternalStorageDirectory().toString();
+        File saveFolder = new File(folder + "/Movies/new /");
+        if (!saveFolder.exists()) {
+            saveFolder.mkdirs();
+        }
+    }
+
+    public void saveFrames(ArrayList<Bitmap> saveBitmapList) throws IOException {
+
+        String folder = Environment.getExternalStorageDirectory().toString();
+        File saveFolder = new File(folder + "/Movies/new /");
+        if (!saveFolder.exists()) {
+            saveFolder.mkdirs();
+        }
+
+
+        int i = 1;
+        for (Bitmap b : saveBitmapList) {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            b.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+
+            File f = new File(saveFolder, "frame" + i + ".jpg");
+
+            f.createNewFile();
+
+            FileOutputStream fo = new FileOutputStream(f);
+            fo.write(bytes.toByteArray());
+
+            fo.flush();
+            fo.close();
+
+            i++;
+        }
+
+    }
+
+    // UPDATED!
+    public String getPath(Uri uri) {
+        String[] projection = {MediaStore.Video.Media.DATA};
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        if (cursor != null) {
+            // HERE YOU WILL GET A NULLPOINTER IF CURSOR IS NULL
+            // THIS CAN BE, IF YOU USED OI FILE MANAGER FOR PICKING THE MEDIA
+            int column_index = cursor
+                    .getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } else
+            return null;
+    }
 
 }

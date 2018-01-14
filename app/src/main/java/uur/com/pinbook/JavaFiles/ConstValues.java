@@ -10,6 +10,8 @@ public class ConstValues {
     public static final String GEO_FIRE_DB_ITEMS = "https://androidteam-f4c25.firebaseio.com/PinItems";
     public static final String GEO_FIRE_DB_LOCATIONS = "https://androidteam-f4c25.firebaseio.com/Locations";
     public static final String GEO_FIRE_DB_USER_LOCATIONS = "https://androidteam-f4c25.firebaseio.com/UserLocations";
+    public static final String GEO_FIRE_DB_REG_BASED_LOCATION = "https://androidteam-f4c25.firebaseio.com/RegionBasedLocation";
+    public static final String GEO_FIRE_DB_PIN_MODELS = "https://androidteam-f4c25.firebaseio.com/PinModels";
     public static final String FB_APPLICATION_ID = "1:695005347563:android:e77f50983708f0c0";
 
     //Firebase
@@ -17,6 +19,8 @@ public class ConstValues {
     public static final String UserLocations = "UserLocations";
     public static final String Users = "Users";
     public static final String Locations = "Locations";
+    public static final String PinModels = "PinModels";
+    public static final String Friends = "Friends";
 
     //Firebase users childs
     public static final String userID = "userID";
@@ -45,6 +49,7 @@ public class ConstValues {
     public static final String geolocation = "geolocation";
     public static final String latitude = "latitude";
     public static final String longitude = "longitude";
+    public static final String city = "city";
 
     //Firebase pinItems child
     public static final String pictureId = "pictureId";
@@ -60,11 +65,59 @@ public class ConstValues {
     public static final String pinPictureImage = "pinPictureImage";
     public static final String pinVideoImage = "pinVideoImage";
     public static final String pinTextImage = "pinTextImage";
-
-
     public static final String ProfileImages = "ProfileImages";
+
+    //Firebase pinModel child
+    public static final String notified = "Notified";
+    public static final String owner = "Owner";
+    //public static final String pinTypeInfo = "PinTypeInfo";
+    public static final String property = "Property";
+    public static final String toWhom = "ToWhom";
+
 
 
     //General constants
     public static final int videoDuration = 20;
+
+
+    public static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 20;
+    public static final int PERMISSION_REQUEST_VIDEO_CAPTURE = 21;
+    public static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 22;
+    public static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 23;
+
+    public static final int VIDEO_CAMERA_SELECTED = 0;
+    public static final int VIDEO_GALLERY_SELECTED = 1;
+    public static final int VIDEO_PLAY_SELECTED = 2;
+    public static final int VIDEO_DELETE_SELECTED = 3;
+
+    public static final int IMAGE_CAMERA_SELECTED = 0;
+    public static final int IMAGE_GALLERY_SELECTED = 1;
+
+
+    public static final int MY_PERMISSION_GET_IMAGE_GALLERY = 10;
+    public static final int MY_PERMISSION_GET_IMAGE_CAMERA = 11;
+    public static final int MY_PERMISSION_GET_VIDEO_GALLERY = 12;
+    public static final int MY_PERMISSION_GET_VIDEO_CAMERA = 13;
+
+    public static final float SHAKE_THRESHOLD = 20.0f;
+    public static final int MIN_TIME_BETWEEN_SHAKES_MILLISECS = 1000;
+
+    //Pin popup window constants
+    public static final int singlePinThrowVal = 65;
+    public static final int multiPinThrowVal = 270;
+
+    //Pin properties
+    public static final String propFriends = "Friends";
+    public static final String propPersons = "Persons";
+    public static final String propOnlyMe = "OnlyMe";
+    public static final String propGroups = "Groups";
+
+    //Pin toWhom properties
+    public static final String toWhomAll = "ALL";
+    public static final String toWhomSpecial = "SPECIAL";
+
+    //Pin notify Flags
+    public static final String notifyYes = "Y";
+    public static final String notifyNo  = "N";
+
 }
