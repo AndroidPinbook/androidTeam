@@ -9,8 +9,7 @@ import android.net.Uri;
 public class Friend {
 
     String userID;
-    String name;
-    String surname;
+    String nameSurname;
     String profilePicSrc;
 
     public String getUserID() {
@@ -21,20 +20,12 @@ public class Friend {
         this.userID = userID;
     }
 
-    public String getName() {
-        return name;
+    public String getNameSurname() {
+        return nameSurname;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
+    public void setNameSurname(String nameSurname) {
+        this.nameSurname = nameSurname;
     }
 
     public String getProfilePicSrc() {

@@ -97,7 +97,8 @@ import uur.com.pinbook.JavaFiles.PinData;
 import uur.com.pinbook.JavaFiles.RegionBasedLocation;
 import uur.com.pinbook.JavaFiles.UserLocation;
 import uur.com.pinbook.R;
-import static uur.com.pinbook.JavaFiles.ConstValues.*;
+import static uur.com.pinbook.ConstantsModel.NumericConstant.*;
+
 
 public class PinThrowActivity extends FragmentActivity implements
         OnMapReadyCallback,

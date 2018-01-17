@@ -19,8 +19,17 @@ public class User implements Serializable{
     String surname;
     String gender;
     String profilePicSrc;
+    String miniProfPicUrl;
     String birthdate;
     String phoneNum;
+
+    public String getMiniProfPicUrl() {
+        return miniProfPicUrl;
+    }
+
+    public void setMiniProfPicUrl(String miniProfPicUrl) {
+        this.miniProfPicUrl = miniProfPicUrl;
+    }
 
     public String getUserId() {
         return userId;

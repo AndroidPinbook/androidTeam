@@ -30,11 +30,7 @@ import uur.com.pinbook.Adapters.PersonListAdapter;
 import uur.com.pinbook.DefaultModels.Person;
 import uur.com.pinbook.R;
 
-import static uur.com.pinbook.JavaFiles.ConstValues.Friends;
-import static uur.com.pinbook.JavaFiles.ConstValues.Users;
-import static uur.com.pinbook.JavaFiles.ConstValues.name;
-import static uur.com.pinbook.JavaFiles.ConstValues.profilePictureUrl;
-import static uur.com.pinbook.JavaFiles.ConstValues.surname;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
 /**
  * Created by mac on 13.01.2018.
@@ -44,9 +40,12 @@ import static uur.com.pinbook.JavaFiles.ConstValues.surname;
 public class PersonFragment extends Fragment{
 
     RecyclerView personRecyclerView;
-    RecyclerView personHorRecyclerView;
+    //RecyclerView personHorRecyclerView;
 
     private View mView;
+
+    static ValueEventListener valueEventListenerForDetails;
+    static ValueEventListener valueEventListenerForFriendList;
 
     String FBuserID;
 
@@ -77,25 +76,21 @@ public class PersonFragment extends Fragment{
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
         personRecyclerView = (RecyclerView) mView.findViewById(R.id.personRecyclerView);
-        personHorRecyclerView = (RecyclerView) mView.findViewById(R.id.personHorizontalRecyclerView);
+        //FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        //personHorRecyclerView = (RecyclerView) mView.findViewById(R.id.personHorizontalRecyclerView);
         getData(FBuserID);
-
-        personRecyclerView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i("Info", "personRecyclerView clicked");
-
-            }
-        });
     }
 
     public void getData(String userID){
+
+
+
 
         personList = new ArrayList<Person>();
 
         DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(Friends).child(userID);
 
-        ValueEventListener valueEventListenerForFriendList = mDbrefFriendList.addValueEventListener(new ValueEventListener() {
+        valueEventListenerForFriendList = mDbrefFriendList.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -112,7 +107,7 @@ public class PersonFragment extends Fragment{
 
                     final DatabaseReference mDbrefDetails = FirebaseDatabase.getInstance().getReference(Users).child(friendUserID);
 
-                    ValueEventListener valueEventListenerForDetails = mDbrefDetails.addValueEventListener(new ValueEventListener() {
+                    valueEventListenerForDetails = mDbrefDetails.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
 

@@ -82,9 +82,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import uur.com.pinbook.Activities.MainActivity;
 import uur.com.pinbook.Activities.PinThrowActivity;
 import uur.com.pinbook.Activities.PlayVideoActivity;
 import uur.com.pinbook.Activities.ProfilePageActivity;
+import uur.com.pinbook.Activities.RegisterPageActivity;
 import uur.com.pinbook.Adapters.SpecialSelectTabAdapter;
 import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.Adapters.CustomDialogAdapter;
@@ -106,7 +108,9 @@ import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LOCATION_SERVICE;
 import static android.content.Context.SENSOR_SERVICE;
 import static com.facebook.FacebookSdk.getApplicationContext;
-import static uur.com.pinbook.JavaFiles.ConstValues.*;
+
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
+import static uur.com.pinbook.ConstantsModel.NumericConstant.*;
 
 public class AddPinFragment extends BaseFragment implements
         OnMapReadyCallback,
@@ -1444,6 +1448,7 @@ public class AddPinFragment extends BaseFragment implements
         adapter.addFragment(new PersonFragment(FBuserId),"Kisiler");
         adapter.addFragment(new GroupFragment(), "Gruplar");
         viewPager.setAdapter(adapter);
+
     }
 
     public boolean hideKeyBoard() {

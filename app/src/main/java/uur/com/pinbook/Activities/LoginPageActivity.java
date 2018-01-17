@@ -103,6 +103,8 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
         if(firebaseAuth.getCurrentUser() != null){
             firebaseAuth.signOut();
         }
+
+
     }
 
     public void onClick(View view) {

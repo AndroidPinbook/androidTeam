@@ -1,10 +1,10 @@
-package uur.com.pinbook.JavaFiles;
+package uur.com.pinbook.ConstantsModel;
 
 /**
- * Created by mac on 31.12.2017.
+ * Created by mac on 16.01.2018.
  */
 
-public class ConstValues {
+public class FirebaseConstant {
 
     public static final String GEO_FIRE_DB = "https://androidteam-f4c25.firebaseio.com";
     public static final String GEO_FIRE_DB_ITEMS = "https://androidteam-f4c25.firebaseio.com/PinItems";
@@ -32,6 +32,7 @@ public class ConstValues {
     public static final String birthday = "birthday";
     public static final String email = "email";
     public static final String profilePictureUrl = "profilePictureUrl";
+    public static final String profilePicMiniUrl = "profilePicMiniUrl";
     public static final String password = "password";
     public static final String mobilePhone = "mobilePhone";
     public static final String provider = "provider";
@@ -74,38 +75,6 @@ public class ConstValues {
     public static final String property = "Property";
     public static final String toWhom = "ToWhom";
 
-
-
-    //General constants
-    public static final int videoDuration = 20;
-
-
-    public static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 20;
-    public static final int PERMISSION_REQUEST_VIDEO_CAPTURE = 21;
-    public static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 22;
-    public static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 23;
-
-    public static final int VIDEO_CAMERA_SELECTED = 0;
-    public static final int VIDEO_GALLERY_SELECTED = 1;
-    public static final int VIDEO_PLAY_SELECTED = 2;
-    public static final int VIDEO_DELETE_SELECTED = 3;
-
-    public static final int IMAGE_CAMERA_SELECTED = 0;
-    public static final int IMAGE_GALLERY_SELECTED = 1;
-
-
-    public static final int MY_PERMISSION_GET_IMAGE_GALLERY = 10;
-    public static final int MY_PERMISSION_GET_IMAGE_CAMERA = 11;
-    public static final int MY_PERMISSION_GET_VIDEO_GALLERY = 12;
-    public static final int MY_PERMISSION_GET_VIDEO_CAMERA = 13;
-
-    public static final float SHAKE_THRESHOLD = 20.0f;
-    public static final int MIN_TIME_BETWEEN_SHAKES_MILLISECS = 1000;
-
-    //Pin popup window constants
-    public static final int singlePinThrowVal = 65;
-    public static final int multiPinThrowVal = 270;
-
     //Pin properties
     public static final String propFriends = "Friends";
     public static final String propPersons = "Persons";
@@ -119,5 +88,4 @@ public class ConstValues {
     //Pin notify Flags
     public static final String notifyYes = "Y";
     public static final String notifyNo  = "N";
-
 }

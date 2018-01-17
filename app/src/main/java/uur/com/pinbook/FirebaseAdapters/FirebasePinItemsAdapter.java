@@ -17,7 +17,7 @@ import com.google.firebase.storage.UploadTask;
 import uur.com.pinbook.JavaFiles.PinData;
 import uur.com.pinbook.JavaFiles.UserLocation;
 
-import static uur.com.pinbook.JavaFiles.ConstValues.*;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
 public class FirebasePinItemsAdapter extends AppCompatActivity{
 

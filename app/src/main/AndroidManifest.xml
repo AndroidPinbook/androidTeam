@@ -86,6 +86,10 @@
             android:name=".Activities.EmailVerifyPageActivity"
             android:theme="@style/Toolbar" />
 
+        <activity
+            android:name=".Activities.MainActivity"
+            android:theme="@style/Toolbar" />
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").

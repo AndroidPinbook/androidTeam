@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,6 +15,11 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -39,29 +45,31 @@ public class PersonListAdapter extends RecyclerView.Adapter<PersonListAdapter.My
     ArrayList<Person> personList;
     LayoutInflater layoutInflater;
     View view;
-    View horView;
+    //View horView;
     Context context;
     private ImageView userProfileImgView;
     LinearLayout personListLinearLayout;
-    CardView personVertCardView;
+    //CardView personVertCardView;
+
+    static FirebaseStorage storage;
+    static StorageReference islandRef;
 
     public static ArrayList<Person> selectedPersonList;
 
     public PersonListAdapter(Context context, ArrayList<Person> personList) {
-
-
-
         layoutInflater = LayoutInflater.from(context);
 
         this.personList = personList;
         this.context = context;
+
+        storage = FirebaseStorage.getInstance();
     }
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         view = layoutInflater.inflate(R.layout.person_list_item, parent, false);
-        horView = layoutInflater.inflate(R.layout.person_list_horizontal_item, parent, false);
+        //horView = layoutInflater.inflate(R.layout.person_list_horizontal_item, parent, false);
 
         selectedPersonList = new ArrayList<Person>();
 
@@ -74,7 +82,6 @@ public class PersonListAdapter extends RecyclerView.Adapter<PersonListAdapter.My
 
         Person selectedPerson = personList.get(position);
         holder.setData(selectedPerson, position);
-
     }
 
     @Override
@@ -120,7 +127,7 @@ public class PersonListAdapter extends RecyclerView.Adapter<PersonListAdapter.My
             userNameSurname = (TextView) view.findViewById(R.id.personNameTextView);
             selectCheckBox = (CheckBox) view.findViewById(R.id.selectCheckBox);
             personListLinearLayout = (LinearLayout) view.findViewById(R.id.personListLinearLayout);
-            personVertCardView = (CardView) view.findViewById(R.id.personRootCardView);
+            //personVertCardView = (CardView) view.findViewById(R.id.personRootCardView);
 
             selectCheckBox.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -147,14 +154,6 @@ public class PersonListAdapter extends RecyclerView.Adapter<PersonListAdapter.My
                     }
                 }
             });
-
-
-            personVertCardView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
-            });
         }
 
         public void setData(Person selectedPerson, int position) {
@@ -162,6 +161,23 @@ public class PersonListAdapter extends RecyclerView.Adapter<PersonListAdapter.My
             this.userNameSurname.setText(selectedPerson.getUserNameSurname());
             this.position = position;
             this.selectedPerson = selectedPerson;
+
+            //islandRef = storage.getReferenceFromUrl(selectedPerson.getImageUriText());
+
+            /*final long ONE_MEGABYTE = 50 * 50;
+            islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    userProfileImgView.setImageBitmap(Bitmap.createScaledBitmap(bmp, userProfileImgView.getWidth(),
+                            userProfileImgView.getHeight(), false));
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    Log.i("Info", "addOnFailureListener: " + exception.toString());
+                }
+            });*/
 
 
             if (!selectedPerson.getImageUriText().equals(" ")) {
@@ -192,7 +208,7 @@ public class PersonListAdapter extends RecyclerView.Adapter<PersonListAdapter.My
 
                 InputStream profileImageStream = urlConnection.getInputStream();
                 Bitmap photo = BitmapFactory.decodeStream(profileImageStream);
-                photo = BitmapConversion.getRoundedShape(photo, 600, 600, null);
+                photo = BitmapConversion.getRoundedShape(photo, 500, 500, null);
 
                 userProfileImgView.setImageBitmap(photo);
                 return result;

@@ -47,7 +47,6 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
     private FirebaseAuth mAuth;
     private DatabaseReference mDbref;
-    private Uri downloadUrl = null;
     private UriAdapter uriAdapter;
 
     private StorageReference mStorageRef;
@@ -271,6 +270,7 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
             mProgressDialog.show();
 
             saveProfPicViaEmailVerify();
+            saveMiniProfPicToFB();
 
             mProgressDialog.dismiss();
 
@@ -282,6 +282,31 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
     }
 
 
+    public void saveMiniProfPicToFB(){
+
+        riversRef = mStorageRef.child("Users/profilePics").child(FBuserId + "_mini.jpg");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        photo.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        photo = BitmapConversion.getRoundedShape(photo, 50, 50, null);
+        byte[] data = baos.toByteArray();
+
+        UploadTask uploadTask = riversRef.putBytes(data);
+
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                user.setMiniProfPicUrl(downloadUrl.toString());
+            }
+        });
+    }
 
     public void saveProfPicViaEmailVerify(){
 
@@ -294,10 +319,8 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                            downloadUrl = taskSnapshot.getDownloadUrl();
+                            Uri downloadUrl = taskSnapshot.getDownloadUrl();
                             user.setProfilePicSrc(downloadUrl.toString());
-
-                            Log.i("Info", "downloadUrl:" + downloadUrl);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {

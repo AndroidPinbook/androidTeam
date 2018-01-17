@@ -10,7 +10,7 @@ import java.util.Map;
 
 import uur.com.pinbook.JavaFiles.User;
 
-import static uur.com.pinbook.JavaFiles.ConstValues.*;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
 public class FirebaseUserAdapter {
 
@@ -46,6 +46,9 @@ public class FirebaseUserAdapter {
         setValuesToCloud(userId, values);
 
         values.put(profilePictureUrl, user.getProfilePicSrc());
+        setValuesToCloud(userId, values);
+
+        values.put(profilePicMiniUrl, user.getMiniProfPicUrl());
         setValuesToCloud(userId, values);
     }
 

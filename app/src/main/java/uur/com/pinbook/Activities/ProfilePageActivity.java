@@ -21,10 +21,12 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.twitter.sdk.android.core.TwitterCore;
 
 import butterknife.BindArray;
 import butterknife.BindView;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.Manifest;
 import uur.com.pinbook.R;
 import butterknife.ButterKnife;
@@ -45,6 +47,8 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
 
     private FirebaseAuth firebaseAuth;
+    private String FBuserId;
+
 
     private CallbackManager mCallbackManager;
 
@@ -89,7 +93,8 @@ public class ProfilePageActivity extends AppCompatActivity implements
             startActivity(new Intent(this, EnterPageActivity.class));
         }
 
-        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        FBuserId = currentUser.getUid();
 
         ButterKnife.bind(this);
 
@@ -131,6 +136,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
             }
         });
 
+        FirebaseGetFriends.getInstance(FBuserId);
 
     }
 

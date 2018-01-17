@@ -12,7 +12,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
 
-import static uur.com.pinbook.JavaFiles.ConstValues.*;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;

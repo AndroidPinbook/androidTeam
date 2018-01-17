@@ -12,7 +12,8 @@ import java.util.Map;
 
 import uur.com.pinbook.JavaFiles.RegionBasedLocation;
 import uur.com.pinbook.JavaFiles.UserLocation;
-import static uur.com.pinbook.JavaFiles.ConstValues.*;
+
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
 public class FirebaseLocationAdapter {
 
