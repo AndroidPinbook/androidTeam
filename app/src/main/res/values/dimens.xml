@@ -31,4 +31,6 @@
     <dimen name="design_fab_size_normal">56dp</dimen>
     <dimen name="design_fab_size_mini">43dp</dimen>
 
+    <dimen name="card_padding">60dp</dimen>
+
 </resources>

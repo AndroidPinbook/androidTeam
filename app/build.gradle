@@ -30,7 +30,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.google.android.gms:play-services-maps:11.4.2'
-
+    compile 'com.android.support:cardview-v7:26.1.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
@@ -58,6 +58,7 @@ dependencies {
     compile 'com.jakewharton:butterknife:8.5.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
 
+
     //implementation files('/Users/mac/Downloads/twitter4j-4.0.4/lib/twitter4j-core-4.0.4.jar')
     //implementation files('/Users/mac/Downloads/twitter4j-4.0.4/twitter4j-http2-support/twitter4j-http2-support-4.0.4.jar')
 
@@ -72,6 +73,7 @@ dependencies {
     }
 
 }
+
 
 
 apply plugin: 'com.google.gms.google-services'
