@@ -35,5 +35,12 @@ public class NumericConstant {
 
     //Pin popup window constants
     public static final int singlePinThrowVal = 65;
-    public static final int multiPinThrowVal = 270;
+    public static final int multiPinThrowVal = 60;
+
+    //Bitmap circular constants
+    public static final int friendImageShown = 500;
+
+    //Sepcial selection page item number
+    public static final int persons = 0;
+    public static final int groups = 1;
 }

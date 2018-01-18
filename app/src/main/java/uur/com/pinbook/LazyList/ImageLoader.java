@@ -21,7 +21,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.widget.ImageView;
 
+import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.R;
+import static uur.com.pinbook.ConstantsModel.NumericConstant.*;
 
 public class ImageLoader {
 
@@ -31,8 +33,8 @@ public class ImageLoader {
     ExecutorService executorService;
     Handler handler=new Handler();//handler to display images in UI thread
 
-    public ImageLoader(Context context){
-        fileCache=new FileCache(context);
+    public ImageLoader(Context context, String fileChild){
+        fileCache=new FileCache(context, fileChild);
         executorService=Executors.newFixedThreadPool(5);
     }
 
@@ -42,9 +44,11 @@ public class ImageLoader {
     {
         imageViews.put(imageView, url);
         Bitmap bitmap=memoryCache.get(url);
-        if(bitmap!=null)
+
+        if(bitmap!=null) {
+            bitmap = BitmapConversion.getRoundedShape(bitmap, friendImageShown, friendImageShown, null);
             imageView.setImageBitmap(bitmap);
-        else
+        } else
         {
             queuePhoto(url, imageView);
             imageView.setImageResource(stub_id);
@@ -177,8 +181,10 @@ public class ImageLoader {
         {
             if(imageViewReused(photoToLoad))
                 return;
-            if(bitmap!=null)
+            if(bitmap!=null) {
+                bitmap = BitmapConversion.getRoundedShape(bitmap, friendImageShown, friendImageShown, null);
                 photoToLoad.imageView.setImageBitmap(bitmap);
+            }
             else
                 photoToLoad.imageView.setImageResource(stub_id);
         }

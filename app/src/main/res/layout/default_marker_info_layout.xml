@@ -93,27 +93,6 @@
                 android:src="@drawable/trash_icon_80"
                 android:background="@drawable/img_border"/>
 
-            <!--android.support.design.widget.FloatingActionButton
-                android:id="@+id/approveFab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:scaleType="center"
-                android:src="@drawable/approve_icon_80"
-                app:backgroundTint="@color/background"
-                app:fabSize="mini"
-                android:clickable="true" /-->
-
-
-
-            <!--android.support.design.widget.FloatingActionButton
-                android:id="@+id/cancelFab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:scaleType="center"
-                android:src="@drawable/cancel_icon"
-                app:backgroundTint="@color/background"
-                android:clickable="true"
-                app:fabSize="mini" /-->
         </LinearLayout>
 
     </LinearLayout>

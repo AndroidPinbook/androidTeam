@@ -55,7 +55,9 @@
         <activity
             android:name=".Activities.ProfilePageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-
+        <activity
+            android:name=".Activities.PlayVideoActivity"
+            android:theme="@style/Toolbar" />
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />

@@ -33,6 +33,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -90,6 +91,8 @@ import uur.com.pinbook.Activities.RegisterPageActivity;
 import uur.com.pinbook.Adapters.SpecialSelectTabAdapter;
 import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.Adapters.CustomDialogAdapter;
+import uur.com.pinbook.DefaultModels.SelectedFriendList;
+import uur.com.pinbook.DefaultModels.SelectedGroupList;
 import uur.com.pinbook.FirebaseAdapters.FirebaseLocationAdapter;
 import uur.com.pinbook.FirebaseAdapters.FirebasePinItemsAdapter;
 import uur.com.pinbook.FirebaseAdapters.FirebasePinModelAdapter;
@@ -111,6 +114,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 import static uur.com.pinbook.ConstantsModel.NumericConstant.*;
+import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
 public class AddPinFragment extends BaseFragment implements
         OnMapReadyCallback,
@@ -128,6 +132,9 @@ public class AddPinFragment extends BaseFragment implements
     private static Animation rightSlideDownAnim;
     private static Animation leftSlideDownAnim;
     private static Animation upSlideDownAnim;
+
+    private static SelectedGroupList selectedGroupListInstance;
+    private static SelectedFriendList selectedFriendListInstance;
 
     public GoogleMap mMap;
 
@@ -171,6 +178,7 @@ public class AddPinFragment extends BaseFragment implements
     private static ImageView pinFriendsImgv;
     private static ImageView pinOnlymeImgv;
     private static ImageView pinSpecialImgv;
+    private boolean isSpecialSelected = false;
 
     private MapView mapView;
     private View mView;
@@ -215,6 +223,7 @@ public class AddPinFragment extends BaseFragment implements
     private static ImageView pinPhotoImageView;
 
 
+    private int specialSelectedPage = 0;
     private Marker marker;
 
     private boolean pinMarkedApproved = false;
@@ -286,7 +295,7 @@ public class AddPinFragment extends BaseFragment implements
 
         ButterKnife.bind(this, mView);
 
-        ((ProfilePageActivity)getActivity()).updateToolbarTitle("Share");
+        ((ProfilePageActivity)getActivity()).updateToolbarTitle(PinThrowTitle);
 
         profilePageMainLinearLayout = (LinearLayout) ((ProfilePageActivity)getActivity()).findViewById(R.id.profilePageMainLayout);
 
@@ -321,9 +330,8 @@ public class AddPinFragment extends BaseFragment implements
             userLocation = new UserLocation();
             regionBasedLocation = new RegionBasedLocation();
             uriAdapter = new UriAdapter();
-            pinModels = new PinModels();
 
-            locationTrackObj = new LocationTrackerAdapter(context);
+            locationTrackObj = new LocationTrackerAdapter((ProfilePageActivity)getActivity());
 
             if (!locationTrackObj.canGetLocation()) {
                 locationTrackObj.showSettingsAlert();
@@ -372,7 +380,6 @@ public class AddPinFragment extends BaseFragment implements
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         try {
-
             switch (requestCode) {
                 case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
                     if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -437,7 +444,6 @@ public class AddPinFragment extends BaseFragment implements
                     currentLocation.getLongitude()), zoom));
         }
     }
-
 
     private void defineAnimations() {
 
@@ -525,22 +531,13 @@ public class AddPinFragment extends BaseFragment implements
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            // Asking user if explanation is needed
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                     android.Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-                //Prompt the user once explanation has been shown
                 ActivityCompat.requestPermissions(getActivity(),
                         new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                         PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-
-
             } else {
-                // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(getActivity(),
                         new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                         PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
@@ -660,11 +657,9 @@ public class AddPinFragment extends BaseFragment implements
             Location location = null;
 
             if (mLocationPermissionGranted) {
-
                 location = locationManager.getLastKnownLocation(provider);
 
             } else {
-
                 ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             }
 
@@ -680,12 +675,6 @@ public class AddPinFragment extends BaseFragment implements
 
     /*========================================================================================*/
     public void addMarkerToMap() {
-
-        if (marker != null) {
-            CustomDialogAdapter.showDialogWarning(context,
-                    "Yeni PIN birakmak icin ekrandaki pini onaylayiniz veya siliniz");
-            return;
-        }
 
         pinData = new PinData();
 
@@ -741,13 +730,6 @@ public class AddPinFragment extends BaseFragment implements
         Log.i("Info", "onMarkerClick starts");
 
         isMarkerClicked = true;
-
-        /*if (popupWindow.isShowing()) {
-            popupWindow.dismiss();
-        } else {
-            showPopupWindow();
-        }*/
-
         return false;
     }
 
@@ -784,6 +766,7 @@ public class AddPinFragment extends BaseFragment implements
 
         try {
             Log.i("Info", "onStop============");
+            checkPopupShown();
             super.onStop();
 
         } catch (Exception e) {
@@ -846,18 +829,23 @@ public class AddPinFragment extends BaseFragment implements
                 break;
 
             case R.id.pinFriendsImgv:
-                pinFriendsImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-                handlePinThrowForFriends();
+                if(checkExistingMarker()) {
+                    pinFriendsImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
+                    handlePinThrowForFriends();
+                }
                 break;
 
             case R.id.pinOnlymeImgv:
-                pinOnlymeImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-                handlePinThrowForOnlyMe();
+                if (checkExistingMarker()) {
+                    pinOnlymeImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
+                    handlePinThrowForOnlyMe();
+                }
                 break;
-
             case R.id.pinSpecialImgv:
-                pinSpecialImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
-                handlePinThrowForSpecial();
+                if (checkExistingMarker()) {
+                    pinSpecialImgv.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.img_anim));
+                    handlePinThrowForSpecial();
+                }
                 break;
 
             default:
@@ -865,38 +853,46 @@ public class AddPinFragment extends BaseFragment implements
         }
     }
 
+    public boolean checkExistingMarker(){
 
+        if (marker != null) {
+            CustomDialogAdapter.showDialogWarning(context,
+                    "Yeni PIN birakmak icin ekrandaki pini onaylayiniz veya siliniz");
+            return false;
+        }else
+            return true;
+    }
 
     public void handlePinThrowForFriends(){
 
-        pinModels.initializePinModel();
+        pinModels = new PinModels();
         initializeValues();
         isFriendsNotifCheck = true;
         pinModels.setProperty(propFriends);
         pinModels.setOwner(FBuserId);
         pinModels.setToWhom(toWhomAll);
         pinModels.setGroupList(null);
-        pinModels.setUsersList(null);
+        pinModels.setFriendList(null);
         showYesNoDialog(null, "Pininiz bildirimli birakilsin mi?");
         addMarkerToMap();
     }
 
     private void handlePinThrowForOnlyMe() {
 
-        pinModels.initializePinModel();
+        pinModels = new PinModels();
         initializeValues();
         pinModels.setProperty(propOnlyMe);
         pinModels.setOwner(FBuserId);
         pinModels.setToWhom(FBuserId);
         pinModels.setGroupList(null);
-        pinModels.setUsersList(null);
+        pinModels.setFriendList(null);
         pinModels.setNotifiedFlag(notifyNo);
         addMarkerToMap();
     }
 
     private void handlePinThrowForSpecial() {
 
-        pinModels.initializePinModel();
+        pinModels = new PinModels();
         initializeValues();
         isSpecialNotifCheck = true;
         pinModels.setProperty(propPersons);
@@ -905,10 +901,6 @@ public class AddPinFragment extends BaseFragment implements
         pinModels.setNotifiedFlag(notifyYes);
 
         openSpecialChoosenPage();
-
-
-        //pinModels.setGroupList(xxxxx);
-        //pinModels.setUsersList(xxxxx);
     }
 
     private void addPinImage() {
@@ -943,10 +935,7 @@ public class AddPinFragment extends BaseFragment implements
         if (popupWindow != null && popupWindow.isShowing())
             popupWindow.dismiss();
 
-        if (imageViewInflater == null) {
-            imageViewInflater = getLayoutInflater();
-            imageViewLayout = imageViewInflater.inflate(R.layout.default_image_window, mapRelativeLayout, false);
-        }
+        imageViewLayout = getLayoutInflater().inflate(R.layout.default_image_window, mapRelativeLayout, false);
 
         pinPictureApproveImgv = (ImageView) imageViewLayout.findViewById(R.id.pinPictureApproveImgv);
         pinPictureDeleteImgv = (ImageView) imageViewLayout.findViewById(R.id.pinPictureDeleteImgv);
@@ -994,7 +983,6 @@ public class AddPinFragment extends BaseFragment implements
                 showPopupWindow();
                 pinData.setPinImageUri(imageUri);
                 pinData.setImageRealPath(imageRealPath);
-                imageViewInflater = null;
                 mapRelativeLayout.removeView(imageViewLayout);
 
                 Log.i("Info", "    -->pindata.getImageUri     :" + pinData.getPinImageUri());
@@ -1076,10 +1064,7 @@ public class AddPinFragment extends BaseFragment implements
 
         popupWindow.dismiss();
 
-        if (noteTextInflater == null) {
-            noteTextInflater = getLayoutInflater();
-            noteTextLayout = noteTextInflater.inflate(R.layout.default_notetext_window, mapRelativeLayout, false);
-        }
+        noteTextLayout = getLayoutInflater().inflate(R.layout.default_notetext_window, mapRelativeLayout, false);
 
         noteTextApproveImgv = (ImageView) noteTextLayout.findViewById(R.id.noteTextApproveImgv);
         noteTextDeleteImgv = (ImageView) noteTextLayout.findViewById(R.id.noteTextDeleteImgv);
@@ -1113,7 +1098,6 @@ public class AddPinFragment extends BaseFragment implements
                 noteTextImageView.setImageResource(R.drawable.text_icon80);
                 editTextBitmap = null;
                 noteText = null;
-                noteTextInflater = null;
                 mapRelativeLayout.removeView(noteTextLayout);
                 noteTextImageUri = null;
                 showPopupWindow();
@@ -1251,6 +1235,13 @@ public class AddPinFragment extends BaseFragment implements
         if (popupWindow.isShowing())
             return;
 
+        Log.i("Info", "marker.getPosition():" + marker.getPosition());
+
+        if (!mMap.getProjection().getVisibleRegion().latLngBounds.contains(marker.getPosition())) {
+            float zoom = mMap.getCameraPosition().zoom;
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerLatlng, 18));
+        }
+
         Point p = mMap.getProjection().toScreenLocation(marker.getPosition());
 
         Point size = new Point();
@@ -1359,23 +1350,14 @@ public class AddPinFragment extends BaseFragment implements
         imageRealPath = null;
         noteTextImageUri = null;
         noteText = null;
-        initializePinItems();
         marker = null;
         pinThrowImgv.setEnabled(true);
+
+        pinData = new PinData();
 
         if (noteTextEditText != null)
             noteTextEditText.setText(null);
 
-    }
-
-    private void initializePinItems() {
-
-        pinData.setPinImageUri(null);
-        pinData.setPinTextUri(null);
-        pinData.setPinVideoUri(null);
-        pinData.setNoteText(null);
-        pinData.setVideoRealPath(null);
-        pinData.setImageRealPath(null);
     }
 
     private void initializeValues() {
@@ -1407,7 +1389,7 @@ public class AddPinFragment extends BaseFragment implements
             }
         });
 
-        builder.setNegativeButton("KAPAT", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("HAYIR", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
@@ -1424,31 +1406,86 @@ public class AddPinFragment extends BaseFragment implements
 
     public void openSpecialChoosenPage(){
 
-        LayoutInflater inflater = getLayoutInflater();
-        defaultSpecialChoosenPage = (CoordinatorLayout) inflater.inflate(R.layout.activity_select_person,
+        defaultSpecialChoosenPage = getLayoutInflater().inflate(R.layout.activity_select_person,
                 profilePageMainLinearLayout, false);
 
         viewPager = (ViewPager) defaultSpecialChoosenPage.findViewById(R.id.viewpager);
         setupViewPager(viewPager);
 
+        FloatingActionButton addSpecialFab = (FloatingActionButton) defaultSpecialChoosenPage.findViewById(R.id.addSpecialFab);
+
         tabLayout = (TabLayout) defaultSpecialChoosenPage.findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        //tabLayout.getTabAt(0).setIcon(tabIcons[0]);
-        //tabLayout.getTabAt(1).setIcon(tabIcons[1]);
+        ((ProfilePageActivity)getActivity()).updateToolbarTitle(SelectPersonOrGroupTitle);
 
-        ((ProfilePageActivity)getActivity()).updateToolbarTitle("Kisi veya Gruplari Secin");
+        selectedFriendListInstance = null;
+        selectedGroupListInstance = null;
 
         profilePageMainLinearLayout.addView(defaultSpecialChoosenPage);
+
+        specialSelectedPage = persons;
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+
+                switch (tab.getPosition()){
+                    case persons:
+                        specialSelectedPage = persons;
+                        Log.i("Info", "Tablayout kisiler");
+                        break;
+                    case groups:
+                        specialSelectedPage = groups;
+                        Log.i("Info", "Tablayout groups");
+                        break;
+                    default:
+                        Log.i("Info", "Tablayout unknown");
+                        break;
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+
+        addSpecialFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                profilePageMainLinearLayout.removeView(defaultSpecialChoosenPage);
+                ((ProfilePageActivity)getActivity()).updateToolbarTitle(PinThrowTitle);
+
+                selectedFriendListInstance = SelectedFriendList.getInstance();
+                selectedGroupListInstance = SelectedGroupList.getInstance();
+
+                if(specialSelectedPage == persons){
+                    selectedGroupListInstance.clearGrouplist();
+                    pinModels.setFriendList(selectedFriendListInstance.getSelectedFriendList());
+                }else {
+                    selectedFriendListInstance.clearFriendList();
+                    pinModels.setGroupList(selectedGroupListInstance.getGroupList());
+                }
+
+                mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+                    @Override
+                    public void onMapLoaded() {
+                        addMarkerToMap();
+                    }
+                });
+            }
+        });
     }
 
-    private void setupViewPager(ViewPager viewPager) {
+    private void setupViewPager(final ViewPager viewPager) {
 
         SpecialSelectTabAdapter adapter = new SpecialSelectTabAdapter(getActivity().getSupportFragmentManager());
         adapter.addFragment(new PersonFragment(FBuserId),"Kisiler");
         adapter.addFragment(new GroupFragment(), "Gruplar");
         viewPager.setAdapter(adapter);
-
     }
 
     public boolean hideKeyBoard() {
@@ -1459,7 +1496,6 @@ public class AddPinFragment extends BaseFragment implements
             inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             return true;
         }
-
         return false;
     }
 
@@ -1891,9 +1927,6 @@ public class AddPinFragment extends BaseFragment implements
                     double acceleration = Math.sqrt(Math.pow(x, 2) +
                             Math.pow(y, 2) +
                             Math.pow(z, 2)) - SensorManager.GRAVITY_EARTH;
-
-                    //Log.i("Info", "___________________________");
-                    //Log.i("Info", "acceleration:" + acceleration);
 
                     if (acceleration > SHAKE_THRESHOLD) {
                         mLastShakeTime = curTime;

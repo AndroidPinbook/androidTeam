@@ -562,14 +562,9 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
         switch (i) {
             case R.id.registerButton:
-
-                intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent = new Intent(getApplicationContext(), RegisterPageActivity.class);
                 finish();
                 startActivity(intent);
-
-                //intent = new Intent(getApplicationContext(), RegisterPageActivity.class);
-                //finish();
-                //startActivity(intent);
                 break;
 
             case R.id.logInButton:

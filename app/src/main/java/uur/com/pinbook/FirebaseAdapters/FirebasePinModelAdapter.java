@@ -7,10 +7,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import uur.com.pinbook.Adapters.CustomDialogAdapter;
+import uur.com.pinbook.JavaFiles.Friend;
+import uur.com.pinbook.JavaFiles.Group;
 import uur.com.pinbook.JavaFiles.PinModels;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
@@ -22,6 +25,7 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 public class FirebasePinModelAdapter extends AppCompatActivity{
 
     PinModels pinModels;
+    Map<String, String> values;
 
     private DatabaseReference mDbref;
 
@@ -35,18 +39,12 @@ public class FirebasePinModelAdapter extends AppCompatActivity{
 
     public void savePinModel(){
 
-        Map<String, String> values = new HashMap<>();
-
+        values = new HashMap<>();
         mDbref = FirebaseDatabase.getInstance().getReference().child(PinModels).child(pinModels.getLocationID());
 
         values.put(notified, pinModels.getNotifiedFlag());
-        setValuesToCloud(values);
-
         values.put(owner, pinModels.getOwner());
-        setValuesToCloud(values);
-
         values.put(property, pinModels.getProperty());
-        setValuesToCloud(values);
 
         String pinProperty = pinModels.getProperty();
 
@@ -54,18 +52,18 @@ public class FirebasePinModelAdapter extends AppCompatActivity{
 
             case propFriends:
                 values.put(toWhom, toWhomAll);
-                setValuesToCloud(values);
                 break;
 
             case propOnlyMe:
                 values.put(toWhom, pinModels.getOwner());
-                setValuesToCloud(values);
                 break;
 
             case propPersons:
+                fillFriendArray();
                 break;
 
             case propGroups:
+                fillGroupArray();
                 break;
 
             default:
@@ -73,7 +71,36 @@ public class FirebasePinModelAdapter extends AppCompatActivity{
                 break;
         }
 
+        setValuesToCloud(values);
+    }
 
+    public void fillFriendArray(){
+        String[] friendIDs = new String[pinModels.getFriendList().size()];
+
+        int i = 0;
+        for(Friend friend: pinModels.getFriendList()){
+            if(friend.getUserID() != null && !friend.getUserID().equals(" ")) {
+                friendIDs[i] = friend.getUserID();
+                i++;
+            }
+        }
+        Log.i("Info", "friendIDs.toString():" + Arrays.toString(friendIDs));
+
+        values.put(toWhom, Arrays.toString(friendIDs));
+    }
+
+    public void fillGroupArray(){
+        String[] groupIDs = new String[pinModels.getGroupList().size()];
+        int i = 0;
+
+        for(Group group: pinModels.getGroupList()){
+            if(group.getGroupID() != null && !group.getGroupID().equals(" ")) {
+                groupIDs[i] = group.getGroupID();
+                i++;
+            }
+        }
+
+        values.put(toWhom, Arrays.toString(groupIDs));
     }
 
     public  void setValuesToCloud(Map<String, String> values){
@@ -89,6 +116,4 @@ public class FirebasePinModelAdapter extends AppCompatActivity{
             Log.i("Info","  >>setValuesToCloud error:" + e.toString());
         }
     }
-
-
 }

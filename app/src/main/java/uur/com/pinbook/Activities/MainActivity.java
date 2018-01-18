@@ -13,13 +13,11 @@ import com.google.firebase.auth.FirebaseUser;
 
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.JavaFiles.Friend;
-import uur.com.pinbook.LazyList.LazyAdapter;
 import uur.com.pinbook.R;
 
 public class MainActivity extends Activity {
 
     ListView list;
-    LazyAdapter adapter;
 
     private FirebaseAuth firebaseAuth;
     private String FBuserId;
@@ -54,8 +52,6 @@ public class MainActivity extends Activity {
         }
 
         list=(ListView)findViewById(R.id.list);
-        adapter=new LazyAdapter(this, mStrings);
-        list.setAdapter(adapter);
     }
 
     @Override
@@ -68,14 +64,14 @@ public class MainActivity extends Activity {
     public OnClickListener listener=new OnClickListener(){
         @Override
         public void onClick(View arg0) {
-            adapter.imageLoader.clearCache();
+            //adapter.imageLoader.clearCache();
         }
     };
 
     public OnClickListener listener2=new OnClickListener(){
         @Override
         public void onClick(View arg0) {
-            adapter.notifyDataSetChanged();
+            //adapter.notifyDataSetChanged();
         }
     };
 

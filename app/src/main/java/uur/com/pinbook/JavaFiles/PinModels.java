@@ -14,23 +14,8 @@ public class PinModels {
     String property;
     String toWhom;
 
-    ArrayList<String> usersList;
-    ArrayList<String> groupList;
-
-    public void initializePinModel(){
-
-        this.locationID = null;
-        notifiedFlag = null;
-        owner = null;
-        property = null;
-        toWhom = null;
-
-        if(usersList != null)
-            usersList.clear();
-
-        if(groupList != null)
-            groupList.clear();
-    }
+    ArrayList<Friend> friendList;
+    ArrayList<Group> groupList;
 
     public String getLocationID() {
         return locationID;
@@ -72,19 +57,20 @@ public class PinModels {
         this.toWhom = toWhom;
     }
 
-    public ArrayList<String> getUsersList() {
-        return usersList;
+
+    public ArrayList<Friend> getFriendList() {
+        return friendList;
     }
 
-    public void setUsersList(ArrayList<String> usersList) {
-        this.usersList = usersList;
+    public void setFriendList(ArrayList<Friend> friendList) {
+        this.friendList = friendList;
     }
 
-    public ArrayList<String> getGroupList() {
+    public ArrayList<Group> getGroupList() {
         return groupList;
     }
 
-    public void setGroupList(ArrayList<String> groupList) {
+    public void setGroupList(ArrayList<Group> groupList) {
         this.groupList = groupList;
     }
 }

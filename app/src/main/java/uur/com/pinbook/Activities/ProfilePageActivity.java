@@ -137,13 +137,10 @@ public class ProfilePageActivity extends AppCompatActivity implements
         });
 
         FirebaseGetFriends.getInstance(FBuserId);
-
     }
 
     private void initToolbar() {
         setSupportActionBar(toolbar);
-
-
     }
 
     private void initTab() {
@@ -202,21 +199,16 @@ public class ProfilePageActivity extends AppCompatActivity implements
                 super.onBackPressed();
             } else {
 
-
                 if (fragmentHistory.getStackSize() > 1) {
 
                     int position = fragmentHistory.popPrevious();
-
                     switchTab(position);
-
                     updateTabSelection(position);
 
                 } else {
 
                     switchTab(0);
-
                     updateTabSelection(0);
-
                     fragmentHistory.emptyStack();
                 }
             }
