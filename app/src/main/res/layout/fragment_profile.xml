@@ -6,19 +6,37 @@
     android:gravity="center"
     android:orientation="vertical">
 
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/map"
+    <!--android.support.v4.view.ViewPager
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="330dp"
+        android:layout_gravity="bottom"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:paddingBottom="30dp"
+        android:paddingEnd="@dimen/card_padding"
+        android:paddingLeft="@dimen/card_padding"
+        android:paddingRight="@dimen/card_padding"
+        android:paddingStart="@dimen/card_padding" />
 
-    </com.google.android.gms.maps.MapView>
-
-    <TextView
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/btn_click_me"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:background="@android:color/holo_green_dark"
         android:gravity="center"
-        android:text="Profile Fragment"
-        android:textSize="25sp" />
+        android:text="CLICK ME"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"/-->
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:scrollbars="vertical"
+        android:clickable="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

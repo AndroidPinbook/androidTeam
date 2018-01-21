@@ -1,6 +1,7 @@
 package uur.com.pinbook.fragments.InnerFragments;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v4.view.ViewPager;
@@ -16,25 +17,25 @@ import uur.com.pinbook.R;
 import uur.com.pinbook.fragments.BaseFragment;
 
 
-public class SingleLocationFragment extends BaseFragment {
+public class FeedLocationsFragment extends BaseFragment {
+
     View mView;
 
     int fragCount;
 
 
-    public static SingleLocationFragment newInstance(int instance) {
+    public static FeedLocationsFragment newInstance(int instance) {
         Bundle args = new Bundle();
         args.putInt(ARGS_INSTANCE, instance);
-        SingleLocationFragment fragment = new SingleLocationFragment();
+        FeedLocationsFragment fragment = new FeedLocationsFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
 
-    public SingleLocationFragment() {
+    public FeedLocationsFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,11 +48,11 @@ public class SingleLocationFragment extends BaseFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-        mView = inflater.inflate(R.layout.fragment_single_location, container, false);
+        mView = inflater.inflate(R.layout.fragment_feed_locations, container, false);
 
         ButterKnife.bind(this, mView);
 
-        ((ProfilePageActivity) getActivity()).updateToolbarTitle("Single Activity");
+        ((ProfilePageActivity) getActivity()).updateToolbarTitle("Feed page");
 
         return mView;
     }
@@ -61,6 +62,26 @@ public class SingleLocationFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
 
 
+        ViewPager viewPager = (ViewPager) mView.findViewById(R.id.viewPager);
+
+        CardFragmentPagerAdapter pagerAdapter = new CardFragmentPagerAdapter(getActivity().getSupportFragmentManager(), dpToPixels(2, getActivity()));
+        ShadowTransformer fragmentCardShadowTransformer = new ShadowTransformer(viewPager, pagerAdapter);
+        fragmentCardShadowTransformer.enableScaling(true);
+
+        viewPager.setAdapter(pagerAdapter);
+        //viewPager.setPageTransformer(false, fragmentCardShadowTransformer);
+        //viewPager.setOffscreenPageLimit(3);
     }
+
+    /**
+     * Change value in dp to pixels
+     * @param dp
+     * @param context
+     * @return
+     */
+    public static float dpToPixels(int dp, Context context) {
+        return dp * (context.getResources().getDisplayMetrics().density);
+    }
+
 
 }
