@@ -55,7 +55,6 @@ public class PersonFragment extends Fragment{
     public void getData(String userID){
 
         FirebaseGetFriends instance = FirebaseGetFriends.getInstance(userID);
-
         LazyAdapterFriends lazyAdapterFriends = new LazyAdapterFriends(getActivity(), instance.getFriendList());
 
         personRecyclerView.setAdapter(lazyAdapterFriends);

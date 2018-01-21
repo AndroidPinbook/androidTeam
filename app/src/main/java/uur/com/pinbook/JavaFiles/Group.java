@@ -56,4 +56,8 @@ public class Group {
     public void setUserList(ArrayList<String> userList) {
         this.userList = userList;
     }
+
+    public void addUserID(String userID){
+        userList.add(userID);
+    }
 }

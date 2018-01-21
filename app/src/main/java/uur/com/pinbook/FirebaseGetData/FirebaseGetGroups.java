@@ -12,14 +12,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
 
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Friends;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Users;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.name;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.profilePictureUrl;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.surname;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
 /**
  * Created by mac on 18.01.2018.
@@ -28,8 +23,10 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.surname;
 public class FirebaseGetGroups {
 
     String userId;
+    String groupID;
     static ValueEventListener valueEventListenerForDetails;
     static ValueEventListener valueEventListenerForFriendList;
+    static ValueEventListener valueEventListenerForUsers;
 
     private static FirebaseGetGroups instance = null;
 
@@ -54,7 +51,7 @@ public class FirebaseGetGroups {
     public FirebaseGetGroups(String userID){
 
         this.userId = userID;
-        fillFriendList();
+        fillGroupList();
     }
 
     public int getListSize(){
@@ -63,24 +60,24 @@ public class FirebaseGetGroups {
 
     private void fillGroupList() {
 
-        friendList = new ArrayList<Friend>();
+        groupList = new ArrayList<Group>();
 
-        DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(Friends).child(userId);
+        DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(UserGroups).child(userId);
 
+        //UserGroups altindan groupID bilgileri okunur
         valueEventListenerForFriendList = mDbrefFriendList.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                if(friendList != null)
-                    friendList.clear();
+                if(groupList != null) groupList.clear();
 
-                for(DataSnapshot friendsSnapshot: dataSnapshot.getChildren()){
+                for(DataSnapshot groupSnapShot: dataSnapshot.getChildren()){
 
-                    final Friend friend = new Friend();
-                    String friendUserID = friendsSnapshot.getKey();
-                    friend.setUserID(friendUserID);
+                    final Group group = new Group();
+                    groupID = groupSnapShot.getKey();
+                    group.setGroupID(groupID);
 
-                    final DatabaseReference mDbrefDetails = FirebaseDatabase.getInstance().getReference(Users).child(friendUserID);
+                    final DatabaseReference mDbrefDetails = FirebaseDatabase.getInstance().getReference(Groups).child(groupID);
 
                     valueEventListenerForDetails = mDbrefDetails.addValueEventListener(new ValueEventListener() {
                         @Override
@@ -89,24 +86,38 @@ public class FirebaseGetGroups {
                             if(dataSnapshot.getValue() != null){
 
                                 Map<String , String> map = new HashMap<String, String>();
-
                                 map = (Map) dataSnapshot.getValue();
 
-                                String nameSurname = map.get(name) + " " + map.get(surname);
-                                friend.setNameSurname(nameSurname);
-
-                                friend.setProfilePicSrc(map.get(profilePictureUrl));
-
-                                Log.i("Info", "  >>nameSurname:" + nameSurname);
-                                Log.i("Info", "  >>profilePictureUrl:" + map.get(profilePictureUrl));
-
-                                friendList.add(friend);
+                                group.setAdminID(map.get(Admin));
+                                group.setGroupName(map.get(GroupName));
+                                group.setPictureUrl(map.get(GroupPictureUrl));
                             }
+
+                            final DatabaseReference mDbrefDetailsExt = FirebaseDatabase.getInstance().getReference(Groups)
+                                    .child(groupID).child(Users);
+
+                            valueEventListenerForUsers = mDbrefDetailsExt.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                    ArrayList<String> userList = new ArrayList<String>();
+
+                                    for(DataSnapshot userSnapshot : dataSnapshot.getChildren()){
+                                        String userID = userSnapshot.getKey();
+                                        userList.add(userID);
+
+                                    }
+                                    group.setUserList(userList);
+                                    groupList.add(group);
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {}
+                            });
                         }
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
-
                             Log.i("Info", "onCancelled1 error:" + databaseError.toString());
                         }
                     });
@@ -115,7 +126,6 @@ public class FirebaseGetGroups {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
                 Log.i("Info", "onCancelled2 error:" + databaseError.toString());
             }
         });

@@ -58,6 +58,7 @@
         <activity
             android:name=".Activities.PlayVideoActivity"
             android:theme="@style/Toolbar" />
+
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
@@ -87,7 +88,6 @@
         <activity
             android:name=".Activities.EmailVerifyPageActivity"
             android:theme="@style/Toolbar" />
-
         <activity
             android:name=".Activities.MainActivity"
             android:theme="@style/Toolbar" />
@@ -107,6 +107,14 @@
         <activity
             android:name=".Activities.PinThrowActivity"
             android:label="@string/title_activity_pin_throw" />
+
+        <activity
+            android:name=".Activities.AddNewGroupActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
+        <activity
+            android:name=".Activities.SpecialSelectActivity"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

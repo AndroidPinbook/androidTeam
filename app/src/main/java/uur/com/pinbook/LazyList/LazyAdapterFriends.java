@@ -2,6 +2,7 @@ package uur.com.pinbook.LazyList;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ public class LazyAdapterFriends extends RecyclerView.Adapter<LazyAdapterFriends.
         this.context = context;
         imageLoader=new ImageLoader(context.getApplicationContext(), friendsCacheDirectory);
         selectedFriendList = SelectedFriendList.getInstance();
+        Log.i("Info", "LazyAdapterFriends selectedFriendList size:" + selectedFriendList.getSelectedFriendList().size());
     }
 
     public Object getItem(int position) {

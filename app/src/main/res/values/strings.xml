@@ -58,5 +58,10 @@
     <string name="action_settings">Settings</string>
     <string name="exitItem">Cikis</string>
     <string name="section_format">Hello World from section: %1$d</string>
+    <string name="addNewGroup">Yeni Grup</string>
+    <string name="addPersonToGroup">Katilimci Ekle</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

@@ -1,34 +1,35 @@
 package uur.com.pinbook.SpecialFragments;
 
 import android.annotation.SuppressLint;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import butterknife.ButterKnife;
-import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
-import uur.com.pinbook.LazyList.LazyAdapterFriends;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
+import uur.com.pinbook.LazyList.LazyAdapterGroups;
 import uur.com.pinbook.R;
 
-/**
- * Created by mac on 13.01.2018.
- */
-
 @SuppressLint("ValidFragment")
-public class GroupFragment extends android.support.v4.app.Fragment {
+public class GroupFragment extends Fragment {
 
     RecyclerView groupRecyclerView;
 
     private View mView;
+    private View mView2;
     String FBuserID;
+    ViewGroup mContainer;
+    LayoutInflater mLayoutInflater;
 
     LinearLayoutManager linearLayoutManager;
+    RelativeLayout specialSelectRelLayout;
 
     @SuppressLint("ValidFragment")
     public GroupFragment(String FBuserID) {
@@ -44,8 +45,12 @@ public class GroupFragment extends android.support.v4.app.Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
+        this.mContainer = container;
+        this.mLayoutInflater = inflater;
         mView = inflater.inflate(R.layout.fragment_special_select, container, false);
+
         ButterKnife.bind(this, mView);
+        specialSelectRelLayout = (RelativeLayout) mView.findViewById(R.id.specialSelectRelLayout);
         return mView;
     }
 
@@ -58,14 +63,12 @@ public class GroupFragment extends android.support.v4.app.Fragment {
 
     public void getData(String userID){
 
-        FirebaseGetxxxx instance = FirebaseGetFriends.getInstance(userID);
+        FirebaseGetGroups instance = FirebaseGetGroups.getInstance(userID);
+        LazyAdapterGroups lazyAdapterGroups = new LazyAdapterGroups(getActivity(), instance.getGroupList());
 
-        LazyAdapterFriends lazyAdapterFriends = new LazyAdapterFriends(getActivity(), instance.getFriendList());
-
-        personRecyclerView.setAdapter(lazyAdapterFriends);
+        groupRecyclerView.setAdapter(lazyAdapterGroups);
         linearLayoutManager  = new LinearLayoutManager(getActivity());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        personRecyclerView.setLayoutManager(linearLayoutManager);
-
+        groupRecyclerView.setLayoutManager(linearLayoutManager);
     }
 }

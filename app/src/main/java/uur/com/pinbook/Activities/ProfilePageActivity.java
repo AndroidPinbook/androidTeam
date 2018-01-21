@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,6 +28,7 @@ import com.twitter.sdk.android.core.TwitterCore;
 import butterknife.BindArray;
 import butterknife.BindView;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.Manifest;
 import uur.com.pinbook.R;
 import butterknife.ButterKnife;
@@ -137,6 +139,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
         });
 
         FirebaseGetFriends.getInstance(FBuserId);
+        FirebaseGetGroups.getInstance(FBuserId);
     }
 
     private void initToolbar() {
@@ -191,7 +194,11 @@ public class ProfilePageActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
 
-        if (!mNavController.isRootFragment()) {
+        Log.i("Info","--1--:" + mNavController.getCurrentFrag()) ;
+        Log.i("Info","--2--:" + mNavController.getCurrentFrag().getLayoutInflater()) ;
+
+
+        if(!mNavController.isRootFragment()) {
             mNavController.popFragment();
         } else {
 
@@ -214,7 +221,6 @@ public class ProfilePageActivity extends AppCompatActivity implements
             }
         }
     }
-
 
     private void updateTabSelection(int currentTab) {
 
@@ -292,9 +298,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater menuInflater = getMenuInflater();
-
         menuInflater.inflate(R.menu.menu_profile_page, menu);
-
         return super.onCreateOptionsMenu(menu);
     }
 

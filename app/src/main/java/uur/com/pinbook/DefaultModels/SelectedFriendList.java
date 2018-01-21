@@ -23,6 +23,10 @@ public class SelectedFriendList {
         return instance;
     }
 
+    public static void setInstance(SelectedFriendList instance) {
+        SelectedFriendList.instance = instance;
+    }
+
     public ArrayList<Friend> getSelectedFriendList() {
         return selectedFriendList;
     }
@@ -56,6 +60,8 @@ public class SelectedFriendList {
     }
 
     public void clearFriendList(){
-        selectedFriendList.clear();
+        if(selectedFriendList.size() > 0) {
+            selectedFriendList.clear();
+        }
     }
 }

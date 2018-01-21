@@ -21,6 +21,13 @@ public class FirebaseConstant {
     public static final String Locations = "Locations";
     public static final String PinModels = "PinModels";
     public static final String Friends = "Friends";
+    public static final String Groups = "Groups";
+    public static final String UserGroups = "UserGroups";
+
+    //Firebase Group constants
+    public static final String Admin = "Admin";
+    public static final String GroupName = "GroupName";
+    public static final String GroupPictureUrl = "GroupPictureUrl";
 
     //Firebase users childs
     public static final String userID = "userID";

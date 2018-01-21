@@ -4,16 +4,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-
-/**
- * Created by f22labs on 07/03/17.
- */
 
 public class BaseFragment extends Fragment {
 
     public static final String ARGS_INSTANCE = "com.f22labs.instalikefragmenttransaction";
-
 
     FragmentNavigation mFragmentNavigation;
 
@@ -22,7 +16,6 @@ public class BaseFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
     }
-
 
     @Override
     public void onAttach(Context context) {
@@ -35,10 +28,4 @@ public class BaseFragment extends Fragment {
     public interface FragmentNavigation {
          void pushFragment(Fragment fragment);
     }
-
-
-
-
-
-
 }
