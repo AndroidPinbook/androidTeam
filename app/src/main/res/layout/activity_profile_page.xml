@@ -38,12 +38,6 @@
 
     </android.support.v7.widget.Toolbar-->
 
-    <Button
-        android:id="@+id/buttonLogout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="SIGN OUT" />
 
     <View
         android:layout_width="match_parent"

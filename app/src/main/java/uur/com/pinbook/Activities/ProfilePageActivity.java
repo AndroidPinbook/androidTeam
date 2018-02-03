@@ -85,8 +85,8 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
 
         firebaseAuth = FirebaseAuth.getInstance();
 
-        buttonLogout = (Button) findViewById(R.id.buttonLogout);
-        buttonLogout.setOnClickListener(this);
+        //buttonLogout = (Button) findViewById(R.id.buttonLogout);
+        //buttonLogout.setOnClickListener(this);
 
 
         //==================

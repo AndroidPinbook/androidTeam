@@ -1,37 +1,63 @@
 package uur.com.pinbook.fragments;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.mindorks.placeholderview.InfinitePlaceHolderView;
+
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
-import uur.com.pinbook.Activities.ProfilePageActivity;
-import uur.com.pinbook.CardView.CardAdapter;
-import uur.com.pinbook.CardView.CardFragmentPagerAdapter;
-import uur.com.pinbook.CardView.ShadowTransformer;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import uur.com.pinbook.R;
 import butterknife.ButterKnife;
 
-import uur.com.pinbook.fragments.InnerFragments.SingleLocationFragment;
+import uur.com.pinbook.RecyclerView.Adapter.HorizontalAdapter;
+import uur.com.pinbook.RecyclerView.Adapter.VerticalAdapter;
+import uur.com.pinbook.RecyclerView.HelperClasses.GridSpacingItemDecoration;
+import uur.com.pinbook.RecyclerView.HelperClasses.NetworkCheckingClass;
+import uur.com.pinbook.RecyclerView.Interface.ApiInterface;
+import uur.com.pinbook.RecyclerView.Model.Datum;
+import uur.com.pinbook.RecyclerView.Model.JsonData;
+import uur.com.pinbook.RecyclerView.Model.Popular;
+import uur.com.pinbook.RecyclerView.Retrofit.RetrofitApiClient;
+
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class ProfileFragment extends BaseFragment {
 
-    @BindView(R.id.btn_click_me)
-    Button btnClickMe;
 
     int fragCount;
     View view;
-    private RecyclerView recycler_view;
-    private List<CardFragmentPagerAdapter> location_list;
+
+    RecyclerView recyclerViewHorizontal;
+    RecyclerView recyclerViewVertical;
+    HorizontalAdapter horizontalAdapter;
+    VerticalAdapter verticalAdapter;
+    List<Popular> popularList;
+    List<Datum> dataList;
+    ProgressBar progressBar;
+    RelativeLayout relativeLayout;
+    private ApiInterface apiInterface;
+
 
     public static ProfileFragment newInstance(int instance) {
         Bundle args = new Bundle();
@@ -69,75 +95,73 @@ public class ProfileFragment extends BaseFragment {
             fragCount = args.getInt(ARGS_INSTANCE);
         }
 
+        relativeLayout = (RelativeLayout) view.findViewById(R.id.activity_main);
 
-        //initCardView();
+        recyclerViewHorizontal = (RecyclerView) view.findViewById(R.id.horizontal_recycler_view);
+        recyclerViewVertical = (RecyclerView) view.findViewById(R.id.vertical_recycler_view);
+        recyclerViewHorizontal.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false));
+        recyclerViewVertical.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
 
+        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
 
-        recycler_view = (RecyclerView) view.findViewById(R.id.recycler_view);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        popularList = Collections.<Popular>emptyList();
+        dataList = Collections.<Datum>emptyList();
+        apiInterface = RetrofitApiClient.getClient().create(ApiInterface.class);
 
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        layoutManager.scrollToPosition(0);
-
-        recycler_view.setLayoutManager(layoutManager);
-
-        for(int i= 0; i<3 ; i++){
-            
+        if (NetworkCheckingClass.isNetworkAvailable(getActivity())) {
+            progressBar.setVisibility(View.VISIBLE);
+            fetchData();
+        } else {
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(getActivity(), "No internet Connection", Toast.LENGTH_LONG).show();
         }
+
 
 
         return view;
     }
 
-    private void initCardView() {
-
-        ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewPager);
-
-        CardFragmentPagerAdapter pagerAdapter = new CardFragmentPagerAdapter(getChildFragmentManager(), dpToPixels(2, getContext()));
-        ShadowTransformer fragmentCardShadowTransformer = new ShadowTransformer(viewPager, pagerAdapter);
-        fragmentCardShadowTransformer.enableScaling(true);
-
-        viewPager.setAdapter(pagerAdapter);
-        viewPager.setPageTransformer(false, fragmentCardShadowTransformer);
-        viewPager.setOffscreenPageLimit(3);
-    }
-
-    /**
-     * Change value in dp to pixels
-     *
-     * @param dp
-     * @param context
-     * @return
-     */
-    public static float dpToPixels(int dp, Context context) {
-        return dp * (context.getResources().getDisplayMetrics().density);
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
 
 
-        btnClickMe.setOnClickListener(new View.OnClickListener() {
+    private void fetchData() {
+
+        Call<JsonData> call = apiInterface.apiCall();
+        call.enqueue(new Callback<JsonData>() {
             @Override
-            public void onClick(View v) {
+            public void onResponse(Call<JsonData> call, Response<JsonData> response) {
 
-                if (mFragmentNavigation != null) {
-                    mFragmentNavigation.pushFragment(SingleLocationFragment.newInstance(fragCount + 1));
+                JsonData jsonData = response.body();
 
-                }
+                popularList = jsonData.getPopular();
+                dataList = jsonData.getData();
+
+                int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.activity_horizontal_margin);
+
+                //for spacing after every item
+                if (popularList.size() > 0)
+                    recyclerViewHorizontal.addItemDecoration(new GridSpacingItemDecoration(popularList.size(), spacingInPixels, true, 0));
+
+                progressBar.setVisibility(View.GONE);
+
+                relativeLayout.setBackgroundColor(Color.parseColor("#ffffb3"));
+
+
+                horizontalAdapter = new HorizontalAdapter(getContext(), popularList);
+                recyclerViewHorizontal.setAdapter(horizontalAdapter);
+                verticalAdapter = new VerticalAdapter(getContext(), dataList);
+                recyclerViewVertical.setAdapter(verticalAdapter);
+            }
+
+            @Override
+            public void onFailure(Call<JsonData> call, Throwable t) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(getApplicationContext(), t.toString(), Toast.LENGTH_LONG).show();
             }
         });
-
-
-        ((ProfilePageActivity) getActivity()).updateToolbarTitle((fragCount == 0) ? "Profile" : "Sub Profile " + fragCount);
-
     }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
     }
-
 
 }
