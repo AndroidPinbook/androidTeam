@@ -2,6 +2,7 @@ package uur.com.pinbook.FirebaseGetData;
 
 import android.util.Log;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,13 +25,15 @@ public class FirebaseGetGroups {
 
     String userId;
     String groupID;
+    String prevGroupID = " ";
     static ValueEventListener valueEventListenerForDetails;
     static ValueEventListener valueEventListenerForFriendList;
     static ValueEventListener valueEventListenerForUsers;
 
-    private static FirebaseGetGroups instance = null;
+    public static FirebaseGetGroups instance = null;
 
-    ArrayList<Group> groupList;
+    //ArrayList<Group> groupList;
+    HashMap<String, Group> groupListMap = new HashMap<String, Group>();
 
     public static FirebaseGetGroups getInstance(String userId){
 
@@ -40,13 +43,25 @@ public class FirebaseGetGroups {
         return instance;
     }
 
-    public ArrayList<Group> getGroupList() {
-        return groupList;
+    public static void setInstance(FirebaseGetGroups instance) {
+        FirebaseGetGroups.instance = instance;
     }
 
-    public void setGroupList(ArrayList<Group> groupList) {
-        this.groupList = groupList;
+    public HashMap<String, Group> getGroupListMap() {
+        return groupListMap;
     }
+
+    public void setGroupListMap(HashMap<String, Group> groupListMap) {
+        this.groupListMap = groupListMap;
+    }
+
+    //public ArrayList<Group> getGroupList() {
+    //    return instance.groupList;
+    //}
+
+    //public void setGroupList(ArrayList<Group> groupList) {
+    //    instance.groupList = groupList;
+    //}
 
     public FirebaseGetGroups(String userID){
 
@@ -54,13 +69,46 @@ public class FirebaseGetGroups {
         fillGroupList();
     }
 
+    public void addGroupToList(Group group){
+        //instance.groupList.add(group);
+        instance.groupListMap.put(group.getGroupID(), group);
+    }
+
+  /*  public void addGroupWithCheck(Group group){
+        boolean recFound = false;
+        if(instance.getListSize() != 0) {
+            for (Group grp : instance.getGroupList()) {
+                if (grp.getGroupID().equals(group.getGroupID()))
+                    recFound = true;
+            }
+        }
+
+        if(!recFound) instance.groupList.add(group);
+    }*/
+
+    public void removeGroupFromList(String groupID){
+
+        instance.groupListMap.remove(groupID);
+
+      /*  int index = 0;
+        for(Group group : instance.groupList){
+            if(groupID.equals(group.getGroupID())){
+                instance.groupList.remove(index);
+                break;
+            }
+            index ++;
+        }*/
+    }
+
     public int getListSize(){
-        return  groupList.size();
+
+        return instance.groupListMap.size();
+        //return  instance.groupList.size();
     }
 
     private void fillGroupList() {
 
-        groupList = new ArrayList<Group>();
+        //groupList = new ArrayList<Group>();
 
         DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(UserGroups).child(userId);
 
@@ -69,7 +117,7 @@ public class FirebaseGetGroups {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                if(groupList != null) groupList.clear();
+                //if(groupList != null) groupList.clear();
 
                 for(DataSnapshot groupSnapShot: dataSnapshot.getChildren()){
 
@@ -94,21 +142,52 @@ public class FirebaseGetGroups {
                             }
 
                             final DatabaseReference mDbrefDetailsExt = FirebaseDatabase.getInstance().getReference(Groups)
-                                    .child(groupID).child(Users);
+                                    .child(groupID).child(UserList);
 
-                            valueEventListenerForUsers = mDbrefDetailsExt.addValueEventListener(new ValueEventListener() {
+
+
+                            valueEventListenerForUsers = mDbrefDetailsExt.addChildEventListener(new ChildEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
 
-                                    ArrayList<String> userList = new ArrayList<String>();
+                                    ArrayList<String> userIDList = new ArrayList<String>();
 
                                     for(DataSnapshot userSnapshot : dataSnapshot.getChildren()){
                                         String userID = userSnapshot.getKey();
-                                        userList.add(userID);
+                                        userIDList.add(userID);
 
                                     }
-                                    group.setUserList(userList);
-                                    groupList.add(group);
+                                    group.setUserIDList(userIDList);
+
+                                    //addGroupWithCheck(group);
+
+                                    //if(!prevGroupID.equals(groupID))
+                                        //instance.groupList.add(group);
+
+                                    instance.groupListMap.put(group.getGroupID(), group);
+
+
+                                    //prevGroupID = groupID;
+                                }
+
+                                @Override
+                                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+                                }
+
+                                @Override
+                                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                                }
+
+                                @Override
+                                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                                }
+
+                                @Override
+                                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
                                 }
 
                                 @Override
@@ -129,5 +208,7 @@ public class FirebaseGetGroups {
                 Log.i("Info", "onCancelled2 error:" + databaseError.toString());
             }
         });
+
+        //Log.i("Info", "groupList:" + groupList);
     }
 }

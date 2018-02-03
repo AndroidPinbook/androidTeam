@@ -15,7 +15,7 @@ public class Group {
     String pictureUrl;
     String groupName;
 
-    ArrayList<String> userList;
+    ArrayList<String> userIDList;
 
     public String getGroupName() {
         return groupName;
@@ -49,15 +49,15 @@ public class Group {
         this.pictureUrl = pictureUrl;
     }
 
-    public ArrayList<String> getUserList() {
-        return userList;
+    public ArrayList<String> getUserIDList() {
+        return userIDList;
     }
 
-    public void setUserList(ArrayList<String> userList) {
-        this.userList = userList;
+    public void setUserIDList(ArrayList<String> userList) {
+        this.userIDList = userList;
     }
 
     public void addUserID(String userID){
-        userList.add(userID);
+        userIDList.add(userID);
     }
 }

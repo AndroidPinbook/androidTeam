@@ -3,6 +3,7 @@ package uur.com.pinbook.Activities;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -23,9 +24,9 @@ import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.R;
 import uur.com.pinbook.SpecialFragments.PersonFragment;
 
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.propPersons;
+import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
-public class AddNewGroupActivity extends AppCompatActivity{
+public class AddNewGroupActivity extends AppCompatActivity {
 
     Toolbar mToolBar;
     private String FBuserId;
@@ -73,7 +74,7 @@ public class AddNewGroupActivity extends AppCompatActivity{
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         SpecialSelectTabAdapter adapter = new SpecialSelectTabAdapter(this.getSupportFragmentManager());
-        adapter.addFragment(new PersonFragment(FBuserId),"Kisiler");
+        adapter.addFragment(new PersonFragment(FBuserId, verticalShown),"Kisiler");
         viewPager.setAdapter(adapter);
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -84,12 +85,13 @@ public class AddNewGroupActivity extends AppCompatActivity{
 
         selectedFriendListInstance = SelectedFriendList.getInstance();
 
-        Log.i("Info", "LazyAdapterFriends selectedFriendList size:" + selectedFriendListInstance.getSelectedFriendList().size());
 
         if (selectedFriendListInstance.getSelectedFriendList().size() == 0) {
             Toast.makeText(this, "En az 1 kisi secmelisiniz!", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        startActivity(new Intent(this, AddGroupDetailActivity.class));
     }
 
     @Override

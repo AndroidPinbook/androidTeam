@@ -12,6 +12,8 @@ public class FirebaseConstant {
     public static final String GEO_FIRE_DB_USER_LOCATIONS = "https://androidteam-f4c25.firebaseio.com/UserLocations";
     public static final String GEO_FIRE_DB_REG_BASED_LOCATION = "https://androidteam-f4c25.firebaseio.com/RegionBasedLocation";
     public static final String GEO_FIRE_DB_PIN_MODELS = "https://androidteam-f4c25.firebaseio.com/PinModels";
+    public static final String GEO_FIRE_DB_GROUPS = "https://androidteam-f4c25.firebaseio.com/Groups";
+    public static final String GEO_FIRE_DB_USERGROUPS = "https://androidteam-f4c25.firebaseio.com/UserGroups";
     public static final String FB_APPLICATION_ID = "1:695005347563:android:e77f50983708f0c0";
 
     //Firebase
@@ -28,6 +30,8 @@ public class FirebaseConstant {
     public static final String Admin = "Admin";
     public static final String GroupName = "GroupName";
     public static final String GroupPictureUrl = "GroupPictureUrl";
+    public static final String UserList = "UserList";
+    public static final String GroupImage = "GroupImage";
 
     //Firebase users childs
     public static final String userID = "userID";

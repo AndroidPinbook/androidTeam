@@ -7,14 +7,16 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import butterknife.ButterKnife;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
-import uur.com.pinbook.LazyList.LazyAdapterGroups;
+import uur.com.pinbook.ListAdapters.GroupVerticalListAdapter;
 import uur.com.pinbook.R;
 
 @SuppressLint("ValidFragment")
@@ -63,10 +65,12 @@ public class GroupFragment extends Fragment {
 
     public void getData(String userID){
 
-        FirebaseGetGroups instance = FirebaseGetGroups.getInstance(userID);
-        LazyAdapterGroups lazyAdapterGroups = new LazyAdapterGroups(getActivity(), instance.getGroupList());
+        Log.i("Info", "getGroupsSize:" + FirebaseGetGroups.getInstance(userID).getListSize());
 
-        groupRecyclerView.setAdapter(lazyAdapterGroups);
+        FirebaseGetGroups instance = FirebaseGetGroups.getInstance(userID);
+        GroupVerticalListAdapter groupVerticalListAdapter = new GroupVerticalListAdapter(getActivity(), instance.getGroupListMap());
+
+        groupRecyclerView.setAdapter(groupVerticalListAdapter);
         linearLayoutManager  = new LinearLayoutManager(getActivity());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         groupRecyclerView.setLayoutManager(linearLayoutManager);

@@ -1,4 +1,4 @@
-package uur.com.pinbook.LazyList;
+package uur.com.pinbook.ListAdapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -11,30 +11,31 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import uur.com.pinbook.DefaultModels.SelectedGroupList;
-import uur.com.pinbook.JavaFiles.Group;
+import uur.com.pinbook.DefaultModels.SelectedFriendList;
+import uur.com.pinbook.JavaFiles.Friend;
+import uur.com.pinbook.LazyList.ImageLoader;
 import uur.com.pinbook.R;
 
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
-public class LazyAdapterGroups extends RecyclerView.Adapter<LazyAdapterGroups.MyViewHolder>{
+public class FriendVerticalListAdapter extends RecyclerView.Adapter<FriendVerticalListAdapter.MyViewHolder>{
 
-    private ArrayList<Group> data;
+    private ArrayList<Friend> data;
     public ImageLoader imageLoader;
     View view;
     private ImageView specialProfileImgView;
     LinearLayout specialListLinearLayout;
     LayoutInflater layoutInflater;
-    SelectedGroupList selectedGroupList;
+    SelectedFriendList selectedFriendList;
 
     Context context;
 
-    public LazyAdapterGroups(Context context, ArrayList<Group> groupList) {
+    public FriendVerticalListAdapter(Context context, ArrayList<Friend> friendList) {
         layoutInflater = LayoutInflater.from(context);
-        data=groupList;
+        data=friendList;
         this.context = context;
-        imageLoader=new ImageLoader(context.getApplicationContext(), groupsCacheDirectory);
-        selectedGroupList = SelectedGroupList.getInstance();
+        imageLoader=new ImageLoader(context.getApplicationContext(), friendsCacheDirectory);
+        selectedFriendList = SelectedFriendList.getInstance();
     }
 
     public Object getItem(int position) {
@@ -42,26 +43,26 @@ public class LazyAdapterGroups extends RecyclerView.Adapter<LazyAdapterGroups.My
     }
 
     @Override
-    public LazyAdapterGroups.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public FriendVerticalListAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        view = layoutInflater.inflate(R.layout.special_list_item, parent, false);
+        view = layoutInflater.inflate(R.layout.special_vertical_list_item, parent, false);
 
-        LazyAdapterGroups.MyViewHolder holder = new LazyAdapterGroups.MyViewHolder(view);
+        FriendVerticalListAdapter.MyViewHolder holder = new FriendVerticalListAdapter.MyViewHolder(view);
         return holder;
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView specialName;
+        TextView userNameSurname;
         CheckBox selectCheckBox;
-        Group selectedGroup;
+        Friend selectedFriend;
         int position = 0;
 
         public MyViewHolder(View itemView) {
             super(itemView);
 
             specialProfileImgView = (ImageView) view.findViewById(R.id.specialPictureImgView);
-            specialName = (TextView) view.findViewById(R.id.specialNameTextView);
+            userNameSurname = (TextView) view.findViewById(R.id.specialNameTextView);
             selectCheckBox = (CheckBox) view.findViewById(R.id.selectCheckBox);
             specialListLinearLayout = (LinearLayout) view.findViewById(R.id.specialListLinearLayout);
 
@@ -70,11 +71,11 @@ public class LazyAdapterGroups extends RecyclerView.Adapter<LazyAdapterGroups.My
                 public void onClick(View v) {
                     if(selectCheckBox.isChecked()) {
                         selectCheckBox.setChecked(false);
-                        selectedGroupList.removeGroup(selectedGroup.getGroupID());
+                        selectedFriendList.removeFriend(selectedFriend.getUserID());
                     }
                     else {
                         selectCheckBox.setChecked(true);
-                        selectedGroupList.addGroup(selectedGroup);
+                        selectedFriendList.addFriend(selectedFriend);
                     }
                 }
             });
@@ -83,29 +84,29 @@ public class LazyAdapterGroups extends RecyclerView.Adapter<LazyAdapterGroups.My
                 @Override
                 public void onClick(View v) {
                     if(selectCheckBox.isChecked()) {
-                        selectedGroupList.addGroup(selectedGroup);
+                        selectedFriendList.addFriend(selectedFriend);
                     }
                     else {
-                        selectedGroupList.removeGroup(selectedGroup.getGroupID());
+                        selectedFriendList.removeFriend(selectedFriend.getUserID());
                     }
                 }
             });
         }
 
-        public void setData(Group selectedGroup, int position) {
+        public void setData(Friend selectedFriend, int position) {
 
-            this.specialName.setText(selectedGroup.getGroupName());
+            this.userNameSurname.setText(selectedFriend.getNameSurname());
             this.position = position;
-            this.selectedGroup = selectedGroup;
-            imageLoader.DisplayImage(selectedGroup.getPictureUrl(), specialProfileImgView);
+            this.selectedFriend = selectedFriend;
+            imageLoader.DisplayImage(selectedFriend.getProfilePicSrc(), specialProfileImgView);
             selectCheckBox.setChecked(false);
         }
     }
 
     @Override
-    public void onBindViewHolder(LazyAdapterGroups.MyViewHolder holder, int position) {
-        Group selectedGroup = data.get(position);
-        holder.setData(selectedGroup, position);
+    public void onBindViewHolder(FriendVerticalListAdapter.MyViewHolder holder, int position) {
+        Friend selectedFriend = data.get(position);
+        holder.setData(selectedFriend, position);
     }
 
     public long getItemId(int position) {

@@ -6,12 +6,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 
 import java.util.ArrayList;
 
-import uur.com.pinbook.SpecialFragments.PersonFragment;
-
-/**
- * Created by mac on 11.01.2018.
- */
-
 public class SpecialSelectTabAdapter extends FragmentStatePagerAdapter{
 
     private ArrayList<Fragment> mFragmentList = new ArrayList<>();

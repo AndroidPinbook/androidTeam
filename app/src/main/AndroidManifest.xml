@@ -88,9 +88,6 @@
         <activity
             android:name=".Activities.EmailVerifyPageActivity"
             android:theme="@style/Toolbar" />
-        <activity
-            android:name=".Activities.MainActivity"
-            android:theme="@style/Toolbar" />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -107,14 +104,16 @@
         <activity
             android:name=".Activities.PinThrowActivity"
             android:label="@string/title_activity_pin_throw" />
-
         <activity
             android:name=".Activities.AddNewGroupActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
-
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Activities.SpecialSelectActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Activities.AddGroupDetailActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
     </application>
 
 </manifest>

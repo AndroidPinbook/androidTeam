@@ -34,6 +34,8 @@ import static uur.com.pinbook.ConstantsModel.NumericConstant.groups;
 import static uur.com.pinbook.ConstantsModel.NumericConstant.persons;
 import static uur.com.pinbook.ConstantsModel.StringConstant.SelectPersonOrGroupTitle;
 
+import static uur.com.pinbook.ConstantsModel.StringConstant.*;
+
 public class SpecialSelectActivity extends AppCompatActivity implements View.OnClickListener{
 
     private ViewPager viewPager;
@@ -51,6 +53,7 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
     private static SelectedFriendList selectedFriendListInstance;
 
     Toolbar mToolBar;
+    SpecialSelectTabAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,10 +92,12 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
                 switch (tab.getPosition()){
                     case persons:
                         selectedProperty = propPersons;
+                        //setupViewPager(viewPager);
                         Log.i("Info", "Tablayout kisiler");
                         break;
                     case groups:
                         selectedProperty = propGroups;
+                        //setupViewPager(viewPager);
                         Log.i("Info", "Tablayout groups");
                         break;
                     default:
@@ -151,10 +156,22 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
 
     private void setupViewPager(final ViewPager viewPager) {
 
-        SpecialSelectTabAdapter adapter = new SpecialSelectTabAdapter(this.getSupportFragmentManager());
-        adapter.addFragment(new PersonFragment(FBuserId),"Kisiler");
+        adapter = new SpecialSelectTabAdapter(this.getSupportFragmentManager());
+        adapter.addFragment(new PersonFragment(FBuserId, verticalShown),"Kisiler");
         adapter.addFragment(new GroupFragment(FBuserId), "Gruplar");
         viewPager.setAdapter(adapter);
+    }
+
+    public void reloadAdapter(){
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+
+        Log.i("Info", "SpecialSelectAdapter onstart");
+        reloadAdapter();
     }
 
     @Override
@@ -185,7 +202,7 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
 
                     selectedFriendListInstance.clearFriendList();
                 }
-                
+
                 finish();
                 break;
 

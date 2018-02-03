@@ -270,7 +270,7 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
             mProgressDialog.show();
 
             saveProfPicViaEmailVerify();
-            saveMiniProfPicToFB();
+            //saveMiniProfPicToFB();
 
             mProgressDialog.dismiss();
 

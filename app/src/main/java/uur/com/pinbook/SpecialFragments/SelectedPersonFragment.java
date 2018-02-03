@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import butterknife.ButterKnife;
+import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.ListAdapters.FriendGridListAdapter;
 import uur.com.pinbook.ListAdapters.FriendVerticalListAdapter;
@@ -22,20 +23,20 @@ import uur.com.pinbook.R;
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
 @SuppressLint("ValidFragment")
-public class PersonFragment extends Fragment{
+public class SelectedPersonFragment extends Fragment{
 
     RecyclerView personRecyclerView;
 
     private View mView;
-    String FBuserID;
     String viewType;
 
     LinearLayoutManager linearLayoutManager;
     GridLayoutManager gridLayoutManager;
 
+    private static SelectedFriendList selectedFriendListInstance;
+
     @SuppressLint("ValidFragment")
-    public PersonFragment(String FBuserID, String viewType) {
-        this.FBuserID = FBuserID;
+    public SelectedPersonFragment(String viewType) {
         this.viewType = viewType;
     }
 
@@ -57,17 +58,18 @@ public class PersonFragment extends Fragment{
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
         personRecyclerView = (RecyclerView) mView.findViewById(R.id.specialRecyclerView);
-        getData(FBuserID);
+        getData();
     }
 
-    public void getData(String userID){
+    public void getData(){
 
-        FirebaseGetFriends instance = FirebaseGetFriends.getInstance(userID);
+        selectedFriendListInstance = SelectedFriendList.getInstance();
 
         switch (viewType){
 
             case verticalShown:
-                FriendVerticalListAdapter friendVerticalListAdapter = new FriendVerticalListAdapter(getActivity(), instance.getFriendList());
+                FriendVerticalListAdapter friendVerticalListAdapter = new FriendVerticalListAdapter(getActivity(),
+                        selectedFriendListInstance.getSelectedFriendList());
                 personRecyclerView.setAdapter(friendVerticalListAdapter);
                 linearLayoutManager  = new LinearLayoutManager(getActivity());
                 linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -80,14 +82,15 @@ public class PersonFragment extends Fragment{
                 break;
 
             case gridShown:
-                FriendGridListAdapter friendGridListAdapter = new FriendGridListAdapter(getActivity(), instance.getFriendList());
+                FriendGridListAdapter friendGridListAdapter = new FriendGridListAdapter(getActivity(),
+                        selectedFriendListInstance.getSelectedFriendList());
                 personRecyclerView.setAdapter(friendGridListAdapter);
                 gridLayoutManager =new GridLayoutManager(getActivity(), 4);
                 personRecyclerView.setLayoutManager(gridLayoutManager);
                 break;
 
             default:
-                Toast.makeText(getActivity(), "Person Fragment getData teknik hata!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "SelectedPersonFragment Fragment getData teknik hata!!", Toast.LENGTH_SHORT).show();
         }
     }
 }

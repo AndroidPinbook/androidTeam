@@ -138,6 +138,8 @@ public class ProfilePageActivity extends AppCompatActivity implements
             }
         });
 
+        FirebaseGetGroups.setInstance(null);
+        FirebaseGetFriends.setInstance(null);
         FirebaseGetFriends.getInstance(FBuserId);
         FirebaseGetGroups.getInstance(FBuserId);
     }

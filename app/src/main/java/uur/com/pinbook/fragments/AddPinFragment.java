@@ -104,8 +104,6 @@ import uur.com.pinbook.JavaFiles.RegionBasedLocation;
 import uur.com.pinbook.JavaFiles.UserLocation;
 import uur.com.pinbook.R;
 import butterknife.ButterKnife;
-import uur.com.pinbook.SpecialFragments.GroupFragment;
-import uur.com.pinbook.SpecialFragments.PersonFragment;
 
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LOCATION_SERVICE;

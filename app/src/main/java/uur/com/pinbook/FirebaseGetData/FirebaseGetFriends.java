@@ -39,6 +39,10 @@ public class FirebaseGetFriends {
         return instance;
     }
 
+    public static void setInstance(FirebaseGetFriends instance) {
+        FirebaseGetFriends.instance = instance;
+    }
+
     public ArrayList<Friend> getFriendList() {
         return friendList;
     }
