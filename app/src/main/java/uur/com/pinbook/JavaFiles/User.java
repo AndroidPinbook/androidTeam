@@ -1,14 +1,6 @@
 package uur.com.pinbook.JavaFiles;
 
-import android.graphics.Bitmap;
-
-import com.google.firebase.auth.FirebaseUser;
-
 import java.io.Serializable;
-
-/**
- * Created by mac on 2.12.2017.
- */
 
 public class User implements Serializable{
 

@@ -1,8 +1,8 @@
 package uur.com.pinbook.FirebaseGetData;
 
 import android.util.Log;
+import android.widget.ImageView;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -10,110 +10,69 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.WeakHashMap;
 
+import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
 
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
-/**
- * Created by mac on 18.01.2018.
- */
-
 public class FirebaseGetGroups {
 
     String userId;
-    String groupID;
-    String prevGroupID = " ";
-    static ValueEventListener valueEventListenerForDetails;
-    static ValueEventListener valueEventListenerForFriendList;
-    static ValueEventListener valueEventListenerForUsers;
+    Map<String, Group> groupListMap = Collections.synchronizedMap(new WeakHashMap<String, Group>());
 
-    public static FirebaseGetGroups instance = null;
-
-    //ArrayList<Group> groupList;
-    HashMap<String, Group> groupListMap = new HashMap<String, Group>();
+    public static FirebaseGetGroups FBGetGroupsInstance = null;
 
     public static FirebaseGetGroups getInstance(String userId){
 
-        if(instance == null)
-            instance = new FirebaseGetGroups(userId);
+        if(FBGetGroupsInstance == null)
+            FBGetGroupsInstance = new FirebaseGetGroups(userId);
 
-        return instance;
+        return FBGetGroupsInstance;
     }
 
     public static void setInstance(FirebaseGetGroups instance) {
-        FirebaseGetGroups.instance = instance;
+        FBGetGroupsInstance = instance;
     }
 
-    public HashMap<String, Group> getGroupListMap() {
-        return groupListMap;
+    public Map<String, Group> getGroupListMap() {
+        return FBGetGroupsInstance.groupListMap;
     }
 
     public void setGroupListMap(HashMap<String, Group> groupListMap) {
         this.groupListMap = groupListMap;
     }
 
-    //public ArrayList<Group> getGroupList() {
-    //    return instance.groupList;
-    //}
-
-    //public void setGroupList(ArrayList<Group> groupList) {
-    //    instance.groupList = groupList;
-    //}
-
     public FirebaseGetGroups(String userID){
-
         this.userId = userID;
         fillGroupList();
     }
 
     public void addGroupToList(Group group){
-        //instance.groupList.add(group);
-        instance.groupListMap.put(group.getGroupID(), group);
+        groupListMap.put(group.getGroupID(), group);
     }
 
-  /*  public void addGroupWithCheck(Group group){
-        boolean recFound = false;
-        if(instance.getListSize() != 0) {
-            for (Group grp : instance.getGroupList()) {
-                if (grp.getGroupID().equals(group.getGroupID()))
-                    recFound = true;
-            }
-        }
-
-        if(!recFound) instance.groupList.add(group);
-    }*/
-
     public void removeGroupFromList(String groupID){
-
-        instance.groupListMap.remove(groupID);
-
-      /*  int index = 0;
-        for(Group group : instance.groupList){
-            if(groupID.equals(group.getGroupID())){
-                instance.groupList.remove(index);
-                break;
-            }
-            index ++;
-        }*/
+        this.groupListMap.remove(groupID);
     }
 
     public int getListSize(){
-
-        return instance.groupListMap.size();
-        //return  instance.groupList.size();
+        return this.groupListMap.size();
     }
 
     private void fillGroupList() {
 
-        //groupList = new ArrayList<Group>();
+        //groupListMap = new HashMap<String, Group>();
 
         DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(UserGroups).child(userId);
 
         //UserGroups altindan groupID bilgileri okunur
-        valueEventListenerForFriendList = mDbrefFriendList.addValueEventListener(new ValueEventListener() {
+        ValueEventListener valueEventListenerForFriendList = mDbrefFriendList.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -122,77 +81,53 @@ public class FirebaseGetGroups {
                 for(DataSnapshot groupSnapShot: dataSnapshot.getChildren()){
 
                     final Group group = new Group();
-                    groupID = groupSnapShot.getKey();
+                    String groupID = groupSnapShot.getKey();
+
                     group.setGroupID(groupID);
 
                     final DatabaseReference mDbrefDetails = FirebaseDatabase.getInstance().getReference(Groups).child(groupID);
 
-                    valueEventListenerForDetails = mDbrefDetails.addValueEventListener(new ValueEventListener() {
+                    ValueEventListener valueEventListenerForDetails = mDbrefDetails.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
 
                             if(dataSnapshot.getValue() != null){
 
-                                Map<String , String> map = new HashMap<String, String>();
+                                Map<String , Object> map = new HashMap<String, Object>();
                                 map = (Map) dataSnapshot.getValue();
 
-                                group.setAdminID(map.get(Admin));
-                                group.setGroupName(map.get(GroupName));
-                                group.setPictureUrl(map.get(GroupPictureUrl));
+                                group.setAdminID((String) map.get(Admin));
+                                group.setGroupName((String) map.get(GroupName));
+                                group.setPictureUrl((String) map.get(GroupPictureUrl));
+
+                                Map<String, Object> userList = new HashMap<String, Object>();
+                                userList = (Map<String, Object>) map.get(UserList);
+
+                                Log.i("Info", "xx");
+
+                                ArrayList<Friend> friendArrayList = new ArrayList<Friend>();
+                                Iterator it = userList.entrySet().iterator();
+
+                                while (it.hasNext()) {
+                                    Map.Entry pair = (Map.Entry) it.next();
+                                    String key = (String) pair.getKey();
+
+                                    Friend friend = new Friend();
+
+                                    Map<String, String > userDetail = new HashMap<String, String>();
+                                    userDetail = (Map<String, String>) pair.getValue();
+
+                                    friend.setUserID((String) pair.getKey());
+                                    friend.setProfilePicSrc(userDetail.get(profilePictureUrl));
+                                    friend.setNameSurname(userDetail.get(nameSurname));
+
+                                    friendArrayList.add(friend);
+                                    it.remove();
+                                }
+
+                                group.setFriendList(friendArrayList);
+                                addGroupToList(group);
                             }
-
-                            final DatabaseReference mDbrefDetailsExt = FirebaseDatabase.getInstance().getReference(Groups)
-                                    .child(groupID).child(UserList);
-
-
-
-                            valueEventListenerForUsers = mDbrefDetailsExt.addChildEventListener(new ChildEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                                    ArrayList<String> userIDList = new ArrayList<String>();
-
-                                    for(DataSnapshot userSnapshot : dataSnapshot.getChildren()){
-                                        String userID = userSnapshot.getKey();
-                                        userIDList.add(userID);
-
-                                    }
-                                    group.setUserIDList(userIDList);
-
-                                    //addGroupWithCheck(group);
-
-                                    //if(!prevGroupID.equals(groupID))
-                                        //instance.groupList.add(group);
-
-                                    instance.groupListMap.put(group.getGroupID(), group);
-
-
-                                    //prevGroupID = groupID;
-                                }
-
-                                @Override
-                                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-                                }
-
-                                @Override
-                                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                                }
-
-                                @Override
-                                public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                                }
-
-                                @Override
-                                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {}
-                            });
                         }
 
                         @Override
@@ -208,7 +143,5 @@ public class FirebaseGetGroups {
                 Log.i("Info", "onCancelled2 error:" + databaseError.toString());
             }
         });
-
-        //Log.i("Info", "groupList:" + groupList);
     }
 }

@@ -1,14 +1,19 @@
 package uur.com.pinbook.ListAdapters;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.media.Image;
+import android.os.Parcelable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -21,46 +26,63 @@ import com.google.firebase.auth.FirebaseUser;
 
 import org.w3c.dom.Text;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import uur.com.pinbook.Activities.DetailActivity;
+import uur.com.pinbook.Activities.DisplayGroupDetail;
 import uur.com.pinbook.Activities.ProfilePhotoActivity;
+import uur.com.pinbook.Activities.RegisterPageActivity;
 import uur.com.pinbook.Adapters.CustomDialogAdapter;
 import uur.com.pinbook.ConstantsModel.StringConstant;
 import uur.com.pinbook.DefaultModels.SelectedGroupList;
 import uur.com.pinbook.FirebaseAdapters.FirebaseDeleteGroupAdapter;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
+import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
 import uur.com.pinbook.LazyList.ImageLoader;
 import uur.com.pinbook.R;
 
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
 public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVerticalListAdapter.MyViewHolder> {
 
     private ArrayList<Group> data = new ArrayList<>();
     public ImageLoader imageLoader;
     View view;
-    private ImageView specialProfileImgView;
     LinearLayout specialListLinearLayout;
     LayoutInflater layoutInflater;
     SelectedGroupList selectedGroupList;
     Context context;
 
+    String FBUserID = null;
+
     public static final int groupDetailItem = 0;
     public static final int groupDeleteItem = 1;
 
-    public GroupVerticalListAdapter(Context context, HashMap<String, Group> groupListMap) {
+    public GroupVerticalListAdapter(Context context, Map<String, Group> groupListMap) {
         layoutInflater = LayoutInflater.from(context);
         fillGroupArray(groupListMap);
+        Collections.sort(data, new CustomComparator());
         this.context = context;
         imageLoader = new ImageLoader(context.getApplicationContext(), groupsCacheDirectory);
         selectedGroupList = SelectedGroupList.getInstance();
     }
 
-    private void fillGroupArray(HashMap<String, Group> groupListMap) {
+    public class CustomComparator implements Comparator<Group> {
+        @Override
+        public int compare(Group o1, Group o2) {
+            return o1.getGroupName().compareToIgnoreCase(o2.getGroupName());
+        }
+    }
+
+    private void fillGroupArray(Map<String, Group> groupListMap) {
         Iterator it = groupListMap.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
@@ -85,9 +107,10 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
         TextView adminIDTextView;
         CheckBox selectCheckBox;
         Group selectedGroup;
+        ImageView specialProfileImgView;
         int position = 0;
 
-        public MyViewHolder(View itemView) {
+        public MyViewHolder(final View itemView) {
             super(itemView);
 
             specialProfileImgView = (ImageView) view.findViewById(R.id.specialPictureImgView);
@@ -97,13 +120,10 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
             itemIdTextView = (TextView) view.findViewById(R.id.itemIdTextView);
             adminIDTextView = (TextView) view.findViewById(R.id.adminIDTextView);
 
-            //String gID = selectedGroup.getGroupID();
-            //selectedGroup.setUserIDList(getUserIDList(gID));
-
             specialListLinearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    selectedGroup = data.get(position);
+                    hideKeyBoard(itemView);
                     if (selectCheckBox.isChecked()) {
                         selectCheckBox.setChecked(false);
                         selectedGroupList.removeGroup(selectedGroup.getGroupID());
@@ -117,8 +137,7 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
             selectCheckBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-                    selectedGroup = data.get(position);
+                    hideKeyBoard(itemView);
                     if (selectCheckBox.isChecked()) {
                         selectedGroupList.addGroup(selectedGroup);
                     } else {
@@ -133,7 +152,7 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
                     Log.i("Info", "Long click");
                     Log.i("Info", "view:" + v.toString());
 
-                    selectedGroup = data.get(position);
+                    hideKeyBoard(itemView);
                     ViewGroup viewGroup = (ViewGroup) v;
 
                     boolean groupIDFoundInd = false;
@@ -174,41 +193,41 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
                     }
 
                     showGroupDetail(foundedGroupId, foundedGroupName, foundedAdminID,
-                            position, selectedGroup);
+                            position, selectedGroup, specialProfileImgView);
 
                     return true;
                 }
             });
         }
 
-        //public ArrayList<String> getUserIDList(String groupSelectedID){
-
-
-        //}
-
         public void setData(Group selectedGroup, int position) {
 
+            this.selectedGroup = selectedGroup;
+            this.position = position;
             this.specialNameTextView.setText(selectedGroup.getGroupName());
             this.itemIdTextView.setText(selectedGroup.getGroupID());
             this.adminIDTextView.setText(selectedGroup.getAdminID());
-            this.position = position;
-            this.selectedGroup = selectedGroup;
-            imageLoader.DisplayImage(selectedGroup.getPictureUrl(), specialProfileImgView);
+            imageLoader.DisplayImage(selectedGroup.getPictureUrl(), specialProfileImgView, displayRounded);
             selectCheckBox.setChecked(false);
         }
     }
 
     public String getFbUserID() {
 
-        FirebaseAuth firebaseAuth;
-        firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        return currentUser.getUid();
+        if(FBUserID == null) {
+            FirebaseAuth firebaseAuth;
+            firebaseAuth = FirebaseAuth.getInstance();
+            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+            FBUserID = currentUser.getUid();
+        }
+
+        return FBUserID;
     }
 
     private void showGroupDetail(final String groupID, String groupName,
                                  final String adminID, final int position,
-                                 final Group selectedGroup) {
+                                 final Group selectedGroup,
+                                 final ImageView specialProfileImgView) {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1);
         adapter.add("  Grup Bilgileri");
@@ -231,13 +250,18 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
 
                 if (item == groupDetailItem) {
 
+                    Intent intent = new Intent(context, DisplayGroupDetail.class);
+                    intent.putExtra(groupConstant, selectedGroup);
+                    context.startActivity(intent);
 
                 } else if (item == groupDeleteItem) {
 
                     if (adminID.equals(getFbUserID())) {
+                        imageLoader.removeImageViewFromMap(selectedGroup.getPictureUrl());
                         removeItemFromGroupList(position);
                         FirebaseGetGroups.getInstance(adminID).removeGroupFromList(selectedGroup.getGroupID());
                         deleteGroup(selectedGroup);
+                        notifyDataSetChanged();
                     }
                     //else
                     //exitFromGroup();
@@ -257,7 +281,7 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
     public void removeItemFromGroupList(int position) {
 
         data.remove(position);
-        notifyDataSetChanged();
+        notifyItemRemoved(position);
     }
 
     public void deleteGroup(Group selectedGroup) {
@@ -268,6 +292,14 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
     public void onBindViewHolder(GroupVerticalListAdapter.MyViewHolder holder, int position) {
         Group selectedGroup = data.get(position);
         holder.setData(selectedGroup, position);
+    }
+
+    public void hideKeyBoard(View view){
+
+        Log.i("Info", "hideKeyBoard");
+
+        InputMethodManager inputMethodManager =(InputMethodManager)context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     public long getItemId(int position) {

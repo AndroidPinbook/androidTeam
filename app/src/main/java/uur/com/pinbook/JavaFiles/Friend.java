@@ -2,11 +2,13 @@ package uur.com.pinbook.JavaFiles;
 
 import android.net.Uri;
 
+import java.io.Serializable;
+
 /**
  * Created by mac on 13.01.2018.
  */
 
-public class Friend {
+public class Friend implements Serializable{
 
     String userID;
     String nameSurname;

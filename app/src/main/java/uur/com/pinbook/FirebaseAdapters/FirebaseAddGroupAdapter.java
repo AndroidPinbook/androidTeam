@@ -9,6 +9,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
+import uur.com.pinbook.FirebaseGetData.FirebaseGetUser;
+import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
 
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
@@ -45,8 +47,10 @@ public class FirebaseAddGroupAdapter {
         addGroupItems(values);
         addGroupUserIDs();
 
-        for(int i=0; i < group.getUserIDList().size(); i++)
-            addGroupToUserGroup(group.getUserIDList().get(i));
+        for(Friend friend: group.getFriendList()){
+            String userID = friend.getUserID();
+            addGroupToUserGroup(userID);
+        }
 
         addGroupToUserGroup(group.getAdminID());
     }
@@ -76,21 +80,41 @@ public class FirebaseAddGroupAdapter {
 
     public void addGroupUserIDs(){
 
-        for(int i=0; i< group.getUserIDList().size(); i++){
-
-            String userIDItem = group.getUserIDList().get(i);
-            setUserIDToUserList(userIDItem);
+        for(Friend friend: group.getFriendList()){
+            setUserIDToUserList(friend);
         }
 
-        setUserIDToUserList(group.getAdminID());
+        addAdminToUserList();
     }
 
-    public void setUserIDToUserList(String addedUserID){
+    private void addAdminToUserList() {
+
+        FirebaseGetUser firebaseGetUser = FirebaseGetUser.getInstance(group.getAdminID());
+
+        Friend friend = new Friend();
+
+        String nameSurname = firebaseGetUser.getUser().getName().trim() + " " +
+                firebaseGetUser.getUser().getSurname().trim();
+
+        friend.setNameSurname(nameSurname);
+        friend.setProfilePicSrc(firebaseGetUser.getUser().getProfilePicSrc());
+        friend.setUserID(firebaseGetUser.getUser().getUserId());
+
+        setUserIDToUserList(friend);
+    }
+
+    public void setUserIDToUserList(Friend friend){
+
+        Map<String, String> tempMap = new HashMap<String, String>();
+        tempMap.put(nameSurname, friend.getNameSurname());
+        tempMap.put(profilePictureUrl, friend.getProfilePicSrc());
+
+        String userID = friend.getUserID();
 
         mDbref.child(Groups)
                 .child(getGroupID())
                 .child(UserList)
-                .child(addedUserID).setValue(" ", new DatabaseReference.CompletionListener() {
+                .child(userID).setValue(tempMap, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 Log.i("Info", "     >>databaseError:" + databaseError);

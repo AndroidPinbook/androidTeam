@@ -32,6 +32,8 @@ public class FirebaseConstant {
     public static final String GroupPictureUrl = "GroupPictureUrl";
     public static final String UserList = "UserList";
     public static final String GroupImage = "GroupImage";
+    public static final String GroupID = "GroupID";
+
 
     //Firebase users childs
     public static final String userID = "userID";

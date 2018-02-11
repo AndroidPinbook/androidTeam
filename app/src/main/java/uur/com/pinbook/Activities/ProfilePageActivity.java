@@ -29,6 +29,7 @@ import butterknife.BindArray;
 import butterknife.BindView;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetUser;
 import uur.com.pinbook.Manifest;
 import uur.com.pinbook.R;
 import butterknife.ButterKnife;
@@ -142,6 +143,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
         FirebaseGetFriends.setInstance(null);
         FirebaseGetFriends.getInstance(FBuserId);
         FirebaseGetGroups.getInstance(FBuserId);
+        FirebaseGetUser.getInstance(FBuserId);
     }
 
     private void initToolbar() {

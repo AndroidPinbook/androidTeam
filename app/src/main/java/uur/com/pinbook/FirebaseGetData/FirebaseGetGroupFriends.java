@@ -1,6 +1,5 @@
 package uur.com.pinbook.FirebaseGetData;
 
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
@@ -17,30 +16,16 @@ import uur.com.pinbook.JavaFiles.Friend;
 
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
-/**
- * Created by mac on 17.01.2018.
- */
+public class FirebaseGetGroupFriends {
 
-public class FirebaseGetFriends {
-
-    String userId;
-    static ValueEventListener valueEventListenerForDetails;
-    static ValueEventListener valueEventListenerForFriendList;
-
-    private static FirebaseGetFriends FBGetFriendsInstance = null;
+    String selectionType;
+    String FBUserID;
 
     ArrayList<Friend> friendList;
 
-    public static FirebaseGetFriends getInstance(String userId){
-
-        if(FBGetFriendsInstance == null)
-            FBGetFriendsInstance = new FirebaseGetFriends(userId);
-
-        return FBGetFriendsInstance;
-    }
-
-    public static void setInstance(FirebaseGetFriends instance) {
-        FBGetFriendsInstance = instance;
+    public FirebaseGetGroupFriends(String selectionType, String FBUserID){
+        this.selectionType = selectionType;
+        this.FBUserID = FBUserID;
     }
 
     public ArrayList<Friend> getFriendList() {
@@ -51,12 +36,6 @@ public class FirebaseGetFriends {
         this.friendList = friendList;
     }
 
-    public FirebaseGetFriends(String userID){
-
-        this.userId = userID;
-        fillFriendList();
-    }
-
     public int getListSize(){
         return  friendList.size();
     }
@@ -65,7 +44,11 @@ public class FirebaseGetFriends {
 
         friendList = new ArrayList<Friend>();
 
-        DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(Friends).child(userId);
+        DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(Friends).child(FBUserID);
+
+
+        /*
+
 
         valueEventListenerForFriendList = mDbrefFriendList.addValueEventListener(new ValueEventListener() {
             @Override
@@ -118,6 +101,6 @@ public class FirebaseGetFriends {
 
                 Log.i("Info", "onCancelled2 error:" + databaseError.toString());
             }
-        });
+        });*/
     }
 }

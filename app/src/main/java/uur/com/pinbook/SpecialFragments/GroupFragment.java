@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import butterknife.ButterKnife;
-import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.ListAdapters.GroupVerticalListAdapter;
 import uur.com.pinbook.R;
@@ -25,7 +24,6 @@ public class GroupFragment extends Fragment {
     RecyclerView groupRecyclerView;
 
     private View mView;
-    private View mView2;
     String FBuserID;
     ViewGroup mContainer;
     LayoutInflater mLayoutInflater;
@@ -64,8 +62,6 @@ public class GroupFragment extends Fragment {
     }
 
     public void getData(String userID){
-
-        Log.i("Info", "getGroupsSize:" + FirebaseGetGroups.getInstance(userID).getListSize());
 
         FirebaseGetGroups instance = FirebaseGetGroups.getInstance(userID);
         GroupVerticalListAdapter groupVerticalListAdapter = new GroupVerticalListAdapter(getActivity(), instance.getGroupListMap());

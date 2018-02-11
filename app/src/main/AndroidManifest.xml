@@ -105,15 +105,19 @@
             android:name=".Activities.PinThrowActivity"
             android:label="@string/title_activity_pin_throw" />
         <activity
-            android:name=".Activities.AddNewGroupActivity"
+            android:name=".Activities.AddNewFriendActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Activities.SpecialSelectActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Activities.AddGroupDetailActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Activities.DisplayGroupDetail"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
+        <activity android:name=".Activities.DetailActivity"></activity>
     </application>
 
 </manifest>

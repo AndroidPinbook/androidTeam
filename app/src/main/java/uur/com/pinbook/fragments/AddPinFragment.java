@@ -32,16 +32,11 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -82,14 +77,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import uur.com.pinbook.Activities.AddNewGroupActivity;
-import uur.com.pinbook.Activities.EnterPageActivity;
 import uur.com.pinbook.Activities.PlayVideoActivity;
 import uur.com.pinbook.Activities.ProfilePageActivity;
 import uur.com.pinbook.Activities.SpecialSelectActivity;
-import uur.com.pinbook.Adapters.SpecialSelectTabAdapter;
 import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.Adapters.CustomDialogAdapter;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.Interfaces.IOnBackPressed;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.DefaultModels.SelectedGroupList;
@@ -795,7 +788,11 @@ public class AddPinFragment extends BaseFragment implements
 
     private void checkComeFromSpecialSelectActivity() {
 
+        //if(FirebaseGetGroups.FBGetGroupsInstance.getListSize() == 0)
+        //    FirebaseGetGroups.getInstance(FBuserId);
+
         if(SpecialSelectActivity.specialSelectedInd) {
+
             selectedFriendListInstance = SelectedFriendList.getInstance();
             selectedGroupListInstance = SelectedGroupList.getInstance();
 

@@ -3,8 +3,11 @@ package uur.com.pinbook.Adapters;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.util.Log;
 
 import java.util.ArrayList;
+
+import uur.com.pinbook.SpecialFragments.PersonFragment;
 
 public class SpecialSelectTabAdapter extends FragmentStatePagerAdapter{
 
@@ -30,8 +33,29 @@ public class SpecialSelectTabAdapter extends FragmentStatePagerAdapter{
         mFragmentListTitles.add(title);
     }
 
-    @Override public CharSequence getPageTitle(int position) {
+    @Override
+    public CharSequence getPageTitle(int position) {
         return mFragmentListTitles.get(position);
-        // sadece icon istiyorsak return null yapmak yeterli
+    }
+
+    /*@Override
+    public int getItemPosition(Object object) {
+
+        Log.i("Info", "object:" + object);
+        int position = 0;
+
+        if (position >= 0) {
+            return position;
+        } else {
+            return POSITION_NONE;
+        }
+    }*/
+
+    public void updateFragment(int position, Fragment fragment){
+        mFragmentList.set(position, fragment);
+    }
+
+    public void updateFragmentTitle(int position, String title){
+        mFragmentListTitles.set(position, title);
     }
 }

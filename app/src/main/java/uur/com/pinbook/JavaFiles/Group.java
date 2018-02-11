@@ -1,21 +1,18 @@
 package uur.com.pinbook.JavaFiles;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 
-import uur.com.pinbook.ConstantsModel.StringConstant;
-
-/**
- * Created by mac on 11.01.2018.
- */
-
-public class Group {
+public class Group implements Serializable{
 
     String groupID;
     String adminID;
     String pictureUrl;
     String groupName;
-
-    ArrayList<String> userIDList;
+    ArrayList<Friend> friendList;
 
     public String getGroupName() {
         return groupName;
@@ -49,15 +46,12 @@ public class Group {
         this.pictureUrl = pictureUrl;
     }
 
-    public ArrayList<String> getUserIDList() {
-        return userIDList;
+    public ArrayList<Friend> getFriendList() {
+        return friendList;
     }
 
-    public void setUserIDList(ArrayList<String> userList) {
-        this.userIDList = userList;
+    public void setFriendList(ArrayList<Friend> friendList) {
+        this.friendList = friendList;
     }
 
-    public void addUserID(String userID){
-        userIDList.add(userID);
-    }
 }

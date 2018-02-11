@@ -75,7 +75,7 @@ public class FriendGridListAdapter extends RecyclerView.Adapter<FriendGridListAd
             this.userNameSurname.setText(username);
             this.position = position;
             this.selectedFriend = selectedFriend;
-            imageLoader.DisplayImage(selectedFriend.getProfilePicSrc(), specialProfileImgView);
+            imageLoader.DisplayImage(selectedFriend.getProfilePicSrc(), specialProfileImgView, displayRounded);
         }
     }
 

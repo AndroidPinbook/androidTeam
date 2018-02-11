@@ -22,4 +22,13 @@ public class StringConstant {
     //Firebase group delete-exit constants
     public static final String deleteGroup = "deleteGroup";
     public static final String exitGroup = "exitGroup";
+
+    //Activity put extra contents
+    public static final String groupConstant = "group";
+    public static final String comeFromPage = "comeFromPage";
+
+    //image display type
+    public static final String displayRounded = "rounded";
+    public static final String displayRectangle = "rectangle";
+
 }

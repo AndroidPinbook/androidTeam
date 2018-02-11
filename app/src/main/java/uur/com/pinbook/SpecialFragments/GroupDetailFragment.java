@@ -1,6 +1,7 @@
 package uur.com.pinbook.SpecialFragments;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,29 +15,30 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import butterknife.ButterKnife;
-import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
+import uur.com.pinbook.JavaFiles.Group;
 import uur.com.pinbook.ListAdapters.FriendGridListAdapter;
 import uur.com.pinbook.ListAdapters.FriendVerticalListAdapter;
+import uur.com.pinbook.ListAdapters.GroupDTLVerticalListAdapter;
 import uur.com.pinbook.R;
 
-import static uur.com.pinbook.ConstantsModel.StringConstant.*;
+import static uur.com.pinbook.ConstantsModel.StringConstant.gridShown;
+import static uur.com.pinbook.ConstantsModel.StringConstant.horizontalShown;
+import static uur.com.pinbook.ConstantsModel.StringConstant.verticalShown;
 
 @SuppressLint("ValidFragment")
-public class SelectedPersonFragment extends Fragment{
+public class GroupDetailFragment extends Fragment {
 
+    Group group;
+    String viewType;
+    View mView;
     RecyclerView personRecyclerView;
 
-    private View mView;
-    String viewType;
-
     LinearLayoutManager linearLayoutManager;
-    GridLayoutManager gridLayoutManager;
-
-    private static SelectedFriendList selectedFriendListInstance;
 
     @SuppressLint("ValidFragment")
-    public SelectedPersonFragment(String viewType) {
+    public GroupDetailFragment(Group group, String viewType) {
+        this.group = group;
         this.viewType = viewType;
     }
 
@@ -63,34 +65,19 @@ public class SelectedPersonFragment extends Fragment{
 
     public void getData(){
 
-        selectedFriendListInstance = SelectedFriendList.getInstance();
-
         switch (viewType){
 
             case verticalShown:
-                FriendVerticalListAdapter friendVerticalListAdapter = new FriendVerticalListAdapter(getActivity(),
-                        selectedFriendListInstance.getSelectedFriendList(), null);
-                personRecyclerView.setAdapter(friendVerticalListAdapter);
-                linearLayoutManager  = new LinearLayoutManager(getActivity());
+                GroupDTLVerticalListAdapter groupDTLVerticalListAdapter =
+                        new GroupDTLVerticalListAdapter(getActivity(), group.getFriendList(), group.getGroupID());
+                personRecyclerView.setAdapter(groupDTLVerticalListAdapter);
+                linearLayoutManager = new LinearLayoutManager(getActivity());
                 linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
                 personRecyclerView.setLayoutManager(linearLayoutManager);
                 break;
 
-            case horizontalShown:
-                linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-                personRecyclerView.setLayoutManager(linearLayoutManager);
-                break;
-
-            case gridShown:
-                FriendGridListAdapter friendGridListAdapter = new FriendGridListAdapter(getActivity(),
-                        selectedFriendListInstance.getSelectedFriendList());
-                personRecyclerView.setAdapter(friendGridListAdapter);
-                gridLayoutManager =new GridLayoutManager(getActivity(), 4);
-                personRecyclerView.setLayoutManager(gridLayoutManager);
-                break;
-
             default:
-                Toast.makeText(getActivity(), "SelectedPersonFragment Fragment getData teknik hata!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Person Fragment getData teknik hata!!", Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -51,6 +51,7 @@ import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.FirebaseAdapters.FirebaseAddGroupAdapter;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
+import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
 import uur.com.pinbook.R;
 import uur.com.pinbook.SpecialFragments.SelectedPersonFragment;
@@ -388,13 +389,7 @@ public class AddGroupDetailActivity extends AppCompatActivity implements View.On
 
         group.setAdminID(FBuserId);
         group.setGroupName(groupNameEditText.getText().toString());
-
-        ArrayList<String> userIDList = new ArrayList<String>();
-
-        for (int i = 0; i < selectedFriendListInstance.getSize(); i++)
-            userIDList.add(selectedFriendListInstance.getFriend(i).getUserID());
-
-        group.setUserIDList(userIDList);
+        group.setFriendList(selectedFriendListInstance.getSelectedFriendList());
 
         firebaseGroupAdapter = new FirebaseAddGroupAdapter(group);
 
@@ -409,16 +404,6 @@ public class AddGroupDetailActivity extends AppCompatActivity implements View.On
         riversRef = mStorageRef.child("Groups/groupPics").child(firebaseGroupAdapter.getGroupID() + ".jpg");
 
         if(tempUri != null) savePicture();
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mProgressDialog.dismiss();
-                Intent intent = new Intent(getApplicationContext(), SpecialSelectActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-            }
-        }, 1000);
     }
 
     private void savePicture() {
@@ -431,6 +416,16 @@ public class AddGroupDetailActivity extends AppCompatActivity implements View.On
                         Uri downloadUrl = taskSnapshot.getDownloadUrl();
                         group.setPictureUrl(downloadUrl.toString());
                         firebaseGroupAdapter.savePictureUrl(group.getPictureUrl());
+
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                mProgressDialog.dismiss();
+                                Intent intent = new Intent(getApplicationContext(), SpecialSelectActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                            }
+                        }, 1000);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
