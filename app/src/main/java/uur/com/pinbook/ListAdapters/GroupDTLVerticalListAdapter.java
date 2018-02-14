@@ -32,6 +32,7 @@ import uur.com.pinbook.FirebaseAdapters.FirebaseDeleteFriendAdapter;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.JavaFiles.Friend;
+import uur.com.pinbook.JavaFiles.Group;
 import uur.com.pinbook.LazyList.ImageLoader;
 import uur.com.pinbook.R;
 
@@ -46,8 +47,7 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
     LinearLayout specialListLinearLayout;
     LayoutInflater layoutInflater;
 
-    String FBUserID = null;
-    String groupID;
+    Group group;
 
     Context context;
     Activity activity;
@@ -55,12 +55,12 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
     public static final int removeFromGroup = 0;
     public static final int displayProfile = 1;
 
-    public GroupDTLVerticalListAdapter(Context context, ArrayList<Friend> friendList, String groupID) {
+    public GroupDTLVerticalListAdapter(Context context, Group group) {
         layoutInflater = LayoutInflater.from(context);
-        data=friendList;
+        data = group.getFriendList();
         Collections.sort(data, new CustomComparator());
         this.context = context;
-        this.groupID = groupID;
+        this.group = group;
         activity = (Activity) context;
         imageLoader=new ImageLoader(context.getApplicationContext(), friendsCacheDirectory);
     }
@@ -80,7 +80,6 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
     public GroupDTLVerticalListAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         view = layoutInflater.inflate(R.layout.group_detail_list, parent, false);
-
         GroupDTLVerticalListAdapter.MyViewHolder holder = new GroupDTLVerticalListAdapter.MyViewHolder(view);
         return holder;
     }
@@ -119,15 +118,13 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
                         public void onClick(DialogInterface dialog, int item) {
 
                             if (item == removeFromGroup) {
-
                                 removeUserFromGroupList(position);
                                 FirebaseDeleteFriendAdapter firebaseDeleteFriendAdapter =
-                                        new FirebaseDeleteFriendAdapter(groupID, selectedFriend.getUserID());
+                                        new FirebaseDeleteFriendAdapter(group.getGroupID(), selectedFriend.getUserID());
                                 firebaseDeleteFriendAdapter.deleteUserFromGroup();
                                 notifyDataSetChanged();
 
                                 textview.setText(Integer.toString(data.size()));
-
 
                                 if(context instanceof DisplayGroupDetail){
                                     ((DisplayGroupDetail)context).setGroupFriendList(data);
@@ -139,26 +136,31 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
                             } else {
                                 Toast.makeText(context, "Item Selected Error!!", Toast.LENGTH_SHORT).show();
                             }
-
                         }
                     });
 
                     AlertDialog alert = builder.create();
                     alert.show();
-
                 }
             });
-
         }
 
         public void setData(Friend selectedFriend, int position) {
 
-            if(getFbUserID().equals(selectedFriend.getUserID())) {
+            //kullanici adi soyadi bilgisi yazilacak
+            if(getFbUserID().equals(selectedFriend.getUserID()))
                 this.userNameSurname.setText("Siz");
-                adminDisplayBtn.setVisibility(View.VISIBLE);
-            }else {
+            else
                 this.userNameSurname.setText(selectedFriend.getNameSurname());
-                adminDisplayBtn.setVisibility(View.GONE);
+
+            //Admin grup box degeri eklenecek
+            if(getFbUserID().equals(group.getAdminID()))
+                adminDisplayBtn.setVisibility(View.VISIBLE);
+            else {
+                if(group.getAdminID().equals(selectedFriend.getUserID()))
+                    adminDisplayBtn.setVisibility(View.VISIBLE);
+                else
+                    adminDisplayBtn.setVisibility(View.GONE);
             }
 
             this.position = position;
@@ -173,21 +175,7 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
     }
 
     public String getFbUserID() {
-
-        if(FBUserID != null)
-            return FBUserID;
-
-        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
-            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
-            return FBUserID;
-        }
-
-        FirebaseAuth firebaseAuth;
-        firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        FBUserID = currentUser.getUid();
-
-        return FBUserID;
+        return FirebaseGetAccountHolder.getUserID();
     }
 
     @Override

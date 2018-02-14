@@ -24,6 +24,7 @@ import com.twitter.sdk.android.core.TwitterCore;
 
 import butterknife.BindArray;
 import butterknife.BindView;
+import uur.com.pinbook.Controller.ClearSingletonClasses;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
@@ -137,6 +138,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
         FirebaseGetGroups.setInstance(null);
         FirebaseGetFriends.setInstance(null);
+        FirebaseGetAccountHolder.setInstance(null);
         FirebaseGetFriends.getInstance(FBuserId);
         FirebaseGetGroups.getInstance(FBuserId);
         FirebaseGetAccountHolder.getInstance(FBuserId);
@@ -309,6 +311,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
             LoginManager.getInstance().logOut();
             TwitterCore.getInstance().getSessionManager().clearActiveSession();
+            ClearSingletonClasses.clearAllClasses();
             finish();
             startActivity(new Intent(this, EnterPageActivity.class));
         }

@@ -36,7 +36,6 @@ public class DisplayGroupDetail extends AppCompatActivity implements View.OnClic
     ImageView groupPictureImgV;
     public ImageLoader imageLoader;
     TextView personCntTv;
-    String FBUserID = null;
 
     SpecialSelectTabAdapter adapter;
     private Context appContext = null;
@@ -101,21 +100,7 @@ public class DisplayGroupDetail extends AppCompatActivity implements View.OnClic
     }
 
     public String getFbUserID() {
-
-        if(FBUserID != null)
-            return FBUserID;
-
-        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
-            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
-            return FBUserID;
-        }
-
-        FirebaseAuth firebaseAuth;
-        firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        FBUserID = currentUser.getUid();
-
-        return FBUserID;
+        return FirebaseGetAccountHolder.getUserID();
     }
 
     @Override

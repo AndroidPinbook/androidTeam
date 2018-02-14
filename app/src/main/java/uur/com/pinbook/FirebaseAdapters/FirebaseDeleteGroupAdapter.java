@@ -5,11 +5,14 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
 
@@ -37,8 +40,12 @@ public class FirebaseDeleteGroupAdapter {
             deleteGroupImageFromStorage();
         }else if(type == exitGroup){
 
-            deleteAdminFromUserGroupsModel();
+            deleteUserFromGroup();
         }
+    }
+
+    public String getFbUserID() {
+        return FirebaseGetAccountHolder.getUserID();
     }
 
     private void deleteGroupImageFromStorage() {
@@ -71,8 +78,11 @@ public class FirebaseDeleteGroupAdapter {
         mDbref.removeValue();
     }
 
-    public void deleteAdminFromUserGroupsModel(){
-        mDbref = FirebaseDatabase.getInstance().getReference().child(UserGroups).child(adminID).child(groupID);
+    public void deleteUserFromGroup(){
+        mDbref = FirebaseDatabase.getInstance().getReference().child(Groups).child(groupID).child(UserList).child(getFbUserID());
+        mDbref.removeValue();
+
+        mDbref = FirebaseDatabase.getInstance().getReference().child(UserGroups).child(getFbUserID()).child(groupID);
         mDbref.removeValue();
     }
 

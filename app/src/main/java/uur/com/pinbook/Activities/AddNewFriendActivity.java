@@ -29,10 +29,6 @@ import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 public class AddNewFriendActivity extends AppCompatActivity {
 
     Toolbar mToolBar;
-    private String FBUserID = null;
-
-    private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
 
     ViewPager viewPager;
     String comingPageName = null;
@@ -73,21 +69,7 @@ public class AddNewFriendActivity extends AppCompatActivity {
     }
 
     public String getFbUserID() {
-
-        if(FBUserID != null)
-            return FBUserID;
-
-        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
-            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
-            return FBUserID;
-        }
-
-        FirebaseAuth firebaseAuth;
-        firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        FBUserID = currentUser.getUid();
-
-        return FBUserID;
+        return FirebaseGetAccountHolder.getUserID();
     }
 
 

@@ -65,7 +65,6 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
     SelectedGroupList selectedGroupList;
     Context context;
 
-    String FBUserID = null;
     private String searchText;
 
     public static final int groupDetailItem = 0;
@@ -230,8 +229,7 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
                         return false;
                     }
 
-                    showGroupDetail(foundedGroupId, foundedGroupName, foundedAdminID,
-                            position, selectedGroup, specialProfileImgView);
+                    showGroupDetail(position, selectedGroup, specialProfileImgView);
 
                     return true;
                 }
@@ -251,38 +249,23 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
     }
 
     public String getFbUserID() {
-
-        if(FBUserID != null)
-            return FBUserID;
-
-        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
-            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
-            return FBUserID;
-        }
-
-        FirebaseAuth firebaseAuth;
-        firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        FBUserID = currentUser.getUid();
-
-        return FBUserID;
+        return FirebaseGetAccountHolder.getUserID();
     }
 
-    private void showGroupDetail(final String groupID, String groupName,
-                                 final String adminID, final int position,
+    private void showGroupDetail(final int position,
                                  final Group selectedGroup,
                                  final ImageView specialProfileImgView) {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1);
         adapter.add("  Grup Bilgileri");
 
-        if (adminID.equals(getFbUserID()))
+        if (selectedGroup.getAdminID().equals(getFbUserID()))
             adapter.add("  Grubu Sil");
         else
             adapter.add("  Gruptan Cik");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(groupName);
+        builder.setTitle(selectedGroup.getGroupName());
 
         builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int item) {
@@ -297,16 +280,20 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
 
                 } else if (item == groupDeleteItem) {
 
-                    if (adminID.equals(getFbUserID())) {
+                    if (selectedGroup.getAdminID().equals(getFbUserID())) {
                         imageLoader.removeImageViewFromMap(selectedGroup.getPictureUrl());
                         removeItemFromGroupList(position);
-                        FirebaseGetGroups.getInstance(adminID).removeGroupFromList(selectedGroup.getGroupID());
-                        deleteGroupFromFirebase(selectedGroup);
+                        FirebaseGetGroups.getInstance(selectedGroup.getAdminID()).removeGroupFromList(selectedGroup.getGroupID());
+                        deleteGroupFromFirebase(selectedGroup, deleteGroup);
                         notifyDataSetChanged();
                     }
-                    //else
-                    //exitFromGroup();
-
+                    else{
+                        //imageLoader.removeImageViewFromMap(selectedGroup.getPictureUrl());
+                        removeItemFromGroupList(position);
+                        deleteGroupFromFirebase(selectedGroup, exitGroup);
+                        FirebaseGetGroups.getInstance(getFbUserID()).removeGroupFromList(selectedGroup.getGroupID());
+                        notifyDataSetChanged();
+                    }
 
                 } else {
                     Toast.makeText(context, "Item Selected Error!!", Toast.LENGTH_SHORT).show();
@@ -325,14 +312,23 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
         notifyItemRemoved(position);
     }
 
-    public void deleteGroupFromFirebase(Group selectedGroup) {
-        FirebaseDeleteGroupAdapter firebaseDeleteGroupAdapter = new FirebaseDeleteGroupAdapter(selectedGroup, deleteGroup);
+    public void deleteGroupFromFirebase(Group selectedGroup, String type) {
+        FirebaseDeleteGroupAdapter firebaseDeleteGroupAdapter = new FirebaseDeleteGroupAdapter(selectedGroup, type);
     }
 
     @Override
     public void onBindViewHolder(GroupVerticalListAdapter.MyViewHolder holder, int position) {
-        Group selectedGroup = groupListCopy.get(position);
-        holder.setData(selectedGroup, position);
+        Log.i("Info", "groupListCopy len           :" + groupListCopy.size());
+        Log.i("Info", "   onBindViewHolder position:" + position);
+
+
+        try {
+            Group selectedGroup = groupListCopy.get(position);
+            holder.setData(selectedGroup, position);
+        }catch (IndexOutOfBoundsException exception){
+            Log.i("Info", "error:" + exception.toString());
+            exception.printStackTrace();
+        }
     }
 
     public void hideKeyBoard(View view){

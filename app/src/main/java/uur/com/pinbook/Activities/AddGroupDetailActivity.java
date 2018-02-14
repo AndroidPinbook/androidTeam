@@ -68,8 +68,6 @@ public class AddGroupDetailActivity extends AppCompatActivity implements View.On
     FloatingActionButton saveGroupInfoFab;
     EditText groupNameEditText;
 
-    private String FBUserID = null;
-
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
 
@@ -137,21 +135,7 @@ public class AddGroupDetailActivity extends AppCompatActivity implements View.On
     }
 
     public String getFbUserID() {
-
-        if(FBUserID != null)
-            return FBUserID;
-
-        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
-            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
-            return FBUserID;
-        }
-
-        FirebaseAuth firebaseAuth;
-        firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        FBUserID = currentUser.getUid();
-
-        return FBUserID;
+        return FirebaseGetAccountHolder.getUserID();
     }
 
     public void hideKeyBoard(){

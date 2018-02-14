@@ -1,4 +1,6 @@
 package uur.com.pinbook.FirebaseGetData;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -37,8 +39,20 @@ public class FirebaseGetAccountHolder {
         return instance;
     }
 
-    public String getUserID() {
-        return instance.userID;
+    public static void setInstance(FirebaseGetAccountHolder instance) {
+        FirebaseGetAccountHolder.instance = instance;
+    }
+
+    public static String getUserID() {
+        if(!instance.userID.isEmpty())
+            return instance.userID;
+        else{
+            FirebaseAuth firebaseAuth;
+            firebaseAuth = FirebaseAuth.getInstance();
+            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+            instance.userID = currentUser.getUid();
+            return instance.userID;
+        }
     }
 
     public static void setUserID(String userID) {

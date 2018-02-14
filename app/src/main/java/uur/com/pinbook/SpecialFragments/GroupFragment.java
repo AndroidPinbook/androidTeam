@@ -70,7 +70,7 @@ public class GroupFragment extends Fragment {
     public void getData(String userID){
 
         FirebaseGetGroups instance = FirebaseGetGroups.getInstance(userID);
-        GroupVerticalListAdapter groupVerticalListAdapter = new GroupVerticalListAdapter(context, instance.getGroupArrayList(), searchText);
+        final GroupVerticalListAdapter groupVerticalListAdapter = new GroupVerticalListAdapter(context, instance.getGroupArrayList(), searchText);
 
         groupRecyclerView.setAdapter(groupVerticalListAdapter);
         linearLayoutManager  = new LinearLayoutManager(getActivity());

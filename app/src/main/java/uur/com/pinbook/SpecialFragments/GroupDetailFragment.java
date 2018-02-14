@@ -69,7 +69,7 @@ public class GroupDetailFragment extends Fragment {
 
             case verticalShown:
                 GroupDTLVerticalListAdapter groupDTLVerticalListAdapter =
-                        new GroupDTLVerticalListAdapter(getActivity(), group.getFriendList(), group.getGroupID());
+                        new GroupDTLVerticalListAdapter(getActivity(), group);
                 personRecyclerView.setAdapter(groupDTLVerticalListAdapter);
                 linearLayoutManager = new LinearLayoutManager(getActivity());
                 linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);

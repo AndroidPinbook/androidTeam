@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import uur.com.pinbook.Adapters.SpecialSelectTabAdapter;
+import uur.com.pinbook.Controller.ClearSingletonClasses;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.DefaultModels.SelectedGroupList;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
@@ -38,8 +39,6 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
 
     private ViewPager viewPager;
     private TabLayout tabLayout;
-
-    private String FBUserID = null;
 
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
@@ -148,21 +147,7 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
     }
 
     public String getFbUserID() {
-
-        if(FBUserID != null)
-            return FBUserID;
-
-        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
-            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
-            return FBUserID;
-        }
-
-        FirebaseAuth firebaseAuth;
-        firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        FBUserID = currentUser.getUid();
-
-        return FBUserID;
+        return FirebaseGetAccountHolder.getUserID();
     }
 
     public boolean onPrepareOptionsMenu(Menu menu)
@@ -184,6 +169,7 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
                 finish();
                 break;
             case R.id.logOut:
+                ClearSingletonClasses.clearAllClasses();
                 finish();
                 startActivity(new Intent(this, EnterPageActivity.class));
                 break;

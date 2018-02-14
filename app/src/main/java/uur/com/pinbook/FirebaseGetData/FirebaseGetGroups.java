@@ -3,6 +3,7 @@ package uur.com.pinbook.FirebaseGetData;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,12 +26,13 @@ public class FirebaseGetGroups {
 
     String userId;
     ArrayList<Group> groupArrayList;
+    boolean groupDeleted = false;
 
     public static FirebaseGetGroups FBGetGroupsInstance = null;
 
-    public static FirebaseGetGroups getInstance(String userId){
+    public static FirebaseGetGroups getInstance(String userId) {
 
-        if(FBGetGroupsInstance == null)
+        if (FBGetGroupsInstance == null)
             FBGetGroupsInstance = new FirebaseGetGroups(userId);
 
         return FBGetGroupsInstance;
@@ -48,53 +50,81 @@ public class FirebaseGetGroups {
         this.groupArrayList = groupArrayList;
     }
 
-    public FirebaseGetGroups(String userID){
+    public FirebaseGetGroups(String userID) {
         this.userId = userID;
         fillGroupList();
     }
 
-    public void addGroupToList(Group group){
+    public void addGroupToList(Group group) {
 
         boolean groupFounded = false;
 
-        for(Group group1 : groupArrayList){
-            if(group1.getGroupID().equals(group.getGroupID())) {
+        for (Group group1 : FBGetGroupsInstance.groupArrayList) {
+            if (group1.getGroupID().equals(group.getGroupID())) {
                 groupFounded = true;
                 break;
             }
         }
 
-        if(!groupFounded)
-            groupArrayList.add(group);
+        if (!groupFounded)
+            FBGetGroupsInstance.groupArrayList.add(group);
     }
 
-    public void removeGroupFromList(String groupID){
+    public void removeGroupFromList(String groupID) {
         int index = 0;
-        for(Group group : groupArrayList){
-            if(group.getGroupID().equals(groupID)) {
-                groupArrayList.remove(index);
+        for (Group group : FBGetGroupsInstance.groupArrayList) {
+            if (group.getGroupID().equals(groupID)) {
+                FBGetGroupsInstance.groupArrayList.remove(index);
+                groupDeleted = true;
                 break;
             }
             index++;
         }
     }
 
-    public int getListSize(){
-        return groupArrayList.size();
+    public int getListSize() {
+        return FBGetGroupsInstance.groupArrayList.size();
     }
 
     private void fillGroupList() {
 
-        groupArrayList = new ArrayList<Group>();
+        this.groupArrayList = new ArrayList<Group>();
 
         DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(UserGroups).child(userId);
+
+        ChildEventListener c = mDbrefFriendList.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.i("Info", "  ->onChildAdded");
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Log.i("Info", "  ->onChildChanged");
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Log.i("Info", "  ->onChildRemoved");
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                Log.i("Info", "  ->onChildMoved");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i("Info", "  ->onCancelled");
+            }
+        });
 
         //UserGroups altindan groupID bilgileri okunur
         ValueEventListener valueEventListenerForFriendList = mDbrefFriendList.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                for(DataSnapshot groupSnapShot: dataSnapshot.getChildren()){
+                for (DataSnapshot groupSnapShot : dataSnapshot.getChildren()) {
 
                     final Group group = new Group();
                     String groupID = groupSnapShot.getKey();
@@ -107,9 +137,9 @@ public class FirebaseGetGroups {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
 
-                            if(dataSnapshot.getValue() != null){
+                            if (dataSnapshot.getValue() != null) {
 
-                                Map<String , Object> map = new HashMap<String, Object>();
+                                Map<String, Object> map = new HashMap<String, Object>();
                                 map = (Map) dataSnapshot.getValue();
 
                                 group.setAdminID((String) map.get(Admin));
@@ -130,7 +160,7 @@ public class FirebaseGetGroups {
 
                                     Friend friend = new Friend();
 
-                                    Map<String, String > userDetail = new HashMap<String, String>();
+                                    Map<String, String> userDetail = new HashMap<String, String>();
                                     userDetail = (Map<String, String>) pair.getValue();
 
                                     friend.setUserID((String) pair.getKey());
@@ -143,6 +173,7 @@ public class FirebaseGetGroups {
 
                                 group.setFriendList(friendArrayList);
                                 addGroupToList(group);
+
                             }
                         }
 

@@ -256,9 +256,6 @@ public class AddPinFragment extends BaseFragment implements
     private LocationListener locationListener;
     private Runnable runnable = null;
 
-    private FirebaseUser currentUser;
-    private String FBUserID = null;
-
     private boolean mLocationPermissionGranted = false;
 
     private PopupWindow popupWindow = null;
@@ -1875,21 +1872,7 @@ public class AddPinFragment extends BaseFragment implements
     }
 
     public String getFbUserID() {
-
-        if(FBUserID != null)
-            return FBUserID;
-
-        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
-            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
-            return FBUserID;
-        }
-
-        FirebaseAuth firebaseAuth;
-        firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        FBUserID = currentUser.getUid();
-
-        return FBUserID;
+        return FirebaseGetAccountHolder.getUserID();
     }
 
     @Override
