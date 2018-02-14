@@ -101,7 +101,6 @@
         <activity
             android:name=".Activities.PinThrowActivity"
             android:label="@string/title_activity_pin_throw"></activity>
-        <activity android:name=".Activities.SingleLocationActivity"></activity>
     </application>
 
 </manifest>
