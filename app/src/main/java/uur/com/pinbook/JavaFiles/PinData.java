@@ -21,6 +21,9 @@ public class PinData {
     String videoRealPath;
     String imageRealPath;
 
+    public PinData() {
+    }
+
     public Uri getPinVideoImageUri() {
         return pinVideoImageUri;
     }

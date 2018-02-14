@@ -10,6 +10,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
+import uur.com.pinbook.JavaFiles.LocationDb;
+
 import uur.com.pinbook.JavaFiles.RegionBasedLocation;
 import uur.com.pinbook.JavaFiles.UserLocation;
 
@@ -78,7 +80,7 @@ public class FirebaseLocationAdapter {
         });
     }
 
-    public static void saveLocationInfo(UserLocation userLocation) {
+    public static void saveLocationInfo(LocationDb LocationDb) {
 
         mDbref = null;
         Map<String, String> values = new HashMap<>();
@@ -87,7 +89,7 @@ public class FirebaseLocationAdapter {
 
         setLocationId(locItemId);
 
-        values.put(userID, userLocation.getUserId());
+        values.put(userID, LocationDb.getUserId());
         addItemLocation(values, locItemId);
 
         values.put(countryCode, userLocation.getCountryCode());

@@ -84,9 +84,7 @@
         </activity>
         <activity
             android:name=".Activities.ProfilePhotoActivity"
-            android:theme="@style/Toolbar">
-
-        </activity>
+            android:theme="@style/Toolbar"></activity>
         <activity
             android:name=".Activities.EmailVerifyPageActivity"
             android:theme="@style/Toolbar" />

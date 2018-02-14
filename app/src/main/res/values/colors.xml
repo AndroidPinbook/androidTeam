@@ -61,4 +61,9 @@
 
     <color name="green">#70c050</color>
 
+    <color name="popular_image_background">#B8E986</color>
+    <color name="background_color">#3481c1</color>
+    <color name="horizontal_image_background">#F8E81C</color>
+    <color name="name_text_color">#333333</color>
+
 </resources>

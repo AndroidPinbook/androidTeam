@@ -89,7 +89,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
         firebaseAuth = FirebaseAuth.getInstance();
 
         if (firebaseAuth.getCurrentUser() == null) {
-            finish();
+            //finish();
             startActivity(new Intent(this, EnterPageActivity.class));
         }
 
