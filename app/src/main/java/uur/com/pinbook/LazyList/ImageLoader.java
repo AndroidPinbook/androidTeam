@@ -74,8 +74,6 @@ public class ImageLoader {
             if (url != null && fileChild == groupsCacheDirectory)
                 new DownloadImageTask(imageView, displayType).execute(url);
 
-
-            //imageView.setImageResource(stub_id);
         }
     }
 

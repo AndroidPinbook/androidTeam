@@ -24,7 +24,7 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 public class FirebaseGetGroups {
 
     String userId;
-    Map<String, Group> groupListMap = Collections.synchronizedMap(new WeakHashMap<String, Group>());
+    ArrayList<Group> groupArrayList;
 
     public static FirebaseGetGroups FBGetGroupsInstance = null;
 
@@ -40,12 +40,12 @@ public class FirebaseGetGroups {
         FBGetGroupsInstance = instance;
     }
 
-    public Map<String, Group> getGroupListMap() {
-        return FBGetGroupsInstance.groupListMap;
+    public ArrayList<Group> getGroupArrayList() {
+        return groupArrayList;
     }
 
-    public void setGroupListMap(HashMap<String, Group> groupListMap) {
-        this.groupListMap = groupListMap;
+    public void setGroupArrayList(ArrayList<Group> groupArrayList) {
+        this.groupArrayList = groupArrayList;
     }
 
     public FirebaseGetGroups(String userID){
@@ -54,20 +54,38 @@ public class FirebaseGetGroups {
     }
 
     public void addGroupToList(Group group){
-        groupListMap.put(group.getGroupID(), group);
+
+        boolean groupFounded = false;
+
+        for(Group group1 : groupArrayList){
+            if(group1.getGroupID().equals(group.getGroupID())) {
+                groupFounded = true;
+                break;
+            }
+        }
+
+        if(!groupFounded)
+            groupArrayList.add(group);
     }
 
     public void removeGroupFromList(String groupID){
-        this.groupListMap.remove(groupID);
+        int index = 0;
+        for(Group group : groupArrayList){
+            if(group.getGroupID().equals(groupID)) {
+                groupArrayList.remove(index);
+                break;
+            }
+            index++;
+        }
     }
 
     public int getListSize(){
-        return this.groupListMap.size();
+        return groupArrayList.size();
     }
 
     private void fillGroupList() {
 
-        //groupListMap = new HashMap<String, Group>();
+        groupArrayList = new ArrayList<Group>();
 
         DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(UserGroups).child(userId);
 
@@ -75,8 +93,6 @@ public class FirebaseGetGroups {
         ValueEventListener valueEventListenerForFriendList = mDbrefFriendList.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
-                //if(groupList != null) groupList.clear();
 
                 for(DataSnapshot groupSnapShot: dataSnapshot.getChildren()){
 

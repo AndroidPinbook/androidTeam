@@ -80,8 +80,10 @@ import java.util.Locale;
 import uur.com.pinbook.Activities.PlayVideoActivity;
 import uur.com.pinbook.Activities.ProfilePageActivity;
 import uur.com.pinbook.Activities.SpecialSelectActivity;
+import uur.com.pinbook.Activities.TabActivity;
 import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.Adapters.CustomDialogAdapter;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.Interfaces.IOnBackPressed;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
@@ -255,7 +257,7 @@ public class AddPinFragment extends BaseFragment implements
     private Runnable runnable = null;
 
     private FirebaseUser currentUser;
-    private String FBuserId;
+    private String FBUserID = null;
 
     private boolean mLocationPermissionGranted = false;
 
@@ -350,11 +352,6 @@ public class AddPinFragment extends BaseFragment implements
             pinFriendsImgv.setOnClickListener(this);
             pinOnlymeImgv.setOnClickListener(this);
             pinSpecialImgv.setOnClickListener(this);
-
-            mAuth = FirebaseAuth.getInstance();
-            currentUser = mAuth.getCurrentUser();
-            FBuserId = currentUser.getUid();
-
 
         } catch (Exception e) {
             Log.i("Info", "     >>onCreate try error:" + e.toString());
@@ -788,9 +785,6 @@ public class AddPinFragment extends BaseFragment implements
 
     private void checkComeFromSpecialSelectActivity() {
 
-        //if(FirebaseGetGroups.FBGetGroupsInstance.getListSize() == 0)
-        //    FirebaseGetGroups.getInstance(FBuserId);
-
         if(SpecialSelectActivity.specialSelectedInd) {
 
             selectedFriendListInstance = SelectedFriendList.getInstance();
@@ -903,7 +897,7 @@ public class AddPinFragment extends BaseFragment implements
         initializeValues();
         isFriendsNotifCheck = true;
         pinModels.setProperty(propFriends);
-        pinModels.setOwner(FBuserId);
+        pinModels.setOwner(getFbUserID());
         pinModels.setToWhom(toWhomAll);
         pinModels.setGroupList(null);
         pinModels.setFriendList(null);
@@ -916,8 +910,8 @@ public class AddPinFragment extends BaseFragment implements
         pinModels = new PinModels();
         initializeValues();
         pinModels.setProperty(propOnlyMe);
-        pinModels.setOwner(FBuserId);
-        pinModels.setToWhom(FBuserId);
+        pinModels.setOwner(getFbUserID());
+        pinModels.setToWhom(getFbUserID());
         pinModels.setGroupList(null);
         pinModels.setFriendList(null);
         pinModels.setNotifiedFlag(notifyNo);
@@ -929,7 +923,7 @@ public class AddPinFragment extends BaseFragment implements
         pinModels = new PinModels();
         initializeValues();
         isSpecialNotifCheck = true;
-        pinModels.setOwner(FBuserId);
+        pinModels.setOwner(getFbUserID());
         pinModels.setToWhom(toWhomSpecial);
         pinModels.setNotifiedFlag(notifyYes);
         //openSpecialChoosenPage();
@@ -941,6 +935,7 @@ public class AddPinFragment extends BaseFragment implements
         selectedGroupListInstance = null;
 
         startActivity(new Intent(getActivity(), SpecialSelectActivity.class));
+        //startActivity(new Intent(getActivity(), TabActivity.class));
     }
 
     private void addPinImage() {
@@ -1258,6 +1253,7 @@ public class AddPinFragment extends BaseFragment implements
         checkPopupShown();
         CustomDialogAdapter.showDialogSuccess(context, "Pin Birakildi");
         marker = null;
+        imageUri = null;
         mMap.clear();
     }
 
@@ -1534,6 +1530,7 @@ public class AddPinFragment extends BaseFragment implements
                     videoImageView.setImageResource(R.drawable.video_icon80);
                     pinData.setPinVideoUri(null);
                     pinData.setVideoRealPath(null);
+                    pinData.setPinVideoImageUri(null);
 
                     Log.i("Info", "    -->pinData.getPinVideoUri     :" + pinData.getPinVideoUri());
                     Log.i("Info", "    -->pinData.getPinVideoRealPath:" + pinData.getVideoRealPath());
@@ -1716,6 +1713,7 @@ public class AddPinFragment extends BaseFragment implements
                 }
             }
 
+            pinData.setPinVideoImageUri(getImageUri(getApplicationContext(), bitmap));
             bitmap = BitmapConversion.getRoundedShape(bitmap, 600, 600, null);
             videoImageView.setImageBitmap(bitmap);
             showPopupWindow();
@@ -1759,14 +1757,13 @@ public class AddPinFragment extends BaseFragment implements
 
         if (!itemsAddedToFB)
             return;
-        Log.i("Info", "saveCurrLocation============");
-        Log.i("Info", "     >>userId:" + FBuserId);
+
 
         Log.i("Info", "     >>Latlng latitude :" + markerLatlng.latitude);
         Log.i("Info", "     >>Latlng longitude:" + markerLatlng.longitude);
 
         try {
-            userLocation.setUserId(FBuserId);
+            userLocation.setUserId(getFbUserID());
             userLocation.setLatitude(String.valueOf(markerLatlng.latitude));
             userLocation.setLongitude(String.valueOf(markerLatlng.longitude));
             userLocation.setLocation(markerLocation);
@@ -1820,7 +1817,7 @@ public class AddPinFragment extends BaseFragment implements
             return;
 
         try {
-            firebaseLocationAdapter.saveUserLocationInfo(FBuserId);
+            firebaseLocationAdapter.saveUserLocationInfo(getFbUserID());
 
         } catch (Exception e) {
             itemsAddedToFB = false;
@@ -1836,7 +1833,7 @@ public class AddPinFragment extends BaseFragment implements
 
         try {
 
-            firebaseLocationAdapter.saveRegionBasedLocation(FBuserId, regionBasedLocation);
+            firebaseLocationAdapter.saveRegionBasedLocation(getFbUserID(), regionBasedLocation);
 
         } catch (Exception e) {
             itemsAddedToFB = false;
@@ -1875,6 +1872,24 @@ public class AddPinFragment extends BaseFragment implements
             Log.i("Info", "     >>savePinModel Error:" + e.toString());
             CustomDialogAdapter.showErrorDialog(context, e.toString());
         }
+    }
+
+    public String getFbUserID() {
+
+        if(FBUserID != null)
+            return FBUserID;
+
+        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
+            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
+            return FBUserID;
+        }
+
+        FirebaseAuth firebaseAuth;
+        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        FBUserID = currentUser.getUid();
+
+        return FBUserID;
     }
 
     @Override

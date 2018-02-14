@@ -9,7 +9,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
-import uur.com.pinbook.FirebaseGetData.FirebaseGetUser;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
 
@@ -89,16 +89,16 @@ public class FirebaseAddGroupAdapter {
 
     private void addAdminToUserList() {
 
-        FirebaseGetUser firebaseGetUser = FirebaseGetUser.getInstance(group.getAdminID());
+        FirebaseGetAccountHolder firebaseGetAccountHolder = FirebaseGetAccountHolder.getInstance(group.getAdminID());
 
         Friend friend = new Friend();
 
-        String nameSurname = firebaseGetUser.getUser().getName().trim() + " " +
-                firebaseGetUser.getUser().getSurname().trim();
+        String nameSurname = firebaseGetAccountHolder.getUser().getName().trim() + " " +
+                firebaseGetAccountHolder.getUser().getSurname().trim();
 
         friend.setNameSurname(nameSurname);
-        friend.setProfilePicSrc(firebaseGetUser.getUser().getProfilePicSrc());
-        friend.setUserID(firebaseGetUser.getUser().getUserId());
+        friend.setProfilePicSrc(firebaseGetAccountHolder.getUser().getProfilePicSrc());
+        friend.setUserID(firebaseGetAccountHolder.getUser().getUserId());
 
         setUserIDToUserList(friend);
     }

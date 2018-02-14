@@ -1,29 +1,19 @@
 package uur.com.pinbook.Activities;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,6 +22,7 @@ import com.google.firebase.auth.FirebaseUser;
 import uur.com.pinbook.Adapters.SpecialSelectTabAdapter;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.DefaultModels.SelectedGroupList;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.R;
 import uur.com.pinbook.SpecialFragments.GroupFragment;
 import uur.com.pinbook.SpecialFragments.PersonFragment;
@@ -48,7 +39,7 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
     private ViewPager viewPager;
     private TabLayout tabLayout;
 
-    private String FBuserId;
+    private String FBUserID = null;
 
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
@@ -58,7 +49,9 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
 
     private static SelectedGroupList selectedGroupListInstance;
     private static SelectedFriendList selectedFriendListInstance;
-    EditText searchEditText;
+
+    private static final int personFragmentTab = 0;
+    private static final int groupFragmentTab = 1;
 
     Toolbar mToolBar;
     SpecialSelectTabAdapter adapter;
@@ -70,7 +63,6 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
 
         mToolBar = (Toolbar) findViewById(R.id.toolbarLayout);
         mToolBar.setTitle("Kisi veya Gruplari Seciniz...");
-        //mToolBar.setSubtitle("sun title");
         mToolBar.setNavigationIcon(R.drawable.back_arrow);
         mToolBar.setBackgroundColor(getResources().getColor(R.color.background, null));
         mToolBar.setTitleTextColor(getResources().getColor(R.color.background_white, null));
@@ -79,14 +71,6 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
 
         hideSoftKeyboard();
 
-        searchEditText = (EditText) findViewById(R.id.searchEditText);
-        searchEditText.setOnClickListener(this);
-
-
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-        FBuserId = currentUser.getUid();
-
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
 
@@ -94,55 +78,6 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
-
-        searchEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                Log.i("Info", "beforeTextChanged");
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Log.i("Info", "onTextChanged");
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                Log.i("Info", "afterTextChanged");
-                Log.i("Info", "s:::" + s.toString());
-
-                //viewPager.removeAllViews();
-                //viewPager.removeViewAt(0);
-                //setupViewPager(viewPager);
-
-                switch (selectedProperty){
-                    case propPersons:
-                        //adapter.updateFragment(0, null);
-                        PersonFragment personFragment = new PersonFragment(FBuserId, verticalShown, null,
-                                null, s.toString(), SpecialSelectActivity.this);
-                        //adapter.addFragment(personFragment, "Kisiler");
-                        adapter.updateFragment(0, personFragment);
-                        //viewPager.setAdapter(adapter);
-                        reloadAdapter();
-                        break;
-
-                    case propGroups:
-
-                        break;
-
-                    default:
-                        return;
-                }
-
-
-
-
-
-
-
-
-            }
-        });
 
         selectedProperty = propPersons;
 
@@ -158,14 +93,11 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
                     case persons:
                         selectedProperty = propPersons;
                         hideSoftKeyboard();
-                        //setupViewPager(viewPager);
                         Log.i("Info", "Tablayout kisiler");
                         break;
                     case groups:
                         selectedProperty = propGroups;
                         hideSoftKeyboard();
-                        //adapter.notifyDataSetChanged();
-                        //setupViewPager(viewPager);
                         Log.i("Info", "Tablayout groups");
                         break;
                     default:
@@ -187,13 +119,56 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
 
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.menu_special_select, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.item_search);
+        android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) searchItem.getActionView();
+
+        searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if(selectedProperty.equals(propPersons)) {
+                    PersonFragment personFragment = new PersonFragment(getFbUserID(), verticalShown, null, null, newText, SpecialSelectActivity.this);
+                    adapter.updateFragment(personFragmentTab, personFragment);
+                    reloadAdapter();
+                }else if(selectedProperty.equals(propGroups)){
+                    GroupFragment groupFragment = new GroupFragment(getFbUserID(), SpecialSelectActivity.this, newText);
+                    adapter.updateFragment(groupFragmentTab, groupFragment);
+                    reloadAdapter();
+                }
+                return false;
+            }
+        });
+
         return super.onCreateOptionsMenu(menu);
+    }
+
+    public String getFbUserID() {
+
+        if(FBUserID != null)
+            return FBUserID;
+
+        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
+            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
+            return FBUserID;
+        }
+
+        FirebaseAuth firebaseAuth;
+        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        FBUserID = currentUser.getUid();
+
+        return FBUserID;
     }
 
     public boolean onPrepareOptionsMenu(Menu menu)
     {
         MenuItem register = menu.findItem(R.id.addNewGroup);
-        if(selectedProperty == propPersons)
+        if(selectedProperty.equals(propPersons))
             register.setVisible(false);
         else
             register.setVisible(true);
@@ -225,9 +200,9 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
     private void setupViewPager(final ViewPager viewPager) {
 
         adapter = new SpecialSelectTabAdapter(this.getSupportFragmentManager());
-        adapter.addFragment(new PersonFragment(FBuserId, verticalShown, null,
+        adapter.addFragment(new PersonFragment(getFbUserID(), verticalShown, null,
                 null, null, SpecialSelectActivity.this),"Kisiler");
-        adapter.addFragment(new GroupFragment(FBuserId), "Gruplar");
+        adapter.addFragment(new GroupFragment(getFbUserID(), SpecialSelectActivity.this, null), "Gruplar");
         viewPager.setAdapter(adapter);
     }
 
@@ -238,8 +213,6 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
     @Override
     public void onStart(){
         super.onStart();
-
-        Log.i("Info", "SpecialSelectAdapter onstart");
         reloadAdapter();
     }
 
@@ -275,10 +248,6 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
                 finish();
                 break;
 
-            case R.id.searchEditText:
-                showSoftKeyboard(v);
-                break;
-
             case R.id.viewpager:
                 hideKeyBoard();
                 break;
@@ -297,8 +266,6 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
     }
 
     public void hideKeyBoard(){
-
-        Log.i("Info", "hideKeyBoard");
 
         InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);

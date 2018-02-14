@@ -21,6 +21,7 @@ import java.util.ArrayList;
 
 import uur.com.pinbook.Adapters.SpecialSelectTabAdapter;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
 import uur.com.pinbook.LazyList.ImageLoader;
@@ -101,12 +102,19 @@ public class DisplayGroupDetail extends AppCompatActivity implements View.OnClic
 
     public String getFbUserID() {
 
-        if(FBUserID == null){
-            FirebaseAuth firebaseAuth;
-            firebaseAuth = FirebaseAuth.getInstance();
-            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-            FBUserID = currentUser.getUid();
+        if(FBUserID != null)
+            return FBUserID;
+
+        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
+            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
+            return FBUserID;
         }
+
+        FirebaseAuth firebaseAuth;
+        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        FBUserID = currentUser.getUid();
+
         return FBUserID;
     }
 
@@ -117,8 +125,6 @@ public class DisplayGroupDetail extends AppCompatActivity implements View.OnClic
     }
 
     public void reloadAdapter(){
-        Log.i("Info", "group dt:" + group);
-        //adapter.notifyDataSetChanged();
         adapter.addFragment(new GroupDetailFragment(group, verticalShown)," ");
         viewPager.setAdapter(adapter);
     }

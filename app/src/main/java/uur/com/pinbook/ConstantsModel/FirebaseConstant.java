@@ -75,7 +75,10 @@ public class FirebaseConstant {
     public static final String text = "text";
     public static final String video = "video";
     public static final String picture = "picture";
+    public static final String videoImageURL = "videoImageURL";
 
+
+    public static final String pinVideo = "pinVideo";
     public static final String pinPictureImage = "pinPictureImage";
     public static final String pinVideoImage = "pinVideoImage";
     public static final String pinTextImage = "pinTextImage";

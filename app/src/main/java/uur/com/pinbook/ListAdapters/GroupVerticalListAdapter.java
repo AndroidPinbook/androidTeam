@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -42,6 +44,7 @@ import uur.com.pinbook.Adapters.CustomDialogAdapter;
 import uur.com.pinbook.ConstantsModel.StringConstant;
 import uur.com.pinbook.DefaultModels.SelectedGroupList;
 import uur.com.pinbook.FirebaseAdapters.FirebaseDeleteGroupAdapter;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
@@ -51,9 +54,10 @@ import uur.com.pinbook.R;
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
-public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVerticalListAdapter.MyViewHolder> {
+public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVerticalListAdapter.MyViewHolder> implements Filterable{
 
-    private ArrayList<Group> data = new ArrayList<>();
+    private ArrayList<Group> groupList = new ArrayList<>();
+    private ArrayList<Group> groupListCopy = new ArrayList<>();
     public ImageLoader imageLoader;
     View view;
     LinearLayout specialListLinearLayout;
@@ -62,33 +66,67 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
     Context context;
 
     String FBUserID = null;
+    private String searchText;
 
     public static final int groupDetailItem = 0;
     public static final int groupDeleteItem = 1;
 
-    public GroupVerticalListAdapter(Context context, Map<String, Group> groupListMap) {
+    public GroupVerticalListAdapter(Context context, ArrayList<Group> groupListMap, String searchText) {
         layoutInflater = LayoutInflater.from(context);
-        fillGroupArray(groupListMap);
-        Collections.sort(data, new CustomComparator());
+        groupList = groupListMap;
+        groupListCopy.addAll(groupList);
+        Collections.sort(groupList, new CustomComparator());
         this.context = context;
+        this.searchText = searchText;
         imageLoader = new ImageLoader(context.getApplicationContext(), groupsCacheDirectory);
         selectedGroupList = SelectedGroupList.getInstance();
+
+        if(searchText != null) {
+            if (!searchText.isEmpty())
+                getFilter().filter(searchText);
+        }
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+
+                String searchString = charSequence.toString();
+
+                if (searchString.isEmpty()) {
+
+                    groupListCopy = groupList;
+                } else {
+                    ArrayList<Group> tempFilteredList = new ArrayList<>();
+
+                    for (Group group : groupList) {
+
+                        if (group.getGroupName().toLowerCase().contains(searchString.toLowerCase())) {
+                            tempFilteredList.add(group);
+                        }
+                    }
+                    groupListCopy = tempFilteredList;
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = groupListCopy;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                groupListCopy = (ArrayList<Group>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public class CustomComparator implements Comparator<Group> {
         @Override
         public int compare(Group o1, Group o2) {
             return o1.getGroupName().compareToIgnoreCase(o2.getGroupName());
-        }
-    }
-
-    private void fillGroupArray(Map<String, Group> groupListMap) {
-        Iterator it = groupListMap.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            Group group = (Group) pair.getValue();
-            data.add(group);
-            it.remove();
         }
     }
 
@@ -214,12 +252,18 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
 
     public String getFbUserID() {
 
-        if(FBUserID == null) {
-            FirebaseAuth firebaseAuth;
-            firebaseAuth = FirebaseAuth.getInstance();
-            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-            FBUserID = currentUser.getUid();
+        if(FBUserID != null)
+            return FBUserID;
+
+        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
+            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
+            return FBUserID;
         }
+
+        FirebaseAuth firebaseAuth;
+        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        FBUserID = currentUser.getUid();
 
         return FBUserID;
     }
@@ -231,9 +275,6 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1);
         adapter.add("  Grup Bilgileri");
-
-        Log.i("Info", "adminID :" + adminID);
-        Log.i("Info", "FbUserID:" + getFbUserID());
 
         if (adminID.equals(getFbUserID()))
             adapter.add("  Grubu Sil");
@@ -260,7 +301,7 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
                         imageLoader.removeImageViewFromMap(selectedGroup.getPictureUrl());
                         removeItemFromGroupList(position);
                         FirebaseGetGroups.getInstance(adminID).removeGroupFromList(selectedGroup.getGroupID());
-                        deleteGroup(selectedGroup);
+                        deleteGroupFromFirebase(selectedGroup);
                         notifyDataSetChanged();
                     }
                     //else
@@ -280,17 +321,17 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
 
     public void removeItemFromGroupList(int position) {
 
-        data.remove(position);
+        groupListCopy.remove(position);
         notifyItemRemoved(position);
     }
 
-    public void deleteGroup(Group selectedGroup) {
+    public void deleteGroupFromFirebase(Group selectedGroup) {
         FirebaseDeleteGroupAdapter firebaseDeleteGroupAdapter = new FirebaseDeleteGroupAdapter(selectedGroup, deleteGroup);
     }
 
     @Override
     public void onBindViewHolder(GroupVerticalListAdapter.MyViewHolder holder, int position) {
-        Group selectedGroup = data.get(position);
+        Group selectedGroup = groupListCopy.get(position);
         holder.setData(selectedGroup, position);
     }
 
@@ -308,6 +349,6 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return groupListCopy.size();
     }
 }

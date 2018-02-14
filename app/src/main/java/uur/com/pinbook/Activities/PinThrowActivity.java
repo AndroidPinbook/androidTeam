@@ -93,6 +93,7 @@ import uur.com.pinbook.FirebaseAdapters.FirebaseLocationAdapter;
 import uur.com.pinbook.FirebaseAdapters.FirebasePinItemsAdapter;
 import uur.com.pinbook.Adapters.LocationTrackerAdapter;
 import uur.com.pinbook.Adapters.UriAdapter;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.JavaFiles.PinData;
 import uur.com.pinbook.JavaFiles.RegionBasedLocation;
 import uur.com.pinbook.JavaFiles.UserLocation;
@@ -232,7 +233,7 @@ public class PinThrowActivity extends FragmentActivity implements
     private Runnable runnable = null;
 
     private FirebaseUser currentUser;
-    private String FBuserId;
+    private String FBUserID = null;
 
     private boolean mLocationPermissionGranted = false;
 
@@ -384,14 +385,27 @@ public class PinThrowActivity extends FragmentActivity implements
             pinOnlymeImgv.setOnClickListener(this);
             pinSpecialImgv.setOnClickListener(this);
 
-            mAuth = FirebaseAuth.getInstance();
-            currentUser = mAuth.getCurrentUser();
-            FBuserId = currentUser.getUid();
-
-
         } catch (Exception e) {
             Log.i("Info", "     >>onCreate try error:" + e.toString());
         }
+    }
+
+    public String getFbUserID() {
+
+        if(FBUserID != null)
+            return FBUserID;
+
+        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
+            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
+            return FBUserID;
+        }
+
+        FirebaseAuth firebaseAuth;
+        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        FBUserID = currentUser.getUid();
+
+        return FBUserID;
     }
 
     private void defineAnimations() {
@@ -1462,6 +1476,7 @@ public class PinThrowActivity extends FragmentActivity implements
         pinData.setNoteText(null);
         pinData.setVideoRealPath(null);
         pinData.setImageRealPath(null);
+        pinData.setPinVideoImageUri(null);
     }
 
     private void initializeValues() {
@@ -1591,6 +1606,7 @@ public class PinThrowActivity extends FragmentActivity implements
                     videoImageView.setImageResource(R.drawable.video_icon80);
                     pinData.setPinVideoUri(null);
                     pinData.setVideoRealPath(null);
+                    pinData.setPinVideoImageUri(null);
 
                     Log.i("Info", "    -->pinData.getPinVideoUri     :" + pinData.getPinVideoUri());
                     Log.i("Info", "    -->pinData.getPinVideoRealPath:" + pinData.getVideoRealPath());
@@ -1854,6 +1870,7 @@ public class PinThrowActivity extends FragmentActivity implements
                 }
             }
 
+            pinData.setPinVideoImageUri(getImageUri(getApplicationContext(), bitmap));
             bitmap = BitmapConversion.getRoundedShape(bitmap, 600, 600, null);
             videoImageView.setImageBitmap(bitmap);
             return true;
@@ -1890,14 +1907,12 @@ public class PinThrowActivity extends FragmentActivity implements
 
         if (!itemsAddedToFB)
             return;
-        Log.i("Info", "saveCurrLocation============");
-        Log.i("Info", "     >>userId:" + FBuserId);
 
         Log.i("Info", "     >>Latlng latitude :" + markerLatlng.latitude);
         Log.i("Info", "     >>Latlng longitude:" + markerLatlng.longitude);
 
         try {
-            userLocation.setUserId(FBuserId);
+            userLocation.setUserId(getFbUserID());
             userLocation.setLatitude(String.valueOf(markerLatlng.latitude));
             userLocation.setLongitude(String.valueOf(markerLatlng.longitude));
             userLocation.setLocation(markerLocation);
@@ -1950,7 +1965,7 @@ public class PinThrowActivity extends FragmentActivity implements
             return;
 
         try {
-            firebaseLocationAdapter.saveUserLocationInfo(FBuserId);
+            firebaseLocationAdapter.saveUserLocationInfo(getFbUserID());
 
         } catch (Exception e) {
             itemsAddedToFB = false;
@@ -1965,7 +1980,7 @@ public class PinThrowActivity extends FragmentActivity implements
 
         try {
             regionBasedLocation.setLocationId(firebaseLocationAdapter.getLocationId());
-            firebaseLocationAdapter.saveRegionBasedLocation(FBuserId, regionBasedLocation);
+            firebaseLocationAdapter.saveRegionBasedLocation(getFbUserID(), regionBasedLocation);
 
         } catch (Exception e) {
             itemsAddedToFB = false;

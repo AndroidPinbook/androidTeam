@@ -43,6 +43,12 @@ public class FirebaseDeleteGroupAdapter {
 
     private void deleteGroupImageFromStorage() {
 
+        if(group.getPictureUrl() == null)
+            return;
+
+        if(group.getPictureUrl().equals(""))
+            return;
+
         StorageReference photoRef = FirebaseStorage.getInstance().getReferenceFromUrl(group.getPictureUrl());
 
         photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {

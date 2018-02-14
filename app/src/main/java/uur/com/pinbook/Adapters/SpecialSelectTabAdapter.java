@@ -4,10 +4,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.util.Log;
+import android.view.View;
 
 import java.util.ArrayList;
 
 import uur.com.pinbook.SpecialFragments.PersonFragment;
+import uur.com.pinbook.utils.Utils;
 
 public class SpecialSelectTabAdapter extends FragmentStatePagerAdapter{
 
@@ -38,21 +40,14 @@ public class SpecialSelectTabAdapter extends FragmentStatePagerAdapter{
         return mFragmentListTitles.get(position);
     }
 
-    /*@Override
-    public int getItemPosition(Object object) {
-
-        Log.i("Info", "object:" + object);
-        int position = 0;
-
-        if (position >= 0) {
-            return position;
-        } else {
-            return POSITION_NONE;
-        }
-    }*/
-
     public void updateFragment(int position, Fragment fragment){
         mFragmentList.set(position, fragment);
+    }
+
+    @Override
+    public int getItemPosition(Object object) {
+        // POSITION_NONE makes it possible to reload the PagerAdapter
+        return POSITION_NONE;
     }
 
     public void updateFragmentTitle(int position, String title){

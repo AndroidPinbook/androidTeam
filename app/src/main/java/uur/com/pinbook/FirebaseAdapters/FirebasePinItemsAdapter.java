@@ -31,11 +31,9 @@ public class FirebasePinItemsAdapter extends AppCompatActivity{
     private Uri downloadImageUri;
     private Uri downloadTextUri;
     private Uri downloadVideoUri;
+    private Uri downloadVideoImageUri;
 
     public void savePinItems(UserLocation userLocation, PinData pinData){
-
-        riversRef = null;
-        mDbref = null;
 
         tempUserLocation = userLocation;
         tempPinData = pinData;
@@ -45,10 +43,37 @@ public class FirebasePinItemsAdapter extends AppCompatActivity{
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
+        //Video image datasini atalim
+        if(pinData.getPinVideoImageUri() != null){
+            riversRef = mStorageRef.child(PinItems).child(userLocation.getUserId())
+                    .child(userLocation.getLocationId()).child(picture).child(pinVideoImage + ".jpg");
+
+            riversRef.putFile(pinData.getPinVideoImageUri())
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                            downloadVideoImageUri = taskSnapshot.getDownloadUrl();
+
+                            if(downloadVideoImageUri != null) {
+                                addPinItem(videoImageURL, downloadVideoImageUri.toString());
+                            }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+
+                            Log.i("Info", "put file err:" + exception.toString());
+                        }
+                    });
+        }
+
+
         //Video datasini atalim
         if(pinData.getPinVideoUri() != null){
             riversRef = mStorageRef.child(PinItems).child(userLocation.getUserId())
-                    .child(userLocation.getLocationId()).child(video).child(pinVideoImage + ".mp4");
+                    .child(userLocation.getLocationId()).child(video).child(pinVideo + ".mp4");
 
             riversRef.putFile(pinData.getPinVideoUri())
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {

@@ -1,12 +1,7 @@
 package uur.com.pinbook.Activities;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,30 +9,27 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import uur.com.pinbook.Adapters.SpecialSelectTabAdapter;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.FirebaseAdapters.FirebaseAddFriendToGroupAdapter;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
 import uur.com.pinbook.R;
 import uur.com.pinbook.SpecialFragments.PersonFragment;
 
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
 public class AddNewFriendActivity extends AppCompatActivity {
 
     Toolbar mToolBar;
-    private String FBuserId;
+    private String FBUserID = null;
 
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
@@ -65,7 +57,7 @@ public class AddNewFriendActivity extends AppCompatActivity {
 
         getIntentValues(savedInstanceState);
 
-        Log.i("info", "ddd:" + FirebaseGetGroups.getInstance(FBuserId));
+        Log.i("info", "ddd:" + FirebaseGetGroups.getInstance(getFbUserID()));
 
         SelectedFriendList.setInstance(null);
 
@@ -77,12 +69,27 @@ public class AddNewFriendActivity extends AppCompatActivity {
             }
         });
 
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-        FBuserId = currentUser.getUid();
-
         openPersonSelectionPage();
     }
+
+    public String getFbUserID() {
+
+        if(FBUserID != null)
+            return FBUserID;
+
+        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
+            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
+            return FBUserID;
+        }
+
+        FirebaseAuth firebaseAuth;
+        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        FBUserID = currentUser.getUid();
+
+        return FBUserID;
+    }
+
 
     private void getIntentValues(Bundle savedInstanceState) {
 
@@ -103,8 +110,7 @@ public class AddNewFriendActivity extends AppCompatActivity {
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         SpecialSelectTabAdapter adapter = new SpecialSelectTabAdapter(this.getSupportFragmentManager());
-        adapter.addFragment(new PersonFragment(FBuserId, verticalShown, comingPageName,
-                group, null, AddNewFriendActivity.this)," ");
+        adapter.addFragment(new PersonFragment(getFbUserID(), verticalShown, comingPageName, group, null, AddNewFriendActivity.this)," ");
         viewPager.setAdapter(adapter);
     }
 
@@ -129,11 +135,7 @@ public class AddNewFriendActivity extends AppCompatActivity {
     private void addFriendToGroup() {
 
         for(Friend friend : selectedFriendListInstance.getSelectedFriendList()) {
-            //((DisplayGroupDetail) getApplicationContext()).addFriendToGroup(friend);
-             //Context context = ((DisplayGroupDetail) this).getAppContext();
             DisplayGroupDetail.addFriendToGroup(friend);
-
-     //       ((DisplayGroupDetail)this).addFriendToGroup(null);
         }
 
         FirebaseAddFriendToGroupAdapter addFriendToGroupAdapter =

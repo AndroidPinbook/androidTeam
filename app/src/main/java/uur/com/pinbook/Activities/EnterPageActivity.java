@@ -157,22 +157,14 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
             FirebaseUser fbUser = mAuth.getCurrentUser();
 
-            if (fbUser == null)
-                Log.i("Info", "  >>fbUser is NULL");
-            else
-                Log.i("Info", "  >>fbUser is NOT NULL");
-
             ViewPager enterViewPager = (ViewPager) findViewById(R.id.enterViewPager);
             dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
 
-            // [START initialize_twitter_login]
             mLoginButton = findViewById(R.id.twitterLoginButton);
 
             mLoginButton.setCallback(new Callback<TwitterSession>() {
                 @Override
                 public void success(Result<TwitterSession> result) {
-
-                    Log.i("Info", "twitterLogin:success" + result);
 
                     handleTwitterSession(result.data);
                 }

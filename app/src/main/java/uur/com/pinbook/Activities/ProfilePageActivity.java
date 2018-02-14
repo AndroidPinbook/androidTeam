@@ -1,8 +1,6 @@
 package uur.com.pinbook.Activities;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -29,8 +26,7 @@ import butterknife.BindArray;
 import butterknife.BindView;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
-import uur.com.pinbook.FirebaseGetData.FirebaseGetUser;
-import uur.com.pinbook.Manifest;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.R;
 import butterknife.ButterKnife;
 import uur.com.pinbook.FragmentControllers.FragNavController;
@@ -143,7 +139,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
         FirebaseGetFriends.setInstance(null);
         FirebaseGetFriends.getInstance(FBuserId);
         FirebaseGetGroups.getInstance(FBuserId);
-        FirebaseGetUser.getInstance(FBuserId);
+        FirebaseGetAccountHolder.getInstance(FBuserId);
     }
 
     private void initToolbar() {

@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import butterknife.ButterKnife;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
-import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.ListAdapters.FriendGridListAdapter;
 import uur.com.pinbook.ListAdapters.FriendVerticalListAdapter;
 import uur.com.pinbook.R;

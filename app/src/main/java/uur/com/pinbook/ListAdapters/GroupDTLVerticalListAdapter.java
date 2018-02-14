@@ -29,6 +29,7 @@ import java.util.Comparator;
 import uur.com.pinbook.Activities.DisplayGroupDetail;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.FirebaseAdapters.FirebaseDeleteFriendAdapter;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.LazyList.ImageLoader;
@@ -173,12 +174,19 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
 
     public String getFbUserID() {
 
-        if(FBUserID == null){
-            FirebaseAuth firebaseAuth;
-            firebaseAuth = FirebaseAuth.getInstance();
-            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-            FBUserID = currentUser.getUid();
+        if(FBUserID != null)
+            return FBUserID;
+
+        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
+            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
+            return FBUserID;
         }
+
+        FirebaseAuth firebaseAuth;
+        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        FBUserID = currentUser.getUid();
+
         return FBUserID;
     }
 

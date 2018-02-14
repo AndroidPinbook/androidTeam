@@ -12,25 +12,37 @@ import uur.com.pinbook.JavaFiles.User;
 
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
-public class FirebaseGetUser {
+public class FirebaseGetAccountHolder {
 
-    private static String userID;
+    private static String userID = "";
     private static User user;
 
-    private static FirebaseGetUser instance = null;
+    private static FirebaseGetAccountHolder instance = null;
 
-    public static FirebaseGetUser getInstance(String userID) {
+    public static FirebaseGetAccountHolder getInstance(String userID) {
 
         if(instance == null) {
-            instance = new FirebaseGetUser(userID);
+            instance = new FirebaseGetAccountHolder(userID);
         }
         return instance;
     }
 
-    public FirebaseGetUser(String userID) {
+    public FirebaseGetAccountHolder(String userID) {
         user = new User();
         instance.userID = userID;
         getUserFromFirebase();
+    }
+
+    public static FirebaseGetAccountHolder getInstance() {
+        return instance;
+    }
+
+    public String getUserID() {
+        return instance.userID;
+    }
+
+    public static void setUserID(String userID) {
+        FirebaseGetAccountHolder.userID = userID;
     }
 
     public User getUser() {
@@ -46,8 +58,7 @@ public class FirebaseGetUser {
         final FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference databaseReference = db.getReference(Users).child(userID);
 
-        ValueEventListener valueEventListener;
-        valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
+        ValueEventListener valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 

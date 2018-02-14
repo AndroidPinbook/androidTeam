@@ -115,9 +115,10 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Activities.DisplayGroupDetail"
-            android:theme="@style/AppTheme.NoActionBar"/>
-
-        <activity android:name=".Activities.DetailActivity"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Activities.DetailActivity" />
+        <activity android:name=".Activities.TabActivity"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

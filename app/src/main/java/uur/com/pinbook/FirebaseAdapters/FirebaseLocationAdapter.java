@@ -48,7 +48,6 @@ public class FirebaseLocationAdapter {
 
     public static void saveUserLocationInfo(String FBUserId){
 
-        mDbref = null;
         mDbref = FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_DB_USER_LOCATIONS);
 
         String locId = getLocationId();
@@ -63,8 +62,6 @@ public class FirebaseLocationAdapter {
 
     public static void saveRegionBasedLocation(String FBUserId, RegionBasedLocation regionBasedLocation){
 
-
-        mDbref = null;
         mDbref = FirebaseDatabase.getInstance().getReferenceFromUrl(GEO_FIRE_DB_REG_BASED_LOCATION);
 
         String countryCode = regionBasedLocation.getCountryCode();

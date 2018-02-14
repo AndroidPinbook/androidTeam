@@ -1,7 +1,6 @@
 package uur.com.pinbook.SpecialFragments;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 import butterknife.ButterKnife;
 import uur.com.pinbook.Activities.DisplayGroupDetail;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
-import uur.com.pinbook.FirebaseGetData.FirebaseGetGroupFriends;
 import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
 import uur.com.pinbook.ListAdapters.FriendGridListAdapter;
@@ -46,9 +44,6 @@ public class PersonFragment extends Fragment{
     LinearLayoutManager linearLayoutManager;
     GridLayoutManager gridLayoutManager;
 
-    public static LayoutInflater personFragmentLayoutInflater;
-    public static ViewGroup personFragmentViewGroup;
-
     @SuppressLint("ValidFragment")
     public PersonFragment(String FBuserID, String viewType, String comingPage,
                           Group group, String searchText, Context context) {
@@ -58,9 +53,6 @@ public class PersonFragment extends Fragment{
         this.group = group;
         this.searchText = searchText;
         this.context = context;
-
-        if(searchText != null)
-            getData();
     }
 
     @Override
@@ -72,8 +64,6 @@ public class PersonFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        personFragmentLayoutInflater = inflater;
-        personFragmentViewGroup = container;
         mView = inflater.inflate(R.layout.fragment_special_select, container, false);
         ButterKnife.bind(this, mView);
         return mView;
@@ -103,14 +93,7 @@ public class PersonFragment extends Fragment{
                         friendVerticalListAdapter = new FriendVerticalListAdapter(context, instance.getFriendList(), null);
                 }
                 else{
-
                     friendVerticalListAdapter = new FriendVerticalListAdapter(context, instance.getFriendList(), searchText);
-                }
-
-                if(personRecyclerView == null) {
-                    mView = personFragmentLayoutInflater.inflate(R.layout.fragment_special_select, personFragmentViewGroup, false);
-                    ButterKnife.bind(this, mView);
-                    personRecyclerView = (RecyclerView) mView.findViewById(R.id.specialRecyclerView);
                 }
 
                 personRecyclerView.setAdapter(friendVerticalListAdapter);

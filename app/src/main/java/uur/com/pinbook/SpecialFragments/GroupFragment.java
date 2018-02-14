@@ -1,6 +1,7 @@
 package uur.com.pinbook.SpecialFragments;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,9 +32,14 @@ public class GroupFragment extends Fragment {
     LinearLayoutManager linearLayoutManager;
     RelativeLayout specialSelectRelLayout;
 
+    private Context context;
+    private String searchText;
+
     @SuppressLint("ValidFragment")
-    public GroupFragment(String FBuserID) {
+    public GroupFragment(String FBuserID, Context context, String searchText) {
         this.FBuserID = FBuserID;
+        this.context = context;
+        this.searchText = searchText;
     }
 
     @Override
@@ -64,7 +70,7 @@ public class GroupFragment extends Fragment {
     public void getData(String userID){
 
         FirebaseGetGroups instance = FirebaseGetGroups.getInstance(userID);
-        GroupVerticalListAdapter groupVerticalListAdapter = new GroupVerticalListAdapter(getActivity(), instance.getGroupListMap());
+        GroupVerticalListAdapter groupVerticalListAdapter = new GroupVerticalListAdapter(context, instance.getGroupArrayList(), searchText);
 
         groupRecyclerView.setAdapter(groupVerticalListAdapter);
         linearLayoutManager  = new LinearLayoutManager(getActivity());

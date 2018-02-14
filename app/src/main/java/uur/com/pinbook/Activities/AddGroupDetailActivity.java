@@ -50,6 +50,7 @@ import uur.com.pinbook.Adapters.UriAdapter;
 import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.FirebaseAdapters.FirebaseAddGroupAdapter;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
@@ -67,7 +68,7 @@ public class AddGroupDetailActivity extends AppCompatActivity implements View.On
     FloatingActionButton saveGroupInfoFab;
     EditText groupNameEditText;
 
-    private String FBuserId;
+    private String FBUserID = null;
 
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
@@ -106,10 +107,6 @@ public class AddGroupDetailActivity extends AppCompatActivity implements View.On
         mToolBar.setSubtitleTextColor(getResources().getColor(R.color.background_white, null));
         setSupportActionBar(mToolBar);
 
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-        FBuserId = currentUser.getUid();
-
         mStorageRef = FirebaseStorage.getInstance().getReference();
         mProgressDialog = new ProgressDialog(this);
 
@@ -137,6 +134,24 @@ public class AddGroupDetailActivity extends AppCompatActivity implements View.On
         });
 
         openPersonSelectionPage();
+    }
+
+    public String getFbUserID() {
+
+        if(FBUserID != null)
+            return FBUserID;
+
+        if(!FirebaseGetAccountHolder.getInstance().getUserID().isEmpty()) {
+            FBUserID = FirebaseGetAccountHolder.getInstance().getUserID();
+            return FBUserID;
+        }
+
+        FirebaseAuth firebaseAuth;
+        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        FBUserID = currentUser.getUid();
+
+        return FBUserID;
     }
 
     public void hideKeyBoard(){
@@ -187,7 +202,6 @@ public class AddGroupDetailActivity extends AppCompatActivity implements View.On
             }
 
             saveGroupDetailToFB();
-            //FirebaseGetGroups.getInstance(FBuserId).addGroupToList(group);
         }
 
     }
@@ -387,7 +401,7 @@ public class AddGroupDetailActivity extends AppCompatActivity implements View.On
 
     public void saveGroupDetailToFB() {
 
-        group.setAdminID(FBuserId);
+        group.setAdminID(getFbUserID());
         group.setGroupName(groupNameEditText.getText().toString());
         group.setFriendList(selectedFriendListInstance.getSelectedFriendList());
 
@@ -403,7 +417,23 @@ public class AddGroupDetailActivity extends AppCompatActivity implements View.On
 
         riversRef = mStorageRef.child("Groups/groupPics").child(firebaseGroupAdapter.getGroupID() + ".jpg");
 
-        if(tempUri != null) savePicture();
+        if(tempUri != null)
+            savePicture();
+        else
+            returnPreviousActivity();
+    }
+
+    private void returnPreviousActivity() {
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mProgressDialog.dismiss();
+                Intent intent = new Intent(getApplicationContext(), SpecialSelectActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        }, 1000);
     }
 
     private void savePicture() {
@@ -416,16 +446,7 @@ public class AddGroupDetailActivity extends AppCompatActivity implements View.On
                         Uri downloadUrl = taskSnapshot.getDownloadUrl();
                         group.setPictureUrl(downloadUrl.toString());
                         firebaseGroupAdapter.savePictureUrl(group.getPictureUrl());
-
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                mProgressDialog.dismiss();
-                                Intent intent = new Intent(getApplicationContext(), SpecialSelectActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                            }
-                        }, 1000);
+                        returnPreviousActivity();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

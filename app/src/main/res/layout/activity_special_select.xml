@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/specialSearchLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="uur.com.pinbook.Activities.SpecialSelectActivity"
-    android:orientation="vertical"
-    android:id="@+id/specialSearchLayout"
     android:focusable="true"
-    android:focusableInTouchMode="true">
+    android:focusableInTouchMode="true"
+    android:orientation="vertical"
+    tools:context="uur.com.pinbook.Activities.SpecialSelectActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbarLayout"
@@ -24,10 +23,10 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableRight="@android:drawable/ic_menu_search"
-                />
+                android:drawableRight="@android:drawable/ic_menu_search" />
         </LinearLayout>
     </android.support.v7.widget.Toolbar>
+
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -38,42 +37,30 @@
             android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabMode="fixed"
-            app:tabGravity="fill"/>
+            app:tabGravity="fill"
+            app:tabMode="fixed" />
 
     </android.support.design.widget.AppBarLayout>
 
-    <EditText android:id="@+id/searchEditText"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:drawableLeft="@android:drawable/ic_menu_search"
-        android:hint="Ara..."
-        android:inputType="textVisiblePassword"
-        android:nextFocusUp="@id/searchEditText"
-        android:nextFocusLeft="@id/searchEditText"/>
-
     <RelativeLayout
+        android:id="@+id/viewPagerLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/viewPagerLayout">
+        android:layout_height="match_parent">
 
         <android.support.v4.view.ViewPager
             android:id="@+id/viewpager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"  />
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <android.support.design.widget.FloatingActionButton
+            android:id="@+id/addSpecialFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/addSpecialFab"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_margin="10dp"
-            android:src="@drawable/forward_arrow"/>
+            android:src="@drawable/forward_arrow" />
 
     </RelativeLayout>
-
-
-
 </LinearLayout>

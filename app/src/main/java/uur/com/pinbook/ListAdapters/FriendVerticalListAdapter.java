@@ -3,12 +3,13 @@ package uur.com.pinbook.ListAdapters;
 import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,9 +25,10 @@ import uur.com.pinbook.R;
 
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
-public class FriendVerticalListAdapter extends RecyclerView.Adapter<FriendVerticalListAdapter.MyViewHolder>{
+public class FriendVerticalListAdapter extends RecyclerView.Adapter<FriendVerticalListAdapter.MyViewHolder> implements Filterable{
 
     private ArrayList<Friend> data;
+    private ArrayList<Friend> dataCopy = new ArrayList<Friend>();
     public ImageLoader imageLoader;
     View view;
     private ImageView specialProfileImgView;
@@ -36,37 +38,59 @@ public class FriendVerticalListAdapter extends RecyclerView.Adapter<FriendVertic
     String searchText;
 
     Context context;
-
-    public static ViewGroup friendVerticalListAdapterViewGroup;
-
+    Activity activity;
 
     public FriendVerticalListAdapter(Context context, ArrayList<Friend> friendList, String searchText) {
         layoutInflater = LayoutInflater.from(context);
         data=friendList;
+        dataCopy.addAll(data);
         Collections.sort(data, new CustomComparator());
         this.context = context;
         this.searchText = searchText;
+        activity = (Activity) context;
         imageLoader=new ImageLoader(context.getApplicationContext(), friendsCacheDirectory);
         selectedFriendList = SelectedFriendList.getInstance();
 
-        if(searchText != null)
-            fillRecyclerViewBySearchText();
-
+        if(searchText != null) {
+            if (!searchText.isEmpty())
+                getFilter().filter(searchText);
+        }
     }
 
-    private void fillRecyclerViewBySearchText() {
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
 
-        int index = 0;
+                String searchString = charSequence.toString();
 
-        for(Friend friend : data){
+                if (searchString.isEmpty()) {
 
-            if(friendFounded(friend)){
-                view = layoutInflater.inflate(R.layout.special_vertical_list_item, friendVerticalListAdapterViewGroup, false);
-                FriendVerticalListAdapter.MyViewHolder holder = new FriendVerticalListAdapter.MyViewHolder(view);
-                holder.setData(friend, index);
-                index ++;
+                    dataCopy = data;
+                } else {
+                    ArrayList<Friend> tempFilteredList = new ArrayList<>();
+
+                    for (Friend friend : data) {
+
+                        if (friend.getNameSurname().toLowerCase().contains(searchString.toLowerCase())) {
+                            tempFilteredList.add(friend);
+                        }
+                    }
+                    dataCopy = tempFilteredList;
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = dataCopy;
+                return filterResults;
             }
-        }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                dataCopy = (ArrayList<Friend>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 
     public class CustomComparator implements Comparator<Friend> {
@@ -83,9 +107,8 @@ public class FriendVerticalListAdapter extends RecyclerView.Adapter<FriendVertic
     @Override
     public FriendVerticalListAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        friendVerticalListAdapterViewGroup = parent;
         view = layoutInflater.inflate(R.layout.special_vertical_list_item, parent, false);
-        FriendVerticalListAdapter.MyViewHolder holder = new FriendVerticalListAdapter.MyViewHolder(view);
+        final FriendVerticalListAdapter.MyViewHolder holder = new FriendVerticalListAdapter.MyViewHolder(view);
         return holder;
     }
 
@@ -135,7 +158,6 @@ public class FriendVerticalListAdapter extends RecyclerView.Adapter<FriendVertic
         }
 
         public void setData(Friend selectedFriend, int position) {
-
             this.userNameSurname.setText(selectedFriend.getNameSurname());
             this.position = position;
             this.selectedFriend = selectedFriend;
@@ -146,36 +168,11 @@ public class FriendVerticalListAdapter extends RecyclerView.Adapter<FriendVertic
 
     @Override
     public void onBindViewHolder(FriendVerticalListAdapter.MyViewHolder holder, int position) {
-        Friend selectedFriend = data.get(position);
+        Friend selectedFriend = dataCopy.get(position);
         holder.setData(selectedFriend, position);
     }
 
-    public boolean friendFounded(Friend friend){
-        boolean textFound = false;
-
-        if(searchText != null){
-            String[] parts = friend.getNameSurname().split(" ");
-
-            for(String text : parts){
-                if(text != null && !text.equals("")) {
-                    if(searchText.length() <= text.length()) {
-                        if (searchText.equals(text.substring(0, searchText.length()))) {
-                            textFound = true;
-                            break;
-                        }
-                    }
-                }
-            }
-        }else
-            textFound = true;
-
-        return  textFound;
-    }
-
     public void hideKeyBoard(View view){
-
-        Log.i("Info", "hideKeyBoard");
-
         InputMethodManager inputMethodManager =(InputMethodManager)context.getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
@@ -186,6 +183,6 @@ public class FriendVerticalListAdapter extends RecyclerView.Adapter<FriendVertic
 
     @Override
     public int getItemCount() {
-        return  data.size();
+        return  dataCopy.size();
     }
 }

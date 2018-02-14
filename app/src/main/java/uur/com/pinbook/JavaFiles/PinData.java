@@ -15,10 +15,19 @@ public class PinData {
     Uri pinImageUri;
     Uri pinTextUri;
     Uri pinVideoUri;
+    Uri pinVideoImageUri;
     String noteText;
 
     String videoRealPath;
     String imageRealPath;
+
+    public Uri getPinVideoImageUri() {
+        return pinVideoImageUri;
+    }
+
+    public void setPinVideoImageUri(Uri pinVideoImageUri) {
+        this.pinVideoImageUri = pinVideoImageUri;
+    }
 
     public String getImageRealPath() {
         return imageRealPath;

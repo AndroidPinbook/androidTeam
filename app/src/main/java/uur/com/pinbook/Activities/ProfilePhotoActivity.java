@@ -54,7 +54,7 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
     ProgressDialog mProgressDialog;
 
     public String tag_users = "users";
-    String FBuserId;
+    String FBUserID = null;
 
     public User user;
     public String photoChoosenType = "";
@@ -84,6 +84,8 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         setContentView(R.layout.activity_profile_photo);
 
         mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        FBUserID = currentUser.getUid();
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
         uriAdapter = new UriAdapter();
@@ -257,14 +259,8 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
     public void saveProfilePicToFirebase(){
 
-        Log.i("Info", "saveProfilePicToFirebase starts");
-
         try {
-
-            FirebaseUser currentUser = mAuth.getCurrentUser();
-            FBuserId = currentUser.getUid();
-
-            riversRef = mStorageRef.child("Users/profilePics").child(FBuserId + ".jpg");
+            riversRef = mStorageRef.child("Users/profilePics").child(FBUserID + ".jpg");
 
             mProgressDialog.setMessage("Uploading.....");
             mProgressDialog.show();
@@ -281,10 +277,9 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
     }
 
-
     public void saveMiniProfPicToFB(){
 
-        riversRef = mStorageRef.child("Users/profilePics").child(FBuserId + "_mini.jpg");
+        riversRef = mStorageRef.child("Users/profilePics").child(FBUserID + "_mini.jpg");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         photo.compress(Bitmap.CompressFormat.JPEG, 100, baos);
