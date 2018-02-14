@@ -318,9 +318,6 @@ public class ProfileFragment extends BaseFragment {
                     tempMap.clear();
                     tempMap = ((Map) dataSnapshot.getValue());
 
-                    Log.i("--> ", mp.get("city"));
-                    String city = mp.get("city");
-
                 }
 
             }
