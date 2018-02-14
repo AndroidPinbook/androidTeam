@@ -32,11 +32,6 @@ public class HomeFragment extends BaseFragment {
     int fragCount;
     View view;
 
-    private FirebaseAuth firebaseAuth;
-
-    @BindView(R.id.buttonLogout)
-    Button buttonLogout;
-
     public static HomeFragment newInstance(int instance) {
         Bundle args = new Bundle();
         args.putInt(ARGS_INSTANCE, instance);
@@ -81,33 +76,6 @@ public class HomeFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        firebaseAuth = FirebaseAuth.getInstance();
-
-        if (firebaseAuth.getCurrentUser() == null) {
-            Intent intent = new Intent(getActivity(), EnterPageActivity.class);
-            startActivity(intent);
-        }
-
-
-        firebaseAuth = FirebaseAuth.getInstance();
-
-        buttonLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                firebaseAuth.signOut();
-
-                LoginManager.getInstance().logOut();
-                TwitterCore.getInstance().getSessionManager().clearActiveSession();
-                Intent intent = new Intent(getActivity(), EnterPageActivity.class);
-                startActivity(intent);
-            }
-        });
-
-
 
         btnClickMe.setOnClickListener(new View.OnClickListener() {
             @Override

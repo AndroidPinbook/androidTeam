@@ -29,6 +29,7 @@ import java.util.Map;
 import butterknife.ButterKnife;
 
 import uur.com.pinbook.Activities.ProfilePageActivity;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.JavaFiles.LocationDb;
 import uur.com.pinbook.JavaFiles.PinData;
 import uur.com.pinbook.JavaFiles.UserLocation;
@@ -40,11 +41,8 @@ import uur.com.pinbook.RecyclerView.Model.FeedInnerItem;
 
 
 import static com.facebook.FacebookSdk.getApplicationContext;
-import static uur.com.pinbook.Activities.ProfilePageActivity.FBuserId;
-import static uur.com.pinbook.JavaFiles.ConstValues.Locations;
-import static uur.com.pinbook.JavaFiles.ConstValues.PinItems;
-import static uur.com.pinbook.JavaFiles.ConstValues.UserLocations;
-import static uur.com.pinbook.JavaFiles.ConstValues.Users;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Locations;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.PinItems;
 
 public class ProfileFragment extends BaseFragment {
 
@@ -125,15 +123,20 @@ public class ProfileFragment extends BaseFragment {
             Toast.makeText(getActivity(), "No internet Connection", Toast.LENGTH_LONG).show();
         }
 
-        Log.i("----> userId ", FBuserId);
+
+        Log.i("----> userId ", getUserID());
 
         setLocationList();
         return view;
     }
 
+    public String getUserID(){
+        return FirebaseGetAccountHolder.getUserID();
+    }
+
     private void setLocationList() {
 
-        mDbref = FirebaseDatabase.getInstance().getReference(PinItems).child(FBuserId);
+        mDbref = FirebaseDatabase.getInstance().getReference(PinItems).child(getUserID());
         locationList = new ArrayList<>();
         locationDbsList = new ArrayList<>();
         pinDataList = new ArrayList<>();
