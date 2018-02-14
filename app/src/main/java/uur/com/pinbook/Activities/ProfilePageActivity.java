@@ -17,6 +17,7 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.twitter.sdk.android.core.TwitterCore;
 
 import butterknife.BindArray;
@@ -37,7 +38,9 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
         FragNavController.TransactionListener, FragNavController.RootFragmentListener {
 
 
-    private FirebaseAuth firebaseAuth;
+    public static FirebaseAuth firebaseAuth;
+    public static FirebaseUser currentUser;
+    public static String FBuserId;
     private Button buttonLogout;
 
     private CallbackManager mCallbackManager;
@@ -77,13 +80,13 @@ public class ProfilePageActivity extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_profile_page);
 
         firebaseAuth = FirebaseAuth.getInstance();
+        currentUser = firebaseAuth.getCurrentUser();
+        FBuserId = currentUser.getUid();
 
         if (firebaseAuth.getCurrentUser() == null) {
-            finish();
+            //finish();
             startActivity(new Intent(this, EnterPageActivity.class));
         }
-
-        firebaseAuth = FirebaseAuth.getInstance();
 
         //buttonLogout = (Button) findViewById(R.id.buttonLogout);
         //buttonLogout.setOnClickListener(this);

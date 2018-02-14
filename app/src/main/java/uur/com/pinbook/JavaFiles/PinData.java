@@ -20,6 +20,9 @@ public class PinData {
     String videoRealPath;
     String imageRealPath;
 
+    public PinData() {
+    }
+
     public String getImageRealPath() {
         return imageRealPath;
     }

@@ -2,7 +2,9 @@ package uur.com.pinbook.RecyclerView.Adapter;
 
 import android.content.Context;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,26 +14,27 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import uur.com.pinbook.R;
 import uur.com.pinbook.RecyclerView.HelperClasses.CircleTransform;
-import uur.com.pinbook.RecyclerView.Model.Datum;
+import uur.com.pinbook.RecyclerView.Model.SingleFeed;
 
 
-public class VerticalAdapter extends RecyclerView.Adapter<VerticalAdapter.CustomViewHolder> {
+public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.CustomViewHolder> {
 
     private Context context;
-    private List<Datum> dataList;
+    private List<SingleFeed> feedList;
 
-    public VerticalAdapter(Context context, List<Datum> dataList){
+    public FeedAdapter(Context context, List<SingleFeed> feedList) {
         this.context = context;
-        this.dataList = dataList;
+        this.feedList = feedList;
     }
 
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.data_single_item, null);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_single_item, null);
         CustomViewHolder viewHolder = new CustomViewHolder(view);
 
 //        view.setOnClickListener(this);
@@ -41,40 +44,55 @@ public class VerticalAdapter extends RecyclerView.Adapter<VerticalAdapter.Custom
 
 
     @Override
-    public void onBindViewHolder(VerticalAdapter.CustomViewHolder holder, int position) {
+    public void onBindViewHolder(FeedAdapter.CustomViewHolder holder, int position) {
 
-        Datum datum = dataList.get(position);
 
+        Log.i("--> position ", (Integer.toString(position)));
+        SingleFeed feed = feedList.get(position);
+
+        /*
         Picasso.with(context)
                 .load(datum.getImage())
                 .into(holder.fullImage);
+        */
 
-        holder.nameTextView.setText(datum.getTitle());
+        //feed name text
+        holder.nameTextView.setText(feed.getTitle());
 
+        //feed porfile picture
         Picasso.with(context)
-                .load(datum.getNameImage())
+                .load(feed.getNameImage())
                 .transform(new CircleTransform())
                 .into(holder.profileImage);
 
-        holder.profileName.setText(datum.getName());
+        //feed profile Name
+        holder.profileName.setText(feed.getName());
+
+        //feed Items
+        ArrayList singleFeedItems = feedList.get(position).getAllItemsInSingleFeed();
+        FeedInnerItemDataAdapter itemListDataAdapter = new FeedInnerItemDataAdapter(context, singleFeedItems);
+
+        holder.horizontalRecyclerView.setHasFixedSize(true);
+        holder.horizontalRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+        holder.horizontalRecyclerView.setAdapter(itemListDataAdapter);
+        holder.horizontalRecyclerView.setNestedScrollingEnabled(false);
+
     }
 
     @Override
     public int getItemCount() {
-        return (dataList!=null ? dataList.size() : 0);
+        return (feedList != null ? feedList.size() : 0);
     }
-
 
     class CustomViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
-        ImageView fullImage;
         ImageView profileImage;
         TextView nameTextView;
         TextView profileName;
         TextView timeStamp;
         CardView cardView;
-
+        RecyclerView horizontalRecyclerView;
 
         // We also create a constructor that accepts the entire item row
         // and does the view lookups to find each subview
@@ -86,9 +104,9 @@ public class VerticalAdapter extends RecyclerView.Adapter<VerticalAdapter.Custom
             nameTextView = (TextView) itemView.findViewById(R.id.name_text_view);
             profileName = (TextView) itemView.findViewById(R.id.profile_name);
             timeStamp = (TextView) itemView.findViewById(R.id.time_stamp);
-            fullImage = (ImageView) itemView.findViewById(R.id.full_image);
             profileImage = (ImageView) itemView.findViewById(R.id.profile_image);
             cardView = (CardView) itemView.findViewById(R.id.card_view);
+            horizontalRecyclerView = itemView.findViewById(R.id.horizontalRecycleView);
 
             cardView.setOnClickListener(this);
         }
@@ -96,7 +114,7 @@ public class VerticalAdapter extends RecyclerView.Adapter<VerticalAdapter.Custom
         @Override
         public void onClick(View v) {
             int clickedPosition = getAdapterPosition();
-            Toast.makeText(context, dataList.get(clickedPosition).getName(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, feedList.get(clickedPosition).getName(), Toast.LENGTH_LONG).show();
         }
     }
 }
