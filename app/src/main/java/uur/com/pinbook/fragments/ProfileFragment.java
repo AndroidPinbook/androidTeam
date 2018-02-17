@@ -13,8 +13,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,21 +26,27 @@ import java.util.Map;
 
 import butterknife.ButterKnife;
 
-import uur.com.pinbook.Activities.ProfilePageActivity;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
+import uur.com.pinbook.JavaFiles.Feed;
 import uur.com.pinbook.JavaFiles.LocationDb;
-import uur.com.pinbook.JavaFiles.PinData;
-import uur.com.pinbook.JavaFiles.UserLocation;
 import uur.com.pinbook.R;
-import uur.com.pinbook.RecyclerView.Adapter.FeedAdapter;
+import uur.com.pinbook.RecyclerView.Adapter.FeedAllItemAdapter;
 import uur.com.pinbook.RecyclerView.HelperClasses.NetworkCheckingClass;
-import uur.com.pinbook.RecyclerView.Model.SingleFeed;
-import uur.com.pinbook.RecyclerView.Model.FeedInnerItem;
+import uur.com.pinbook.RecyclerView.Model.FeedAllItem;
+import uur.com.pinbook.RecyclerView.Model.FeedPinItem;
 
 
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Feeds;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Locations;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.PinItems;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.owner;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.picture;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.pictureURL;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.text;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.textURL;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.video;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.videoImageURL;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.videoURL;
 
 public class ProfileFragment extends BaseFragment {
 
@@ -50,29 +54,31 @@ public class ProfileFragment extends BaseFragment {
     View view;
 
     RecyclerView recyclerViewVertical;
-    FeedAdapter feedAdapter;
+
     ProgressBar progressBar;
     RelativeLayout relativeLayout;
 
     DatabaseReference mDbref;
     DatabaseReference tempRef;
-    List<UserLocation> locationList;
-    List<LocationDb> locationDbsList;
-    List<PinData> pinDataList;
-    Map<String, String> mp;
+
+    Map<String, String> mapFeed;
     private ValueEventListener mDbRefListener;
     private ValueEventListener tempRefListener;
     LocationDb locationDb;
-    PinData pinData;
+
     int counter = 0;
-    Uri uriPicture;
-    Uri uriVideo;
-    Uri uriText;
+    Uri uriPicture, uriVideo, uriText ;
     final static int round = 10;
 
-    List<SingleFeed> singleFeedDataList = new ArrayList<SingleFeed>();
     String locationId;
     Map<String, String> tempMap;
+
+    Feed feed;
+    FeedAllItem feedAllItem;
+    FeedPinItem feedPinItem;
+    List<FeedAllItem> feedAllItemList = new ArrayList<FeedAllItem>();
+
+    FeedAllItemAdapter feedAllItemAdapter;
 
     public static ProfileFragment newInstance(int instance) {
         Bundle args = new Bundle();
@@ -109,24 +115,18 @@ public class ProfileFragment extends BaseFragment {
             fragCount = args.getInt(ARGS_INSTANCE);
         }
 
-        relativeLayout = (RelativeLayout) view.findViewById(R.id.activity_main);
-        recyclerViewVertical = (RecyclerView) view.findViewById(R.id.vertical_recycler_view);
-        recyclerViewVertical.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
-
-        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-
         if (NetworkCheckingClass.isNetworkAvailable(getActivity())) {
+
+            init();
             progressBar.setVisibility(View.VISIBLE);
-            //setFeedData();
+            Log.i("----> userId ", getUserID());
+
+            setLocations();
         } else {
             progressBar.setVisibility(View.GONE);
             Toast.makeText(getActivity(), "No internet Connection", Toast.LENGTH_LONG).show();
         }
 
-
-        Log.i("----> userId ", getUserID());
-
-        setLocationList();
         return view;
     }
 
@@ -134,20 +134,20 @@ public class ProfileFragment extends BaseFragment {
         return FirebaseGetAccountHolder.getUserID();
     }
 
-    private void setLocationList() {
+    private void init() {
 
-        mDbref = FirebaseDatabase.getInstance().getReference(PinItems).child(getUserID());
-        locationList = new ArrayList<>();
-        locationDbsList = new ArrayList<>();
-        pinDataList = new ArrayList<>();
-        mp = new HashMap<String, String>();
+        relativeLayout = (RelativeLayout) view.findViewById(R.id.activity_main);
+        recyclerViewVertical = (RecyclerView) view.findViewById(R.id.vertical_recycler_view);
+        recyclerViewVertical.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
+        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+
+        mDbref = FirebaseDatabase.getInstance().getReference(Feeds).child(getUserID());
+        mapFeed = new HashMap<String, String>();
         tempMap = new HashMap<String, String>();
-
-        getLocations();
 
     }
 
-    private void getLocations() {
+    private void setLocations() {
 
         Log.i("", "=======================================>> xx start ");
 
@@ -155,58 +155,21 @@ public class ProfileFragment extends BaseFragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                locationList.clear();
-                locationDbsList.clear();
-
                 for (DataSnapshot locationSnapshot : dataSnapshot.getChildren()) {
 
                     Log.i("====== locationSnapshot", locationSnapshot.toString());
 
-                    mp = ((Map) locationSnapshot.getValue());
+                    mapFeed.clear();
+                    mapFeed = ((Map) locationSnapshot.getValue());
                     locationId = locationSnapshot.getKey();
 
                     Log.i("info", "========================================");
-                    pinData = new PinData();
-                    if (mp.get("pictureURL") != null) {
-                        //Log.i("pictureUrl ", mp.get("pictureURL"));
-                        uriPicture = Uri.parse(mp.get("pictureURL"));
-                        pinData.setPinImageUri(uriPicture);
 
-                    }
+                    feedAllItem = setFeedAllItem();
+                    insertIntoRecyclerView(feedAllItem);
 
-                    if (mp.get("videoURL") != null) {
-                        //.i("videoURL ", mp.get("videoURL"));
-                        uriVideo = Uri.parse(mp.get("videoURL"));
-                        pinData.setPinVideoUri(uriVideo);
-                    }
-
-                    if (mp.get("textURL") != null) {
-                        //Log.i("textURL ", mp.get("textURL"));
-                        uriText = Uri.parse(mp.get("textURL"));
-                        pinData.setPinTextUri(uriText);
-                    }
-
-                    pinDataList.add(pinData);
-                    setFeedData(pinData);
-
-
-
-
-
-                    /*
-                    UserLocation userLocation = new UserLocation();
-                    userLocation.setUserId(FBuserId);
-                    final String locationId = locationSnapshot.getKey();
-                    userLocation.setLocationId(locationSnapshot.getValue(String.class));
-
-                    locationList.add(userLocation);
-
-                    tempRef = FirebaseDatabase.getInstance().getReference(Locations).child(locationId);
-
-                    getLocationDetail(locationId);
-
-                    */
                 }
+
             }
 
             @Override
@@ -220,15 +183,68 @@ public class ProfileFragment extends BaseFragment {
 
     }
 
-    private void addFeedList(LocationDb locationDb) {
+    private FeedAllItem setFeedAllItem() {
 
-        counter++;
-        Log.i(" ========= location_" + counter, locationDb.getLocationId());
+        FeedAllItem tempFeedAllItem = new FeedAllItem();
+        FeedPinItem tempFeedPinItem = new FeedPinItem();
+        ArrayList<FeedPinItem> tempFeedPinItemList = new ArrayList<FeedPinItem>();
+
+        tempFeedAllItem.setLocationId(locationId);
+
+        Log.i("map :", mapFeed.toString());
+
+        for (Map.Entry<String, String> entry : mapFeed.entrySet())
+        {
+
+            switch (entry.getKey()){
+
+                case owner:
+                    tempFeedAllItem.setOwnerId(entry.getValue());
+                    break;
+
+                case pictureURL:
+                    tempFeedPinItem = setFeedPinItem(picture, entry.getValue());
+                    tempFeedPinItemList.add(tempFeedPinItem);
+                    break;
+
+                case videoImageURL:
+                    tempFeedPinItem = setFeedPinItem(video, entry.getValue());
+                    tempFeedPinItemList.add(tempFeedPinItem);
+                    break;
+
+                case textURL:
+                    tempFeedPinItem = setFeedPinItem(text, entry.getValue());
+                    tempFeedPinItemList.add(tempFeedPinItem);
+                    break;
+
+                default:
+                    break;
+            }
+
+        }
+
+        tempFeedAllItem.setFeedPinItems(tempFeedPinItemList);
+        tempFeedAllItem.setOwnerPictureUrl("https://firebasestorage.googleapis.com/v0/b/androidteam-f4c25.appspot.com" +
+                "/o/Users%2FprofilePics%2F8tnZ6beMDdcY3zD0rWGzOhytacA3.jpg?alt=media&token" +
+                "=1fbe7d20-82e5-42e1-af42-a15026f03120");
+        tempFeedAllItem.setOwnerName("Ugur Göğebakan/" + locationId);
+        tempFeedAllItem.setTime(2);
+
+        return tempFeedAllItem;
 
     }
 
+    private FeedPinItem setFeedPinItem(String name, String url) {
 
-    private void setFeedData(PinData pinData) {
+        FeedPinItem feedPinItem = new FeedPinItem();
+        feedPinItem.setName(name);
+        feedPinItem.setUrl(url);
+
+        return feedPinItem;
+    }
+
+
+    private void insertIntoRecyclerView(FeedAllItem feedAllItem) {
 
         relativeLayout.setBackgroundColor(Color.parseColor("#ffffb3"));
         progressBar.setVisibility(View.GONE);
@@ -239,72 +255,18 @@ public class ProfileFragment extends BaseFragment {
         //Log.i("videoUrl ", tempPinData.getPinVideoUri().toString());
         //Log.i("textUrl  ", tempPinData.getPinTextUri().toString());
 
-        setMyLocations(pinData);
+        feedAllItemList.add(feedAllItem);
 
         recyclerViewVertical.setHasFixedSize(true);
 
-        if (singleFeedDataList.size() == 30) {
-            feedAdapter = new FeedAdapter(getContext(), singleFeedDataList);
-            recyclerViewVertical.setAdapter(feedAdapter);
+        if (feedAllItemList.size() == 30) {
+            feedAllItemAdapter = new FeedAllItemAdapter(getContext(), feedAllItemList);
+            recyclerViewVertical.setAdapter(feedAllItemAdapter);
         }
 
-
-/*
-        if(dataList.size()/round >= 1){
-
-            if(dataList.size()%round == 0){
-                feedAdapter = new FeedAdapter(getContext(), dataList);
-                recyclerViewVertical.setAdapter(feedAdapter);
-            }
-            else{
-                //continue
-            }
-
-        }
-        else{
-            //continue
-        }
-*/
 
     }
 
-    private void setMyLocations(PinData pinData) {
-
-        getLocationInfo();
-
-        SingleFeed singleFeed = new SingleFeed();
-
-        singleFeed.setImage("http://lorempixel.com//400//200//");
-        singleFeed.setName("Ugur Göğebakan/" + locationId);
-        singleFeed.setNameImage("https://firebasestorage.googleapis.com/v0/b/androidteam-f4c25.appspot.com" +
-                "/o/Users%2FprofilePics%2F8tnZ6beMDdcY3zD0rWGzOhytacA3.jpg?alt=media&token" +
-                "=1fbe7d20-82e5-42e1-af42-a15026f03120");
-        singleFeed.setCount(2);
-        singleFeed.setType("audio");
-
-        if (mp.get("text") != null) {
-            singleFeed.setTitle(mp.get("text"));
-        } else {
-            singleFeed.setTitle(mp.get("Text boş.."));
-        }
-
-
-        ArrayList<FeedInnerItem> singleItem = new ArrayList<FeedInnerItem>();
-        if (pinData.getPinImageUri() != null) {
-            singleItem.add(new FeedInnerItem("Item image", pinData.getPinImageUri().toString()));
-        }
-        if (pinData.getPinVideoUri() != null) {
-            //singleItem.add(new FeedInnerItem("Item video", tempPinData.getPinVideoUri().toString()));
-        }
-        if (pinData.getPinTextUri() != null) {
-            singleItem.add(new FeedInnerItem("Item text", pinData.getPinTextUri().toString()));
-        }
-
-        singleFeed.setAllItemsInSingleFeed(singleItem);
-
-        singleFeedDataList.add(singleFeed);
-
-    }
 
     private String getLocationInfo() {
 

@@ -19,15 +19,15 @@ import java.util.List;
 
 import uur.com.pinbook.R;
 import uur.com.pinbook.RecyclerView.HelperClasses.CircleTransform;
-import uur.com.pinbook.RecyclerView.Model.SingleFeed;
+import uur.com.pinbook.RecyclerView.Model.FeedAllItem;
 
 
-public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.CustomViewHolder> {
+public class FeedAllItemAdapter extends RecyclerView.Adapter<FeedAllItemAdapter.CustomViewHolder> {
 
     private Context context;
-    private List<SingleFeed> feedList;
+    private List<FeedAllItem> feedList;
 
-    public FeedAdapter(Context context, List<SingleFeed> feedList) {
+    public FeedAllItemAdapter(Context context, List<FeedAllItem> feedList) {
         this.context = context;
         this.feedList = feedList;
     }
@@ -44,11 +44,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.CustomViewHold
 
 
     @Override
-    public void onBindViewHolder(FeedAdapter.CustomViewHolder holder, int position) {
+    public void onBindViewHolder(FeedAllItemAdapter.CustomViewHolder holder, int position) {
 
 
         Log.i("--> position ", (Integer.toString(position)));
-        SingleFeed feed = feedList.get(position);
+        FeedAllItem feed = feedList.get(position);
 
         /*
         Picasso.with(context)
@@ -57,20 +57,20 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.CustomViewHold
         */
 
         //feed name text
-        holder.nameTextView.setText(feed.getTitle());
+        holder.nameTextView.setText("Title");
 
         //feed porfile picture
         Picasso.with(context)
-                .load(feed.getNameImage())
+                .load(feed.getOwnerPictureUrl())
                 .transform(new CircleTransform())
                 .into(holder.profileImage);
 
         //feed profile Name
-        holder.profileName.setText(feed.getName());
+        holder.profileName.setText(feed.getOwnerName());
 
         //feed Items
-        ArrayList singleFeedItems = feedList.get(position).getAllItemsInSingleFeed();
-        FeedInnerItemDataAdapter itemListDataAdapter = new FeedInnerItemDataAdapter(context, singleFeedItems);
+        ArrayList feedPinItems = feed.getFeedPinItems();
+        FeedPinItemAdapter itemListDataAdapter = new FeedPinItemAdapter(context, feedPinItems);
 
         holder.horizontalRecyclerView.setHasFixedSize(true);
         holder.horizontalRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
@@ -114,7 +114,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.CustomViewHold
         @Override
         public void onClick(View v) {
             int clickedPosition = getAdapterPosition();
-            Toast.makeText(context, feedList.get(clickedPosition).getName(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, feedList.get(clickedPosition).getOwnerName(), Toast.LENGTH_LONG).show();
         }
     }
 }

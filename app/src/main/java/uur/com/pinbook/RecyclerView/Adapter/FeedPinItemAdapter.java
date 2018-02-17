@@ -18,16 +18,15 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 import uur.com.pinbook.R;
-import uur.com.pinbook.RecyclerView.HelperClasses.CircleTransform;
-import uur.com.pinbook.RecyclerView.Model.FeedInnerItem;
+import uur.com.pinbook.RecyclerView.Model.FeedPinItem;
 
 
-public class FeedInnerItemDataAdapter extends RecyclerView.Adapter<FeedInnerItemDataAdapter.SingleItemRowHolder> {
+public class FeedPinItemAdapter extends RecyclerView.Adapter<FeedPinItemAdapter.SingleItemRowHolder> {
 
-    private ArrayList<FeedInnerItem> itemsList;
+    private ArrayList<FeedPinItem> itemsList;
     private Context mContext;
 
-    public FeedInnerItemDataAdapter(Context context, ArrayList<FeedInnerItem> itemsList) {
+    public FeedPinItemAdapter(Context context, ArrayList<FeedPinItem> itemsList) {
         this.itemsList = itemsList;
         this.mContext = context;
     }
@@ -42,7 +41,7 @@ public class FeedInnerItemDataAdapter extends RecyclerView.Adapter<FeedInnerItem
     @Override
     public void onBindViewHolder(SingleItemRowHolder holder, int i) {
 
-        FeedInnerItem singleItem = itemsList.get(i);
+        FeedPinItem singleItem = itemsList.get(i);
 
         holder.tvTitle.setText(singleItem.getName());
 
@@ -81,7 +80,6 @@ public class FeedInnerItemDataAdapter extends RecyclerView.Adapter<FeedInnerItem
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
 
                     Toast.makeText(v.getContext(), tvTitle.getText(), Toast.LENGTH_SHORT).show();
 

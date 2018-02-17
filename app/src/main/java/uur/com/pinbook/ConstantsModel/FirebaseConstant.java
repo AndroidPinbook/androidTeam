@@ -25,6 +25,7 @@ public class FirebaseConstant {
     public static final String Friends = "Friends";
     public static final String Groups = "Groups";
     public static final String UserGroups = "UserGroups";
+    public static final String Feeds = "Feeds";
 
     //Firebase Group constants
     public static final String Admin = "Admin";

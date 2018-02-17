@@ -1,31 +1,16 @@
 package uur.com.pinbook.RecyclerView.Model;
 
 /**
- * Created by pratap.kesaboyina on 01-12-2015.
+ * Created by ASUS on 17.2.2018.
  */
-public class FeedInnerItem {
 
+public class FeedPinItem {
 
     private String name;
     private String url;
     private String description;
 
-
-    public FeedInnerItem() {
-    }
-
-    public FeedInnerItem(String name, String url) {
-        this.name = name;
-        this.url = url;
-    }
-
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
+    public FeedPinItem() {
     }
 
     public String getName() {
@@ -36,6 +21,14 @@ public class FeedInnerItem {
         this.name = name;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -43,6 +36,4 @@ public class FeedInnerItem {
     public void setDescription(String description) {
         this.description = description;
     }
-
-
 }
