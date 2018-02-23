@@ -31,4 +31,8 @@ public class StringConstant {
     public static final String displayRounded = "rounded";
     public static final String displayRectangle = "rectangle";
 
+    //Listelemede item yok, gosterilecek uyari mesajlari
+    public static final String noFriendText = "Henüz arkadasiniz bulunmamaktadir.";
+    public static final String noGroupText  = "Henüz olusturdugunuz yada dahil oldugunuz bir grup bulunmamaktadir.";
+
 }

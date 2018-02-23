@@ -1,6 +1,8 @@
 package uur.com.pinbook.Activities;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.view.ViewPager;
@@ -21,13 +23,17 @@ import java.util.ArrayList;
 
 import uur.com.pinbook.Adapters.SpecialSelectTabAdapter;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
+import uur.com.pinbook.FirebaseAdapters.FirebaseDeleteGroupAdapter;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.Group;
 import uur.com.pinbook.LazyList.ImageLoader;
 import uur.com.pinbook.R;
 import uur.com.pinbook.SpecialFragments.GroupDetailFragment;
 
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.notifyNo;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.notifyYes;
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
 public class DisplayGroupDetail extends AppCompatActivity implements View.OnClickListener{
@@ -38,7 +44,6 @@ public class DisplayGroupDetail extends AppCompatActivity implements View.OnClic
     TextView personCntTv;
 
     SpecialSelectTabAdapter adapter;
-    private Context appContext = null;
 
     ViewPager viewPager;
 
@@ -46,7 +51,6 @@ public class DisplayGroupDetail extends AppCompatActivity implements View.OnClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_group_detail);
-        appContext = getApplicationContext();
 
         imageLoader = new ImageLoader(this, groupsCacheDirectory);
 
@@ -64,8 +68,18 @@ public class DisplayGroupDetail extends AppCompatActivity implements View.OnClic
         CardView addFriendCardView = (CardView) findViewById(R.id.addFriendCardView);
         addFriendCardView.setOnClickListener(this);
 
-        if(getFbUserID().equals(group.getAdminID()))
+        CardView deleteGroupCardView = (CardView)findViewById(R.id.deleteGroupCardView);
+        deleteGroupCardView.setOnClickListener(this);
+
+        TextView deleteGroupTextView = (TextView) findViewById(R.id.deleteGroupTextView);
+
+        if(getFbUserID().equals(group.getAdminID())) {
             addFriendCardView.setVisibility(View.VISIBLE);
+            deleteGroupTextView.setText("GRUBU SIL");
+        }else {
+            deleteGroupTextView.setText("GRUPTAN CIK");
+        }
+
 
         CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setTitle(group.getGroupName());
@@ -128,9 +142,59 @@ public class DisplayGroupDetail extends AppCompatActivity implements View.OnClic
                 startActivity(intent);
                 break;
 
+            case R.id.deleteGroupCardView:
+                if(getFbUserID().equals(group.getAdminID())) {
+                    showYesNoDialog(null, "Grubu silmek istediginize emin misiniz?", deleteGroup);
+                }else {
+                    showYesNoDialog(null, "Gruptan çikmak istediginize emin misiniz?", exitGroup);
+                }
+                break;
             default:
                 Toast.makeText(this, "Error occured!!", Toast.LENGTH_SHORT).show();
                 break;
         }
+    }
+
+    public void showYesNoDialog(String title, String message, final String type) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(DisplayGroupDetail.this, android.R.style.Theme_Material_Dialog_Alert);
+
+        builder.setIcon(R.drawable.warning_icon40);
+        builder.setMessage(message);
+
+        if (title != null)
+            builder.setTitle(title);
+
+        builder.setPositiveButton("EVET", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                if(type.equals(deleteGroup)){
+                    imageLoader.removeImageViewFromMap(group.getPictureUrl());
+                    FirebaseDeleteGroupAdapter firebaseDeleteGroupAdapter =
+                            new FirebaseDeleteGroupAdapter(group, deleteGroup);
+                    FirebaseGetGroups.getInstance(group.getAdminID()).removeGroupFromList(group.getGroupID());
+                    finish();
+                }else if(type.equals(exitGroup)){
+                    FirebaseDeleteGroupAdapter firebaseDeleteGroupAdapter =
+                            new FirebaseDeleteGroupAdapter(group, exitGroup);
+                    FirebaseGetGroups.getInstance(getFbUserID()).removeGroupFromList(group.getGroupID());
+                    finish();
+                }else {
+                    dialog.dismiss();
+                }
+
+            }
+        });
+
+        builder.setNegativeButton("HAYIR", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 }

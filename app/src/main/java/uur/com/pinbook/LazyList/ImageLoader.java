@@ -101,10 +101,12 @@ public class ImageLoader {
 
         protected void onPostExecute(Bitmap result) {
 
-            if(displayType == displayRounded)
-                result = BitmapConversion.getRoundedShape(result, friendImageShown, friendImageShown, null);
+            if(result != null) {
+                if (displayType == displayRounded)
+                    result = BitmapConversion.getRoundedShape(result, friendImageShown, friendImageShown, null);
 
-            bmImage.setImageBitmap(result);
+                bmImage.setImageBitmap(result);
+            }
         }
     }
 

@@ -30,10 +30,14 @@ public class FirebaseGetGroups {
 
     public static FirebaseGetGroups FBGetGroupsInstance = null;
 
+
     public static FirebaseGetGroups getInstance(String userId) {
+
 
         if (FBGetGroupsInstance == null)
             FBGetGroupsInstance = new FirebaseGetGroups(userId);
+        else
+            setGroupDeleted(false);
 
         return FBGetGroupsInstance;
     }
@@ -50,14 +54,20 @@ public class FirebaseGetGroups {
         this.groupArrayList = groupArrayList;
     }
 
+    public static void setGroupDeleted(boolean groupDeleted) {
+        FBGetGroupsInstance.groupDeleted = groupDeleted;
+    }
+
     public FirebaseGetGroups(String userID) {
         this.userId = userID;
+        this.groupDeleted = false;
         fillGroupList();
     }
 
     public void addGroupToList(Group group) {
 
         boolean groupFounded = false;
+        this.groupDeleted = false;
 
         for (Group group1 : FBGetGroupsInstance.groupArrayList) {
             if (group1.getGroupID().equals(group.getGroupID())) {
@@ -75,7 +85,7 @@ public class FirebaseGetGroups {
         for (Group group : FBGetGroupsInstance.groupArrayList) {
             if (group.getGroupID().equals(groupID)) {
                 FBGetGroupsInstance.groupArrayList.remove(index);
-                groupDeleted = true;
+                this.groupDeleted = true;
                 break;
             }
             index++;
@@ -91,33 +101,6 @@ public class FirebaseGetGroups {
         this.groupArrayList = new ArrayList<Group>();
 
         DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(UserGroups).child(userId);
-
-        ChildEventListener c = mDbrefFriendList.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.i("Info", "  ->onChildAdded");
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.i("Info", "  ->onChildChanged");
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Log.i("Info", "  ->onChildRemoved");
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                Log.i("Info", "  ->onChildMoved");
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.i("Info", "  ->onCancelled");
-            }
-        });
 
         //UserGroups altindan groupID bilgileri okunur
         ValueEventListener valueEventListenerForFriendList = mDbrefFriendList.addValueEventListener(new ValueEventListener() {
@@ -137,7 +120,8 @@ public class FirebaseGetGroups {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
 
-                            if (dataSnapshot.getValue() != null) {
+                            if (dataSnapshot.getValue() != null &&
+                                    !FBGetGroupsInstance.groupDeleted) {
 
                                 Map<String, Object> map = new HashMap<String, Object>();
                                 map = (Map) dataSnapshot.getValue();
@@ -173,7 +157,6 @@ public class FirebaseGetGroups {
 
                                 group.setFriendList(friendArrayList);
                                 addGroupToList(group);
-
                             }
                         }
 
