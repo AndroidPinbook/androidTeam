@@ -12,6 +12,7 @@ public class StringConstant {
 
     //Page titles
     public static final String PinThrowTitle = "Pin Birak";
+    public static final String ProfileTitle = "Profil";
     public static final String SelectPersonOrGroupTitle = "Kisi veya Gruplari Seciniz";
 
     //Viewpager show types
@@ -35,4 +36,5 @@ public class StringConstant {
     public static final String noFriendText = "Henüz arkadasiniz bulunmamaktadir.";
     public static final String noGroupText  = "Henüz olusturdugunuz yada dahil oldugunuz bir grup bulunmamaktadir.";
 
+    public static final String profileDetailFragment = "profileDetailFragment";
 }

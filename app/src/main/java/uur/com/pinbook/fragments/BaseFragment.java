@@ -28,4 +28,5 @@ public class BaseFragment extends Fragment {
     public interface FragmentNavigation {
          void pushFragment(Fragment fragment);
     }
+
 }
