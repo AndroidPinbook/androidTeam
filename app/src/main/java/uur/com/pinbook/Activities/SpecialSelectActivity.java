@@ -14,16 +14,20 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import uur.com.pinbook.Adapters.CustomDialogAdapter;
 import uur.com.pinbook.Adapters.SpecialSelectTabAdapter;
 import uur.com.pinbook.Controller.ClearSingletonClasses;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.DefaultModels.SelectedGroupList;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
+import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.R;
 import uur.com.pinbook.SpecialFragments.GroupFragment;
 import uur.com.pinbook.SpecialFragments.PersonFragment;
@@ -40,9 +44,6 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
     private ViewPager viewPager;
     private TabLayout tabLayout;
 
-    private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
-
     public static String selectedProperty;
     public static boolean specialSelectedInd = false;
 
@@ -54,6 +55,7 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
 
     Toolbar mToolBar;
     SpecialSelectTabAdapter adapter;
+    TextView noItemFoundTv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +80,8 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
+        noItemFoundTv = (TextView) findViewById(R.id.noItemFoundTv);
+
         selectedProperty = propPersons;
 
         FloatingActionButton addSpecialFab = (FloatingActionButton) findViewById(R.id.addSpecialFab);
@@ -90,13 +94,33 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
 
                 switch (tab.getPosition()){
                     case persons:
+                        if(selectedProperty.equals(propGroups))
+                            hideSoftKeyboard();
+
                         selectedProperty = propPersons;
-                        hideSoftKeyboard();
+
+                        if( FirebaseGetFriends.getInstance(getFbUserID()).getListSize() == 0) {
+                            noItemFoundTv.setVisibility(View.VISIBLE);
+                            noItemFoundTv.setText(noFriendText);
+                        }else {
+                            noItemFoundTv.setVisibility(View.GONE);
+                        }
+
                         Log.i("Info", "Tablayout kisiler");
                         break;
                     case groups:
+                        if(selectedProperty.equals(propPersons))
+                            hideSoftKeyboard();
+
                         selectedProperty = propGroups;
-                        hideSoftKeyboard();
+
+                        if(FirebaseGetGroups.getInstance(getFbUserID()).getListSize() == 0) {
+                            noItemFoundTv.setVisibility(View.VISIBLE);
+                            noItemFoundTv.setText(noGroupText);
+                        }else {
+                            noItemFoundTv.setVisibility(View.GONE);
+                        }
+
                         Log.i("Info", "Tablayout groups");
                         break;
                     default:
@@ -174,7 +198,14 @@ public class SpecialSelectActivity extends AppCompatActivity implements View.OnC
                 startActivity(new Intent(this, EnterPageActivity.class));
                 break;
             case R.id.addNewGroup:
-                startActivity(new Intent(this, AddNewFriendActivity.class));
+
+                if(FirebaseGetFriends.getInstance(getFbUserID()).getListSize() == 0){
+                    CustomDialogAdapter.showDialogWarning(SpecialSelectActivity.this,
+                            "Grup olusturmak için önce arkadas eklemelisiniz.");
+                }else {
+                    startActivity(new Intent(this, AddNewFriendActivity.class));
+                }
+
                 break;
             default:
                 return super.onOptionsItemSelected(item);

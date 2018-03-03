@@ -40,6 +40,8 @@ import uur.com.pinbook.fragments.AddPinFragment;
 import uur.com.pinbook.utils.FragmentHistory;
 import uur.com.pinbook.utils.Utils;
 
+import static uur.com.pinbook.ConstantsModel.StringConstant.*;
+
 public class ProfilePageActivity extends AppCompatActivity implements
         BaseFragment.FragmentNavigation,
         FragNavController.TransactionListener,
@@ -179,6 +181,24 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
     private void switchTab(int position) {
         mNavController.switchTab(position);
+
+        removeChildFragments();
+    }
+
+    private void removeChildFragments() {
+
+        Fragment profileDetailFrg = getSupportFragmentManager().findFragmentByTag(profileDetailFragment);
+        if(profileDetailFrg != null) {
+            getSupportFragmentManager().beginTransaction().remove(profileDetailFrg).commit();
+            getSupportFragmentManager().popBackStack();
+        }
+
+        Fragment inviteFriendFrg = getSupportFragmentManager().findFragmentByTag(inviteFriendFragment);
+        if(inviteFriendFrg != null) {
+            getSupportFragmentManager().beginTransaction().remove(inviteFriendFrg).commit();
+            getSupportFragmentManager().popBackStack();
+        }
+
     }
 
 
@@ -198,6 +218,8 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
         Log.i("Info","--1--:" + mNavController.getCurrentFrag()) ;
         Log.i("Info","--2--:" + mNavController.getCurrentFrag().getLayoutInflater()) ;
+
+
 
 
         if(!mNavController.isRootFragment()) {

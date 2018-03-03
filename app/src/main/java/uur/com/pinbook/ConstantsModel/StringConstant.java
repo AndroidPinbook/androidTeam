@@ -12,6 +12,7 @@ public class StringConstant {
 
     //Page titles
     public static final String PinThrowTitle = "Pin Birak";
+    public static final String ProfileTitle = "Profil";
     public static final String SelectPersonOrGroupTitle = "Kisi veya Gruplari Seciniz";
 
     //Viewpager show types
@@ -31,4 +32,11 @@ public class StringConstant {
     public static final String displayRounded = "rounded";
     public static final String displayRectangle = "rectangle";
 
+    //Listelemede item yok, gosterilecek uyari mesajlari
+    public static final String noFriendText = "Henüz arkadasiniz bulunmamaktadir.";
+    public static final String noGroupText  = "Henüz olusturdugunuz yada dahil oldugunuz bir grup bulunmamaktadir.";
+
+    //Fragment tags
+    public static final String profileDetailFragment = "profileDetailFragment";
+    public static final String inviteFriendFragment = "inviteFriendFragment";
 }

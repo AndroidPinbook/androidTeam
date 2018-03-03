@@ -38,7 +38,7 @@ import uur.com.pinbook.R;
 
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
-public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVerticalListAdapter.MyViewHolder>{
+public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVerticalListAdapter.MyViewHolder> {
 
     private ArrayList<Friend> data;
     public ImageLoader imageLoader;
@@ -55,6 +55,8 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
     public static final int removeFromGroup = 0;
     public static final int displayProfile = 1;
 
+    TextView textview;
+
     public GroupDTLVerticalListAdapter(Context context, Group group) {
         layoutInflater = LayoutInflater.from(context);
         data = group.getFriendList();
@@ -62,7 +64,7 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
         this.context = context;
         this.group = group;
         activity = (Activity) context;
-        imageLoader=new ImageLoader(context.getApplicationContext(), friendsCacheDirectory);
+        imageLoader = new ImageLoader(context.getApplicationContext(), friendsCacheDirectory);
     }
 
     public class CustomComparator implements Comparator<Friend> {
@@ -81,6 +83,10 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
 
         view = layoutInflater.inflate(R.layout.group_detail_list, parent, false);
         GroupDTLVerticalListAdapter.MyViewHolder holder = new GroupDTLVerticalListAdapter.MyViewHolder(view);
+
+        textview = (TextView) activity.findViewById(R.id.personCntTv);
+        textview.setText(Integer.toString(data.size()));
+
         return holder;
     }
 
@@ -99,15 +105,15 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
             specialListLinearLayout = (LinearLayout) view.findViewById(R.id.specialListLinearLayout);
             adminDisplayBtn = (Button) view.findViewById(R.id.adminDisplayBtn);
 
-            final TextView textview = (TextView)activity.findViewById(R.id.personCntTv);
-            textview.setText(Integer.toString(data.size()));
+            //final TextView textview = (TextView) activity.findViewById(R.id.personCntTv);
+            //textview.setText(Integer.toString(data.size()));
 
             specialListLinearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1);
 
-                    if(!getFbUserID().equals(selectedFriend.getUserID())){
+                    if (!getFbUserID().equals(selectedFriend.getUserID())) {
                         adapter.add("  Gruptan Çikar");
                         adapter.add("  Profil Görüntüle");
                     }
@@ -126,8 +132,8 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
 
                                 textview.setText(Integer.toString(data.size()));
 
-                                if(context instanceof DisplayGroupDetail){
-                                    ((DisplayGroupDetail)context).setGroupFriendList(data);
+                                if (context instanceof DisplayGroupDetail) {
+                                    ((DisplayGroupDetail) context).setGroupFriendList(data);
                                 }
 
                             } else if (item == displayProfile) {
@@ -148,20 +154,16 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
         public void setData(Friend selectedFriend, int position) {
 
             //kullanici adi soyadi bilgisi yazilacak
-            if(getFbUserID().equals(selectedFriend.getUserID()))
+            if (getFbUserID().equals(selectedFriend.getUserID()))
                 this.userNameSurname.setText("Siz");
             else
                 this.userNameSurname.setText(selectedFriend.getNameSurname());
 
             //Admin grup box degeri eklenecek
-            if(getFbUserID().equals(group.getAdminID()))
+            if (group.getAdminID().equals(selectedFriend.getUserID()))
                 adminDisplayBtn.setVisibility(View.VISIBLE);
-            else {
-                if(group.getAdminID().equals(selectedFriend.getUserID()))
-                    adminDisplayBtn.setVisibility(View.VISIBLE);
-                else
-                    adminDisplayBtn.setVisibility(View.GONE);
-            }
+            else
+                adminDisplayBtn.setVisibility(View.GONE);
 
             this.position = position;
             this.selectedFriend = selectedFriend;
@@ -169,7 +171,7 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
         }
     }
 
-    public void removeUserFromGroupList(int position){
+    public void removeUserFromGroupList(int position) {
         data.remove(position);
         notifyItemRemoved(position);
     }
@@ -190,6 +192,6 @@ public class GroupDTLVerticalListAdapter extends RecyclerView.Adapter<GroupDTLVe
 
     @Override
     public int getItemCount() {
-        return  data.size();
+        return data.size();
     }
 }

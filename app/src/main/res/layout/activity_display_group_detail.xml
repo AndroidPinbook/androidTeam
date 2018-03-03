@@ -42,9 +42,6 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <!--include layout="@layout/group_nested_scroll_view"/-->
-
-
     <android.support.v4.widget.NestedScrollView
         android:id="@+id/nestedScrollViewContent"
         android:layout_width="match_parent"
@@ -58,6 +55,35 @@
             android:layout_height="match_parent"
             android:minHeight="600dp"
             android:orientation="vertical">
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="5dp"
+                app:cardCornerRadius="5dp"
+                android:id="@+id/deleteGroupCardView">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GRUBU SIL"
+                        android:id="@+id/deleteGroupTextView"
+                        android:layout_gravity="center"
+                        android:textStyle="bold"
+                        android:textSize="20dp"
+                        android:textColor="@color/red_logout"/>
+
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
@@ -88,7 +114,6 @@
                         android:text="   Katilimci Ekle"
                         android:layout_gravity="center"/>
                 </LinearLayout>
-
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
@@ -125,40 +150,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
+
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>
-
-    <!--LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Katilimci sayisi: "/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/personCntTv"/>
-
-    </LinearLayout-->
-
-    <!--android.support.v4.view.ViewPager
-        android:id="@+id/viewpager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/-->
-
-    <!--android.support.design.widget.FloatingActionButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:src="@mipmap/ic_success"
-        app:layout_anchor="@id/app_bar_layout"
-        app:layout_anchorGravity="bottom|right"/-->
-
 
 </android.support.design.widget.CoordinatorLayout>

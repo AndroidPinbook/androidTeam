@@ -70,6 +70,8 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
     public static final int groupDetailItem = 0;
     public static final int groupDeleteItem = 1;
 
+    Activity activity;
+
     public GroupVerticalListAdapter(Context context, ArrayList<Group> groupListMap, String searchText) {
         layoutInflater = LayoutInflater.from(context);
         groupList = groupListMap;
@@ -77,6 +79,7 @@ public class GroupVerticalListAdapter extends RecyclerView.Adapter<GroupVertical
         Collections.sort(groupList, new CustomComparator());
         this.context = context;
         this.searchText = searchText;
+        activity = (Activity) context;
         imageLoader = new ImageLoader(context.getApplicationContext(), groupsCacheDirectory);
         selectedGroupList = SelectedGroupList.getInstance();
 
