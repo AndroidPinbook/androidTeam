@@ -187,11 +187,18 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
     private void removeChildFragments() {
 
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag(profileDetailFragment);
-        if(fragment != null) {
-            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+        Fragment profileDetailFrg = getSupportFragmentManager().findFragmentByTag(profileDetailFragment);
+        if(profileDetailFrg != null) {
+            getSupportFragmentManager().beginTransaction().remove(profileDetailFrg).commit();
             getSupportFragmentManager().popBackStack();
         }
+
+        Fragment inviteFriendFrg = getSupportFragmentManager().findFragmentByTag(inviteFriendFragment);
+        if(inviteFriendFrg != null) {
+            getSupportFragmentManager().beginTransaction().remove(inviteFriendFrg).commit();
+            getSupportFragmentManager().popBackStack();
+        }
+
     }
 
 

@@ -8,17 +8,16 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 
 import butterknife.ButterKnife;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
-import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
-import uur.com.pinbook.ListAdapters.GroupVerticalListAdapter;
 import uur.com.pinbook.R;
+
+import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
 @SuppressLint("ValidFragment")
 public class ProfileDetailFragment extends Fragment {
@@ -31,7 +30,6 @@ public class ProfileDetailFragment extends Fragment {
     LayoutInflater mLayoutInflater;
 
     LinearLayoutManager linearLayoutManager;
-    RelativeLayout specialSelectRelLayout;
 
     private Context context;
     private String searchText;
@@ -53,28 +51,31 @@ public class ProfileDetailFragment extends Fragment {
 
         this.mContainer = container;
         this.mLayoutInflater = inflater;
-        mView = inflater.inflate(R.layout.fragment_special_select, container, false);
-
+        mView = inflater.inflate(R.layout.fragment_profile_detail, container, false);
         ButterKnife.bind(this, mView);
-        specialSelectRelLayout = (RelativeLayout) mView.findViewById(R.id.specialSelectRelLayout);
+
         return mView;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-        groupRecyclerView = (RecyclerView) mView.findViewById(R.id.specialRecyclerView);
-        getData(FBuserID);
-    }
+        LinearLayout addFromFacebookLayout = (LinearLayout) mView.findViewById(R.id.addFromFacebookLayout);
 
-    public void getData(String userID){
+        addFromFacebookLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InviteFriendFragment nextFrag = new InviteFriendFragment(getActivity());
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(((ViewGroup)getView().getParent()).getId(), nextFrag, inviteFriendFragment)
+                        .addToBackStack(inviteFriendFragment)
+                        .commit();
+            }
+        });
 
-        FirebaseGetGroups instance = FirebaseGetGroups.getInstance(userID);
-        final GroupVerticalListAdapter groupVerticalListAdapter = new GroupVerticalListAdapter(context, instance.getGroupArrayList(), searchText);
 
-        groupRecyclerView.setAdapter(groupVerticalListAdapter);
-        linearLayoutManager  = new LinearLayoutManager(getActivity());
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        groupRecyclerView.setLayoutManager(linearLayoutManager);
+
+
+
     }
 }

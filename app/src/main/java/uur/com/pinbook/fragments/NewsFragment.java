@@ -75,19 +75,6 @@ public class NewsFragment extends BaseFragment implements View.OnClickListener{
 
     @Override
     public void onStart() {
-
-        Log.i("Info", "AddPinFragment onStart");
-
-        FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
-
-        //for (Fragment childFragment : childFragments) {
-        //    if (childFragment != null) {
-        //        if (childFragmentTags.contains(childFragment.getTag())) {
-        //            fragmentTransaction.remove(childFragment);
-        //        }
-        //    }
-        //}
-
         super.onStart();
     }
 

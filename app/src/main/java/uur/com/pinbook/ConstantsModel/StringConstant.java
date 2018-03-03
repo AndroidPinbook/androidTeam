@@ -36,5 +36,7 @@ public class StringConstant {
     public static final String noFriendText = "Henüz arkadasiniz bulunmamaktadir.";
     public static final String noGroupText  = "Henüz olusturdugunuz yada dahil oldugunuz bir grup bulunmamaktadir.";
 
+    //Fragment tags
     public static final String profileDetailFragment = "profileDetailFragment";
+    public static final String inviteFriendFragment = "inviteFriendFragment";
 }
