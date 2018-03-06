@@ -19,11 +19,14 @@ import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.twitter.sdk.android.core.TwitterCore;
 
@@ -37,6 +40,7 @@ import uur.com.pinbook.Activities.ProfilePageActivity;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.JavaFiles.Feed;
 import uur.com.pinbook.JavaFiles.LocationDb;
+import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
 
 import butterknife.BindView;
@@ -49,11 +53,18 @@ import uur.com.pinbook.RecyclerView.Model.FeedPinItem;
 import static com.facebook.FacebookSdk.getApplicationContext;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Feeds;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Locations;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Users;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.feedLimit;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.nextItemCount;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.owner;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.picture;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.pictureURL;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.profilePictureUrl;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.surname;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.text;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.textURL;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.userID;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.userName;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.video;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.videoImageURL;
 
@@ -69,25 +80,29 @@ public class HomeFragment extends BaseFragment {
 
     DatabaseReference mDbref;
     DatabaseReference tempRef;
+    DatabaseReference userRef;
 
     Map<String, String> mapFeed;
+    Map<String, String> mapUser;
     private ValueEventListener mDbRefListener;
     private ValueEventListener tempRefListener;
+    private ValueEventListener userRefListener;
     LocationDb locationDb;
 
     int counter = 0;
-    Uri uriPicture, uriVideo, uriText ;
+    Uri uriPicture, uriVideo, uriText;
     final static int round = 10;
 
     String locationId;
-    Map<String, String> tempMap;
 
     Feed feed;
     FeedAllItem feedAllItem;
     FeedPinItem feedPinItem;
     List<FeedAllItem> feedAllItemList = new ArrayList<FeedAllItem>();
+    User user;
 
     FeedAllItemAdapter feedAllItemAdapter;
+    private String startKey;
 
     public static HomeFragment newInstance(int instance) {
         Bundle args = new Bundle();
@@ -106,7 +121,6 @@ public class HomeFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         setHasOptionsMenu(true);
 
     }
@@ -115,8 +129,20 @@ public class HomeFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        if(view == null){
+            view = inflater.inflate(R.layout.fragment_home, container, false);
+            if (NetworkCheckingClass.isNetworkAvailable(getActivity())) {
 
-        view = inflater.inflate(R.layout.fragment_home, container, false);
+                init();
+                progressBar.setVisibility(View.VISIBLE);
+                Log.i("----> userId ", getUserID());
+
+                setLocations();
+            } else {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(getActivity(), "No internet Connection", Toast.LENGTH_LONG).show();
+            }
+        }
 
 
         ButterKnife.bind(this, view);
@@ -126,30 +152,20 @@ public class HomeFragment extends BaseFragment {
             fragCount = args.getInt(ARGS_INSTANCE);
         }
 
-        if (NetworkCheckingClass.isNetworkAvailable(getActivity())) {
-
-            init();
-            progressBar.setVisibility(View.VISIBLE);
-            Log.i("----> userId ", getUserID());
-
-            setLocations();
-        } else {
-            progressBar.setVisibility(View.GONE);
-            Toast.makeText(getActivity(), "No internet Connection", Toast.LENGTH_LONG).show();
-        }
-
         return view;
     }
+
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ( (ProfilePageActivity)getActivity()).updateToolbarTitle((fragCount == 0) ? "Home" : "Sub Home "+fragCount);
+
 
     }
 
-    public String getUserID(){
+
+    public String getUserID() {
         return FirebaseGetAccountHolder.getUserID();
     }
 
@@ -162,7 +178,8 @@ public class HomeFragment extends BaseFragment {
 
         mDbref = FirebaseDatabase.getInstance().getReference(Feeds).child(getUserID());
         mapFeed = new HashMap<String, String>();
-        tempMap = new HashMap<String, String>();
+        mapUser = new HashMap<String, String>();
+        startKey = null;
 
     }
 
@@ -170,24 +187,69 @@ public class HomeFragment extends BaseFragment {
 
         Log.i("", "=======================================>> xx start ");
 
-        mDbRefListener = mDbref.addValueEventListener(new ValueEventListener() {
+        Query query = mDbref.orderByChild("timestamp");
+
+        if(startKey == null){
+            mDbRefListener = query.limitToFirst(feedLimit).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    for (DataSnapshot locationSnapshot : dataSnapshot.getChildren()) {
+
+                        Log.i("====== locationSnapshot", locationSnapshot.toString());
+
+                        String locId = locationSnapshot.getKey();
+                        getLocationDetails(locId);
+                        startKey = locationSnapshot.getKey();
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }else{
+
+            mDbRefListener = query.startAt(startKey).limitToFirst(nextItemCount).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot locationSnapshot : dataSnapshot.getChildren()) {
+
+                        Log.i("====== locationSnapshot", locationSnapshot.toString());
+
+                        String locId = locationSnapshot.getKey();
+                        getLocationDetails(locId);
+                        startKey = locationSnapshot.getKey();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+        }
+
+        Log.i("", "=======================================>> xx finish ");
+
+    }
+
+    private void getLocationDetails(final String loc) {
+
+        tempRef = FirebaseDatabase.getInstance().getReference(Locations).child(loc);
+        tempRefListener = tempRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                for (DataSnapshot locationSnapshot : dataSnapshot.getChildren()) {
+                mapFeed.clear();
+                mapFeed = ((Map) dataSnapshot.getValue());
 
-                    Log.i("====== locationSnapshot", locationSnapshot.toString());
+                FeedAllItem feedAllItem1 = setFeedAllItem(loc);
 
-                    mapFeed.clear();
-                    mapFeed = ((Map) locationSnapshot.getValue());
-                    locationId = locationSnapshot.getKey();
-
-                    Log.i("info", "========================================");
-
-                    feedAllItem = setFeedAllItem();
-                    insertIntoRecyclerView(feedAllItem);
-
-                }
+                getUSerDetails(feedAllItem1, loc);
 
             }
 
@@ -198,26 +260,57 @@ public class HomeFragment extends BaseFragment {
         });
 
 
-        Log.i("", "=======================================>> xx finish ");
+    }
+
+    private void getUSerDetails(final FeedAllItem feedAllItem1, final String loc) {
+        String x = "1BX7p1ZaaSdRSaoG0cAEUKiuzje2";
+        userRef = FirebaseDatabase.getInstance().getReference(Users).child(x);
+
+        userRefListener = userRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.exists()) {
+
+                    mapUser.clear();
+                    mapUser = ((Map) dataSnapshot.getValue());
+
+                    User user1 = setUser();
+
+                    feedAllItem1.setOwnerName(user1.getName() + " " + user1.getSurname()+ "/" + loc);
+                    feedAllItem1.setOwnerPictureUrl(user1.getProfilePicSrc());
+
+                    insertIntoRecyclerView(feedAllItem1);
+
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
     }
 
-    private FeedAllItem setFeedAllItem() {
+    private FeedAllItem setFeedAllItem(String loc) {
 
         FeedAllItem tempFeedAllItem = new FeedAllItem();
         FeedPinItem tempFeedPinItem = new FeedPinItem();
         ArrayList<FeedPinItem> tempFeedPinItemList = new ArrayList<FeedPinItem>();
 
-        tempFeedAllItem.setLocationId(locationId);
+        tempFeedAllItem.setLocationId(loc);
 
         Log.i("map :", mapFeed.toString());
 
-        for (Map.Entry<String, String> entry : mapFeed.entrySet())
-        {
+        for (Map.Entry<String, String> entry : mapFeed.entrySet()) {
 
-            switch (entry.getKey()){
+            switch (entry.getKey()) {
 
-                case owner:
+                case userID:
                     tempFeedAllItem.setOwnerId(entry.getValue());
                     break;
 
@@ -243,14 +336,38 @@ public class HomeFragment extends BaseFragment {
         }
 
         tempFeedAllItem.setFeedPinItems(tempFeedPinItemList);
-        tempFeedAllItem.setOwnerPictureUrl("https://firebasestorage.googleapis.com/v0/b/androidteam-f4c25.appspot.com" +
-                "/o/Users%2FprofilePics%2F8tnZ6beMDdcY3zD0rWGzOhytacA3.jpg?alt=media&token" +
-                "=1fbe7d20-82e5-42e1-af42-a15026f03120");
-        tempFeedAllItem.setOwnerName("Ugur Göğebakan/" + locationId);
         tempFeedAllItem.setTime(2);
 
         return tempFeedAllItem;
 
+    }
+
+    private User setUser() {
+
+        User tempUser = new User();
+
+        for (Map.Entry<String, String> entry : mapUser.entrySet()) {
+
+            switch (entry.getKey()) {
+
+                case userName:
+                    tempUser.setName(entry.getValue());
+                    break;
+
+                case surname:
+                    tempUser.setSurname(entry.getValue());
+                    break;
+
+                case profilePictureUrl:
+                    tempUser.setProfilePicSrc(entry.getValue());
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return tempUser;
     }
 
     private FeedPinItem setFeedPinItem(String name, String url) {
@@ -262,61 +379,29 @@ public class HomeFragment extends BaseFragment {
         return feedPinItem;
     }
 
-
-    private void insertIntoRecyclerView(FeedAllItem feedAllItem) {
+    private void insertIntoRecyclerView(FeedAllItem feedAllItem1) {
 
         relativeLayout.setBackgroundColor(Color.parseColor("#ffffb3"));
         progressBar.setVisibility(View.GONE);
 
 
-        Log.i("", "========================  "+locationId+" ======================");
+        Log.i("", "========================  " + locationId + " ======================");
         //Log.i("imgUrl   ", tempPinData.getPinImageUri().toString());
         //Log.i("videoUrl ", tempPinData.getPinVideoUri().toString());
         //Log.i("textUrl  ", tempPinData.getPinTextUri().toString());
 
-        feedAllItemList.add(feedAllItem);
+        feedAllItemList.add(feedAllItem1);
 
         recyclerViewVertical.setHasFixedSize(true);
 
-        if (feedAllItemList.size() == 30) {
+        if(feedAllItemAdapter == null)
             feedAllItemAdapter = new FeedAllItemAdapter(getContext(), feedAllItemList);
-            recyclerViewVertical.setAdapter(feedAllItemAdapter);
-        }
+
+        recyclerViewVertical.setAdapter(feedAllItemAdapter);
 
 
-    }
-
-
-    private String getLocationInfo() {
-
-        DatabaseReference tempRef =  FirebaseDatabase.getInstance().getReference(Locations).child(locationId);
-
-        tempRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                if (dataSnapshot.getValue() != null) {
-                    locationDb = new LocationDb();
-
-                    Log.i("dataSnapshot ", dataSnapshot.toString());
-                    tempMap.clear();
-                    tempMap = ((Map) dataSnapshot.getValue());
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-
-        return "city";
 
     }
-
 
     @Override
     public void onDestroyView() {

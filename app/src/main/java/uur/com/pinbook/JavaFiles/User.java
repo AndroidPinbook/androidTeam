@@ -15,6 +15,9 @@ public class User implements Serializable{
     String birthdate;
     String phoneNum;
 
+    public User() {
+    }
+
     public String getMiniProfPicUrl() {
         return miniProfPicUrl;
     }
