@@ -107,6 +107,6 @@ public class FirebaseConstant {
     public static final String notifyNo  = "N";
 
     //Firebase Feed Listener
-    public static final int feedLimit = 20;
+    public static final int feedLimit = 7;
     public static final int nextItemCount = 5;
 }

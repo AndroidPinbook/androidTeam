@@ -22,6 +22,7 @@ import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -63,6 +64,7 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.profilePictureUrl;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.surname;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.text;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.textURL;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.timestamp;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.userID;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.userName;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.video;
@@ -103,6 +105,10 @@ public class HomeFragment extends BaseFragment {
 
     FeedAllItemAdapter feedAllItemAdapter;
     private String startKey;
+    private int lastVisibleItem, totalItemCount;
+    private LinearLayoutManager lm;
+
+    private int mPostsPerPage = 5;
 
     public static HomeFragment newInstance(int instance) {
         Bundle args = new Bundle();
@@ -137,7 +143,8 @@ public class HomeFragment extends BaseFragment {
                 progressBar.setVisibility(View.VISIBLE);
                 Log.i("----> userId ", getUserID());
 
-                setLocations();
+                //setLocations();
+                getUsers(null);
             } else {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(getActivity(), "No internet Connection", Toast.LENGTH_LONG).show();
@@ -173,7 +180,9 @@ public class HomeFragment extends BaseFragment {
 
         relativeLayout = (RelativeLayout) view.findViewById(R.id.activity_main);
         recyclerViewVertical = (RecyclerView) view.findViewById(R.id.vertical_recycler_view);
-        recyclerViewVertical.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
+
+        lm = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
+        recyclerViewVertical.setLayoutManager(lm);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
 
         mDbref = FirebaseDatabase.getInstance().getReference(Feeds).child(getUserID());
@@ -181,7 +190,71 @@ public class HomeFragment extends BaseFragment {
         mapUser = new HashMap<String, String>();
         startKey = null;
 
+        feedAllItemAdapter = new FeedAllItemAdapter(getContext());
+        recyclerViewVertical.setAdapter(feedAllItemAdapter);
+
+
+
+        recyclerViewVertical.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                totalItemCount = lm.getItemCount();
+                lastVisibleItem = lm.findLastVisibleItemPosition();
+
+                if (!mIsLoading && totalItemCount <= (lastVisibleItem + mPostsPerPage)) {
+                    getUsers(feedAllItemAdapter.getLastItemId());
+                    mIsLoading = true;
+                }
+
+
+            }
+        });
+
     }
+
+    private void getUsers(String nodeId) {
+
+        Query query;
+
+        if (nodeId == null)
+            query = FirebaseDatabase.getInstance().getReference(Feeds)
+                    .child(getUserID())
+                    .orderByChild(timestamp)
+                    .limitToFirst(mPostsPerPage);
+        else
+            query = FirebaseDatabase.getInstance().getReference(Feeds)
+                    .child(getUserID())
+                    .orderByChild(timestamp)
+                    .startAt(nodeId)
+                    .limitToFirst(mPostsPerPage);
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot locationSnapshot : dataSnapshot.getChildren()) {
+
+                    Log.i("====== locationSnapshot", locationSnapshot.toString());
+
+                    String locId = locationSnapshot.getKey();
+                    getLocationDetails(locId);
+                    startKey = locationSnapshot.getKey();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                mIsLoading = false;
+            }
+        });
+    }
+
+
+
+
 
     private void setLocations() {
 
@@ -212,7 +285,10 @@ public class HomeFragment extends BaseFragment {
             });
         }else{
 
-            mDbRefListener = query.startAt(startKey).limitToFirst(nextItemCount).addValueEventListener(new ValueEventListener() {
+            DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference(Feeds).child(getUserID());
+            Query query2 = ref2.orderByChild("timestamp");
+            ValueEventListener mDbRefListener2;
+            mDbRefListener2 = query2.startAt(startKey).limitToFirst(nextItemCount).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for (DataSnapshot locationSnapshot : dataSnapshot.getChildren()) {
@@ -263,8 +339,8 @@ public class HomeFragment extends BaseFragment {
     }
 
     private void getUSerDetails(final FeedAllItem feedAllItem1, final String loc) {
-        String x = "1BX7p1ZaaSdRSaoG0cAEUKiuzje2";
-        userRef = FirebaseDatabase.getInstance().getReference(Users).child(x);
+
+        userRef = FirebaseDatabase.getInstance().getReference(Users).child(feedAllItem1.getOwnerId());
 
         userRefListener = userRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -379,6 +455,7 @@ public class HomeFragment extends BaseFragment {
         return feedPinItem;
     }
 
+    private boolean mIsLoading = false;
     private void insertIntoRecyclerView(FeedAllItem feedAllItem1) {
 
         relativeLayout.setBackgroundColor(Color.parseColor("#ffffb3"));
@@ -393,13 +470,11 @@ public class HomeFragment extends BaseFragment {
         feedAllItemList.add(feedAllItem1);
 
         recyclerViewVertical.setHasFixedSize(true);
+        feedAllItemAdapter.addAll(feedAllItem1);
+        //feedAllItemAdapter.addAll(feedAllItemList);
+        mIsLoading = false;
 
-        if(feedAllItemAdapter == null)
-            feedAllItemAdapter = new FeedAllItemAdapter(getContext(), feedAllItemList);
-
-        recyclerViewVertical.setAdapter(feedAllItemAdapter);
-
-
+        //recyclerViewVertical.setAdapter(feedAllItemAdapter);
 
     }
 

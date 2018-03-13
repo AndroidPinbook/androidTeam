@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,15 +22,14 @@ import uur.com.pinbook.R;
 import uur.com.pinbook.RecyclerView.HelperClasses.CircleTransform;
 import uur.com.pinbook.RecyclerView.Model.FeedAllItem;
 
-
 public class FeedAllItemAdapter extends RecyclerView.Adapter<FeedAllItemAdapter.CustomViewHolder> {
 
     private Context context;
     private List<FeedAllItem> feedList;
 
-    public FeedAllItemAdapter(Context context, List<FeedAllItem> feedList) {
+    public FeedAllItemAdapter(Context context) {
         this.context = context;
-        this.feedList = feedList;
+        this.feedList = new ArrayList<>();
     }
 
     @Override
@@ -83,6 +83,21 @@ public class FeedAllItemAdapter extends RecyclerView.Adapter<FeedAllItemAdapter.
     public int getItemCount() {
         return (feedList != null ? feedList.size() : 0);
     }
+
+    public void addAll(FeedAllItem fa) {
+        int initialSize = feedList.size();
+
+        //List<FeedAllItem> fa2 = new ArrayList<>();
+        //fa2.add(fa.get(fa.size()-1));
+
+        feedList.add(fa);
+        notifyItemRangeInserted(initialSize, initialSize+1);
+    }
+
+    public String getLastItemId() {
+        return feedList.get(feedList.size() - 1).getLocationId();
+    }
+
 
     class CustomViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         // Your holder should contain a member variable
