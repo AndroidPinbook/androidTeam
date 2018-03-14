@@ -109,6 +109,10 @@ public class HomeFragment extends BaseFragment {
     private LinearLayoutManager lm;
 
     private int mPostsPerPage = 5;
+    Map<String, Long> mapTemp;
+    Long ts;
+    private boolean loading = true;
+
 
     public static HomeFragment newInstance(int instance) {
         Bundle args = new Bundle();
@@ -129,7 +133,7 @@ public class HomeFragment extends BaseFragment {
 
         setHasOptionsMenu(true);
 
-    }
+}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -200,13 +204,32 @@ public class HomeFragment extends BaseFragment {
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                totalItemCount = lm.getItemCount();
-                lastVisibleItem = lm.findLastVisibleItemPosition();
+                int pastVisiblesItems, visibleItemCount, totalItemCount;
 
-                if (!mIsLoading && totalItemCount <= (lastVisibleItem + mPostsPerPage)) {
-                    getUsers(feedAllItemAdapter.getLastItemId());
-                    mIsLoading = true;
+                if(dy > 0) //check for scroll down
+                {
+                    visibleItemCount = lm.getChildCount();
+                    totalItemCount = lm.getItemCount();
+                    pastVisiblesItems = lm.findFirstVisibleItemPosition();
+
+                    if(loading){
+
+                        if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
+                        {
+                            loading = false;
+                            Log.v("...", "Last Item Wow !");
+                            //Do pagination.. i.e. fetch new data
+                            progressBar.setVisibility(View.VISIBLE);
+                            Long nodeId = ts;
+                            getUsers(nodeId);
+
+                        }
+
+                    }
+
+
                 }
+
 
 
             }
@@ -214,7 +237,7 @@ public class HomeFragment extends BaseFragment {
 
     }
 
-    private void getUsers(String nodeId) {
+    private void getUsers(Long nodeId) {
 
         Query query;
 
@@ -240,7 +263,11 @@ public class HomeFragment extends BaseFragment {
 
                     String locId = locationSnapshot.getKey();
                     getLocationDetails(locId);
-                    startKey = locationSnapshot.getKey();
+
+                    mapTemp = ((Map) locationSnapshot.getValue());
+                    ts = mapTemp.get("timestamp");
+
+
                 }
 
             }
@@ -470,9 +497,15 @@ public class HomeFragment extends BaseFragment {
         feedAllItemList.add(feedAllItem1);
 
         recyclerViewVertical.setHasFixedSize(true);
-        feedAllItemAdapter.addAll(feedAllItem1);
+
+        String x = feedAllItem1.getLocationId();
+        String y = feedAllItemAdapter.getLastItemId();
+
+        if(!x.equals(y))
+            feedAllItemAdapter.addAll(feedAllItem1);
+
         //feedAllItemAdapter.addAll(feedAllItemList);
-        mIsLoading = false;
+        loading = true;
 
         //recyclerViewVertical.setAdapter(feedAllItemAdapter);
 

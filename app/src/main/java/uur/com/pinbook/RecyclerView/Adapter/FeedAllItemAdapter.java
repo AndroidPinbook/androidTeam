@@ -91,11 +91,14 @@ public class FeedAllItemAdapter extends RecyclerView.Adapter<FeedAllItemAdapter.
         //fa2.add(fa.get(fa.size()-1));
 
         feedList.add(fa);
-        notifyItemRangeInserted(initialSize, initialSize+1);
+        notifyItemRangeInserted(initialSize, initialSize + 1);
     }
 
     public String getLastItemId() {
-        return feedList.get(feedList.size() - 1).getLocationId();
+        if (feedList.size() > 0)
+            return feedList.get(feedList.size() - 1).getLocationId();
+        else
+            return "0";
     }
 
 
