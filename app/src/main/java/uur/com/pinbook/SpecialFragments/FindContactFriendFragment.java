@@ -36,6 +36,7 @@ import java.util.Map;
 
 import butterknife.ButterKnife;
 import uur.com.pinbook.Activities.DisplayGroupDetail;
+import uur.com.pinbook.DefaultModels.ContactFriendList;
 import uur.com.pinbook.DefaultModels.FacebookFriendList;
 import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
@@ -50,7 +51,7 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
 @SuppressLint("ValidFragment")
-public class FindFacebookFriendsFragment extends Fragment{
+public class FindContactFriendFragment extends Fragment{
 
     RecyclerView personRecyclerView;
 
@@ -62,7 +63,7 @@ public class FindFacebookFriendsFragment extends Fragment{
     GridLayoutManager gridLayoutManager;
 
     @SuppressLint("ValidFragment")
-    public FindFacebookFriendsFragment(Context context, String viewType) {
+    public FindContactFriendFragment(Context context, String viewType) {
         this.context = context;
         this.viewType = viewType;
     }
@@ -96,7 +97,7 @@ public class FindFacebookFriendsFragment extends Fragment{
                 InviteOutboundVerListAdapter inviteOutboundVerListAdapter = null;
 
                 inviteOutboundVerListAdapter = new InviteOutboundVerListAdapter(context,
-                        FacebookFriendList.getInstance().getFacebookFriendList(), null);
+                        ContactFriendList.getInstance().getContactFriendList(), null);
 
                 personRecyclerView.setAdapter(inviteOutboundVerListAdapter);
                 linearLayoutManager = new LinearLayoutManager(context);
@@ -104,7 +105,7 @@ public class FindFacebookFriendsFragment extends Fragment{
                 personRecyclerView.setLayoutManager(linearLayoutManager);
                 break;
             default:
-                Toast.makeText(context, "Person Fragment getData teknik hata!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Fragment getData teknik hata!!", Toast.LENGTH_SHORT).show();
         }
     }
 }

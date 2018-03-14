@@ -398,7 +398,6 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
                 }else {
                     Toast.makeText(ProfilePhotoActivity.this, "Item Selected Error!!", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
 

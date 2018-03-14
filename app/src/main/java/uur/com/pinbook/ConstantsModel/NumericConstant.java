@@ -15,6 +15,7 @@ public class NumericConstant {
     public static final int PERMISSION_REQUEST_VIDEO_CAPTURE = 21;
     public static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 22;
     public static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 23;
+    public static final int PERMISSION_REQUEST_READ_CONTACTS = 24;
 
     public static final int VIDEO_CAMERA_SELECTED = 0;
     public static final int VIDEO_GALLERY_SELECTED = 1;

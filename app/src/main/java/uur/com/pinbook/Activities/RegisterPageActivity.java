@@ -3,24 +3,33 @@ package uur.com.pinbook.Activities;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.RelativeLayout;
+import android.widget.SimpleAdapter;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -28,19 +37,55 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 
+import twitter4j.HttpClient;
+import twitter4j.HttpResponse;
 import uur.com.pinbook.Adapters.CustomDialogAdapter;
 import uur.com.pinbook.Adapters.ErrorMessageAdapter;
 import uur.com.pinbook.Adapters.ValidationAdapter;
+import uur.com.pinbook.ConstantsModel.StringConstant;
+import uur.com.pinbook.Controller.HttpHandler;
+import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.User;
+import uur.com.pinbook.ListAdapters.InviteOutboundVerListAdapter;
 import uur.com.pinbook.R;
 
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.PhoneNums;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Users;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.birthday;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.email;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.gender;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.mobilePhone;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.name;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.profilePictureUrl;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.providerId;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.surname;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.userName;
+import static uur.com.pinbook.ConstantsModel.StringConstant.*;
+
 public class RegisterPageActivity extends AppCompatActivity implements View.OnClickListener,
-        FirebaseAuth.AuthStateListener{
+        FirebaseAuth.AuthStateListener, AdapterView.OnItemSelectedListener{
 
     //Set the radius of the Blur. Supported range 0 < radius <= 25
     private static final float BLUR_RADIUS = 10f;
@@ -54,21 +99,29 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
     private EditText birthdateEditText;
     private EditText passwordEditText;
     private EditText emailEditText;
+    private Spinner countrySpinner;
 
     private FirebaseAuth mAuth;
     private DatabaseReference mDbref;
 
     public String tag_users = "users";
 
+    public HashMap<String, String> countryNameList = new HashMap<>();
+    public HashMap<String, String> countryPhoneList = new HashMap<>();
+
     public String gender;
     String phoneNumber = " ";
     String beforePhoneNum = " ";
 
     public boolean genderSelected = false;
+    DatabaseReference databaseReference;
+    ValueEventListener valueEventListener;
 
     Handler handler;
     private boolean onCreateOk = false;
     private boolean runnableOk = false;
+
+    private String clearPhoneNum = "";
 
     public ImageView maleImageView;
     public ImageView femaleImageView;
@@ -77,9 +130,16 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
 
     RelativeLayout backGrounRelLayout;
 
+    ArrayList<String> countryNameArray = new ArrayList<String>();
+
     public User user = null;
 
     private DatePickerDialog.OnDateSetListener mDateSetListener;
+
+    String selectedCountryName;
+    String selectedPhoneNum;
+    int selectedCountyPosition;
+    String selectedCountryCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +153,6 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         mAuth = FirebaseAuth.getInstance();
 
         registerButton = findViewById(R.id.registerButton);
-
         usernameEditText = findViewById(R.id.usernameEditText);
         nameEditText = findViewById(R.id.nameEditText);
         surnameEditText = findViewById(R.id.surnameEditText);
@@ -103,13 +162,39 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         femaleImageView = findViewById(R.id.femaleImageView);
         passwordEditText = findViewById(R.id.passwordEditText);
         emailEditText = findViewById(R.id.emailEditText);
+        countrySpinner = findViewById(R.id.countrySpinner);
 
-        findViewById(R.id.registerButton).setOnClickListener(this);
-        findViewById(R.id.birthdateEditText).setOnClickListener(this);
-        findViewById(R.id.maleImageView).setOnClickListener(this);
-        findViewById(R.id.femaleImageView).setOnClickListener(this);
-
+        registerButton.setOnClickListener(this);
+        birthdateEditText.setOnClickListener(this);
+        maleImageView.setOnClickListener(this);
+        femaleImageView.setOnClickListener(this);
+        //countrySpinner.setOnItemClickListener((AdapterView.OnItemClickListener) this);
+        countrySpinner.setOnItemSelectedListener((AdapterView.OnItemSelectedListener) this);
         backGrounRelLayout.setOnClickListener(this);
+
+        new GetCountryNameList().execute();
+        new GetPhoneCodeList().execute();
+
+        selectedCountryName = countryNameTurkey;
+        selectedPhoneNum = phoneCodeTurkey;
+
+        countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedCountryName = countrySpinner.getSelectedItem().toString();
+
+                findCountryCode(selectedCountryName);
+                Log.i("Info","selectedCountryName:" + selectedCountryName);
+                Log.i("Info","position:" + position);
+                Log.i("Info","selectedCountryCode:" + selectedCountryCode);
+                selectedPhoneNum = countryPhoneList.get(selectedCountryCode);
+                Log.i("Info","selectedPhoneNum:" + selectedPhoneNum);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
 
         mDateSetListener = new DatePickerDialog.OnDateSetListener() {
             @Override
@@ -120,6 +205,24 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                 birthdateEditText.setText(date);
             }
         };
+    }
+
+    public void findCountryCode(String countryName){
+
+        for ( String key : countryNameList.keySet() ) {
+            if(countryNameList.get(key).equals(countryName)){
+                selectedCountryCode = key;
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
     }
 
     public void getCalender(){
@@ -157,6 +260,8 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
 
                             saveUserInfo(user);
 
+                            //databaseReference.removeEventListener(valueEventListener);
+
                             startProfilePhotoPage();
 
                             onCreateOk = true;
@@ -193,7 +298,7 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         user.setSurname(surnameEditText.getText().toString());
         user.setGender(gender);
         user.setBirthdate(birthdateEditText.getText().toString());
-        user.setPhoneNum(phoneEditText.getText().toString());
+        user.setPhoneNum(clearPhoneNum);
     }
 
     @Override
@@ -205,14 +310,15 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
 
         switch (i){
             case R.id.registerButton:
+                clearPhoneNum = "";
                 if(!validateForm()){
                     return;
                 }
 
-                String email = emailEditText.getText().toString();
-                String password = passwordEditText.getText().toString();
+                String userEmail = emailEditText.getText().toString();
+                String userPassword = passwordEditText.getText().toString();
 
-                createAccount(email, password);
+                checkPhoneNumExistance(userEmail, userPassword);
                 break;
 
             case R.id.birthdateEditText:
@@ -231,9 +337,35 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                 scaleAnimation(i);
                 break;
 
+            case R.id.countrySpinner:
+                break;
+
             default:
                 break;
         }
+    }
+
+    private void checkPhoneNumExistance(final String uMail, final String uPassword) {
+
+        final FirebaseDatabase db = FirebaseDatabase.getInstance();
+        databaseReference = db.getReference(PhoneNums).child(clearPhoneNum);
+
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if(dataSnapshot.getValue() != null)
+                    CustomDialogAdapter.showDialogWarning(RegisterPageActivity.this,
+                            "Telefon Bilgisi Sistemde Kayitli");
+                else
+                    createAccount(uMail, uPassword);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public void hideKeyBoard(){
@@ -241,7 +373,11 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         Log.i("Info", "hideKeyBoard");
 
         InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        //inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+
+        if (getCurrentFocus() != null) {
+            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
     }
 
     private boolean validateForm() {
@@ -342,8 +478,20 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         } else {
             phoneEditText.setText(PhoneNumberUtils.formatNumber(phoneEditText.getText().toString())); //Deprecated method
         }
+        Log.i("Info", "complexPhone:" + selectedPhoneNum + phoneEditText.getText().toString());
+        getClearPhoneNum(selectedPhoneNum + phoneEditText.getText().toString());
 
         return valid;
+    }
+
+    public void getClearPhoneNum(String complexPhoneNum){
+
+        for(int i=0; i < complexPhoneNum.length(); i++){
+            char ch = complexPhoneNum.charAt(i);
+            if(Character.isDigit(ch)){
+                clearPhoneNum += ch;
+            }
+        }
     }
 
     public void scaleAnimation(int genderType){
@@ -393,4 +541,96 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         Intent intent = new Intent(getApplicationContext(), EnterPageActivity.class);
         startActivity(intent);
     }
+
+    private class GetCountryNameList extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... arg0) {
+
+            HttpHandler sh = new HttpHandler();
+            String jsonStr = sh.makeServiceCall(countryNameJSONUrl);
+
+            if (jsonStr != null) {
+                try {
+
+                    JSONObject jsonObj = null;
+                    jsonObj = new JSONObject(jsonStr);
+
+                    Iterator key = jsonObj.keys();
+                    while (key.hasNext()) {
+                        String k = key.next().toString();
+                        countryNameList.put(k, jsonObj.getString(k));
+                        countryNameArray.add(jsonObj.getString(k));
+                        Log.i("Info", "countryNameArray:");
+                    }
+
+                    Collections.sort(countryNameArray, new Comparator<String>() {
+                        @Override
+                        public int compare(String name1, String name2)
+                        {
+                            return  name1.compareTo(name2);
+                        }
+                    });
+
+                } catch (final JSONException e) {
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Json parsing error: " + e.toString(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+
+            ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>
+                    (RegisterPageActivity.this, android.R.layout.simple_spinner_item, countryNameArray);
+            spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            countrySpinner.setAdapter(spinnerArrayAdapter);
+        }
+    }
+
+    private class GetPhoneCodeList extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... arg0) {
+
+            HttpHandler sh = new HttpHandler();
+            String jsonStr = sh.makeServiceCall(countryPhoneJSONUrl);
+
+            if (jsonStr != null) {
+                try {
+
+                    JSONObject jsonObj = null;
+                    jsonObj = new JSONObject(jsonStr);
+
+                    Iterator key = jsonObj.keys();
+                    while (key.hasNext()) {
+                        String k = key.next().toString();
+                        countryPhoneList.put(k, jsonObj.getString(k));
+                    }
+
+                } catch (final JSONException e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Json parsing error: " + e.toString(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }
+
+            return null;
+        }
+    }
+
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -26,10 +27,14 @@ import java.util.ArrayList;
 import butterknife.ButterKnife;
 import uur.com.pinbook.Activities.SpecialSelectActivity;
 import uur.com.pinbook.Adapters.SpecialSelectTabAdapter;
+import uur.com.pinbook.DefaultModels.GetContactList;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
+import uur.com.pinbook.JavaFiles.Friend;
+import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.ListAdapters.GroupVerticalListAdapter;
 import uur.com.pinbook.R;
+import uur.com.pinbook.SpecialFragments.FindContactFriendFragment;
 import uur.com.pinbook.SpecialFragments.FindFacebookFriendsFragment;
 import uur.com.pinbook.SpecialFragments.GroupFragment;
 import uur.com.pinbook.SpecialFragments.PersonFragment;
@@ -37,9 +42,7 @@ import uur.com.pinbook.SpecialFragments.PersonFragment;
 import static uur.com.pinbook.ConstantsModel.StringConstant.verticalShown;
 
 @SuppressLint("ValidFragment")
-public class InviteFriendFragment extends Fragment {
-
-    RecyclerView groupRecyclerView;
+public class InviteContactFriendFragment extends Fragment {
 
     private View mView;
     String FBuserID;
@@ -56,7 +59,7 @@ public class InviteFriendFragment extends Fragment {
     private String searchText;
 
     @SuppressLint("ValidFragment")
-    public InviteFriendFragment(Context context) {
+    public InviteContactFriendFragment(Context context) {
         this.context = context;
         this.FBuserID = FirebaseGetAccountHolder.getUserID();
     }
@@ -81,22 +84,21 @@ public class InviteFriendFragment extends Fragment {
         FloatingActionButton addSpecialFab = (FloatingActionButton) mView.findViewById(R.id.addSpecialFab);
         addSpecialFab.setVisibility(View.GONE);
 
+        AppBarLayout appBarLay = (AppBarLayout) mView.findViewById(R.id.appBarLay);
+        appBarLay.setVisibility(View.GONE);
+
         return mView;
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
-
         viewPager = (ViewPager) mView.findViewById(R.id.viewpager);
         setupViewPager(viewPager);
 
-        tabLayout = (TabLayout) mView.findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
-
-
-
-
+        //tabLayout = (TabLayout) mView.findViewById(R.id.tabs);
+        //tabLayout.setupWithViewPager(viewPager);
     }
 
     private void setupViewPager(final ViewPager viewPager) {
@@ -104,8 +106,8 @@ public class InviteFriendFragment extends Fragment {
         adapter = new SpecialSelectTabAdapter(getFragmentManager());
         //adapter.addFragment(new PersonFragment(FBuserID, verticalShown, null,
         //        null, null, getActivity()),"Facebook");
-        adapter.addFragment(new FindFacebookFriendsFragment(getActivity()), "Facebook");
-        adapter.addFragment(new GroupFragment(FBuserID, getActivity(), null), "Contact");
+        adapter.addFragment(new FindContactFriendFragment( getActivity(), verticalShown), "Kisiler");
+        //adapter.addFragment(new GroupFragment(FBuserID, getActivity(), null), "Contact");
         viewPager.setAdapter(adapter);
     }
 }

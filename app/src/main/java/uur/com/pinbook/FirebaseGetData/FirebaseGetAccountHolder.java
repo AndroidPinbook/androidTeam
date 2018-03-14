@@ -87,6 +87,7 @@ public class FirebaseGetAccountHolder {
                 instance.user.setSurname((String) map.get(surname));
                 instance.user.setProfilePicSrc((String) map.get(profilePictureUrl));
                 instance.user.setUsername((String) map.get(userName));
+                instance.user.setProviderId((String) map.get(providerId));
                 instance.user.setUserId(userID);
             }
 

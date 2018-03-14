@@ -1,6 +1,8 @@
 package uur.com.pinbook.Activities;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +27,7 @@ import com.twitter.sdk.android.core.TwitterCore;
 import butterknife.BindArray;
 import butterknife.BindView;
 import uur.com.pinbook.Controller.ClearSingletonClasses;
+import uur.com.pinbook.DefaultModels.GetContactList;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
@@ -40,6 +43,7 @@ import uur.com.pinbook.fragments.AddPinFragment;
 import uur.com.pinbook.utils.FragmentHistory;
 import uur.com.pinbook.utils.Utils;
 
+import static uur.com.pinbook.ConstantsModel.NumericConstant.PERMISSION_REQUEST_READ_CONTACTS;
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
 public class ProfilePageActivity extends AppCompatActivity implements
@@ -188,14 +192,20 @@ public class ProfilePageActivity extends AppCompatActivity implements
     private void removeChildFragments() {
 
         Fragment profileDetailFrg = getSupportFragmentManager().findFragmentByTag(profileDetailFragment);
-        if(profileDetailFrg != null) {
+        if (profileDetailFrg != null) {
             getSupportFragmentManager().beginTransaction().remove(profileDetailFrg).commit();
             getSupportFragmentManager().popBackStack();
         }
 
-        Fragment inviteFriendFrg = getSupportFragmentManager().findFragmentByTag(inviteFriendFragment);
-        if(inviteFriendFrg != null) {
-            getSupportFragmentManager().beginTransaction().remove(inviteFriendFrg).commit();
+        Fragment inviteFaceFriendFrg = getSupportFragmentManager().findFragmentByTag(inviteFacebookFriendFragment);
+        if (inviteFaceFriendFrg != null) {
+            getSupportFragmentManager().beginTransaction().remove(inviteFaceFriendFrg).commit();
+            getSupportFragmentManager().popBackStack();
+        }
+
+        Fragment inviteContactFriendFrg = getSupportFragmentManager().findFragmentByTag(inviteFacebookFriendFragment);
+        if (inviteContactFriendFrg != null) {
+            getSupportFragmentManager().beginTransaction().remove(inviteContactFriendFrg).commit();
             getSupportFragmentManager().popBackStack();
         }
 
@@ -216,13 +226,11 @@ public class ProfilePageActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
 
-        Log.i("Info","--1--:" + mNavController.getCurrentFrag()) ;
-        Log.i("Info","--2--:" + mNavController.getCurrentFrag().getLayoutInflater()) ;
+        Log.i("Info", "--1--:" + mNavController.getCurrentFrag());
+        Log.i("Info", "--2--:" + mNavController.getCurrentFrag().getLayoutInflater());
 
 
-
-
-        if(!mNavController.isRootFragment()) {
+        if (!mNavController.isRootFragment()) {
             mNavController.popFragment();
         } else {
 
@@ -339,6 +347,25 @@ public class ProfilePageActivity extends AppCompatActivity implements
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+
+        switch (requestCode) {
+            case PERMISSION_REQUEST_READ_CONTACTS:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.i("cc", "ff");
+                    GetContactList.getInstance(this);
+                }
+                break;
+
+            default:
+                break;
+
+        }
     }
 
     public void updateToolbarTitle(String title) {

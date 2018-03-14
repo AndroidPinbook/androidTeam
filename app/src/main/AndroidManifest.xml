@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -47,14 +48,30 @@
         </activity>
         <activity
             android:name=".Activities.LoginPageActivity"
-            android:theme="@style/Toolbar"></activity>
+            android:theme="@style/Toolbar" />
         <activity
             android:name=".Activities.RegisterPageActivity"
             android:exported="true"
-            android:theme="@style/Toolbar"></activity>
+            android:theme="@style/Toolbar" />
         <activity
             android:name=".Activities.ProfilePageActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.CATEGORY_LAUNCHER"/>
+                <!--category android:name="android.intent.category.LAUNCHER" /-->
+                <data
+                    android:host="play.google.com/store/apps/details?id=com.supercell.clashofclans"
+                    android:scheme="https"/>
+                <data
+                    android:host="play.google.com/store/apps/details?id=com.supercell.clashofclans"
+                    android:scheme="http"/>
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".Activities.PlayVideoActivity"
             android:theme="@style/Toolbar" />
@@ -84,7 +101,7 @@
         </activity>
         <activity
             android:name=".Activities.ProfilePhotoActivity"
-            android:theme="@style/Toolbar"></activity>
+            android:theme="@style/Toolbar" />
         <activity
             android:name=".Activities.EmailVerifyPageActivity"
             android:theme="@style/Toolbar" />
@@ -117,8 +134,29 @@
             android:name=".Activities.DisplayGroupDetail"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".Activities.DetailActivity" />
-        <activity android:name=".Activities.TabActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".Activities.TabActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Activities.DynamicLinkActivity"
+            android:label="@string/title_activity_dynamic_link"
+            android:theme="@style/AppTheme.NoActionBar">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.CATEGORY_LAUNCHER"/>
+                <!--category android:name="android.intent.category.LAUNCHER" /-->
+                <data
+                    android:host="play.google.com/store/apps/details?id=com.supercell.clashofclans"
+                    android:scheme="https"/>
+                <data
+                    android:host="play.google.com/store/apps/details?id=com.supercell.clashofclans"
+                    android:scheme="http"/>
+            </intent-filter>
+
+        </activity>
     </application>
 
 </manifest>

@@ -38,5 +38,14 @@ public class StringConstant {
 
     //Fragment tags
     public static final String profileDetailFragment = "profileDetailFragment";
-    public static final String inviteFriendFragment = "inviteFriendFragment";
+    public static final String inviteFacebookFriendFragment = "inviteFacebookFriendFragment";
+    public static final String inviteContactFriendFragment = "inviteContactFriendFragment";
+
+    //Coun JSON URLs
+    public static final String countryNameJSONUrl = "http://country.io/names.json";
+    public static final String countryPhoneJSONUrl = "http://country.io/phone.json";
+
+    public static final String countryNameTurkey = "Turkey";
+    public static final String phoneCodeTurkey = "90";
+
 }

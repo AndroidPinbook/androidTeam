@@ -39,6 +39,14 @@ public class FirebaseGetFriends {
         return FBGetFriendsInstance;
     }
 
+    public static FirebaseGetFriends getFBGetFriendsInstance() {
+        return FBGetFriendsInstance;
+    }
+
+    public static void setFBGetFriendsInstance(FirebaseGetFriends FBGetFriendsInstance) {
+        FirebaseGetFriends.FBGetFriendsInstance = FBGetFriendsInstance;
+    }
+
     public static void setInstance(FirebaseGetFriends instance) {
         FBGetFriendsInstance = instance;
     }
@@ -76,40 +84,24 @@ public class FirebaseGetFriends {
 
                 for(DataSnapshot friendsSnapshot: dataSnapshot.getChildren()){
 
-                    final Friend friend = new Friend();
-                    String friendUserID = friendsSnapshot.getKey();
-                    friend.setUserID(friendUserID);
+                    if(friendsSnapshot.getValue() != null) {
 
-                    final DatabaseReference mDbrefDetails = FirebaseDatabase.getInstance().getReference(Users).child(friendUserID);
+                        final Friend friend = new Friend();
+                        String friendUserID = friendsSnapshot.getKey();
+                        friend.setUserID(friendUserID);
 
-                    valueEventListenerForDetails = mDbrefDetails.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
+                        Map<String, Object> userList = new HashMap<String, Object>();
+                        userList = (Map) dataSnapshot.getValue();
 
-                            if(dataSnapshot.getValue() != null){
+                        Map<String, Object> users = new HashMap<String, Object>();
+                        users = (Map<String, Object>) userList.get(friendUserID);
 
-                                Map<String , String> map = new HashMap<String, String>();
+                        friend.setNameSurname((String) users.get(nameSurname));
+                        friend.setProfilePicSrc((String) users.get(profilePictureUrl));
+                        friend.setProviderId((String)users.get(providerId));
 
-                                map = (Map) dataSnapshot.getValue();
-
-                                String nameSurname = map.get(name) + " " + map.get(surname);
-                                friend.setNameSurname(nameSurname);
-
-                                friend.setProfilePicSrc(map.get(profilePictureUrl));
-
-                                Log.i("Info", "  >>nameSurname:" + nameSurname);
-                                Log.i("Info", "  >>profilePictureUrl:" + map.get(profilePictureUrl));
-
-                                friendList.add(friend);
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                            Log.i("Info", "onCancelled1 error:" + databaseError.toString());
-                        }
-                    });
+                        friendList.add(friend);
+                    }
                 }
             }
 

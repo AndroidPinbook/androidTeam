@@ -1,6 +1,7 @@
 package uur.com.pinbook.FirebaseAdapters;
 
 import android.util.Log;
+
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -15,54 +16,45 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 public class FirebaseUserAdapter {
 
     public static DatabaseReference mDbref;
+    public static String userId;
 
-    public static void saveUserInfo(User user){
+    public static void saveUserInfo(User user) {
 
         Map<String, String> values = new HashMap<>();
 
-        String userId = user.getUserId();
-
+        userId = user.getUserId();
         mDbref = FirebaseDatabase.getInstance().getReference().child(Users);
 
         values.put(email, user.getEmail());
-        setValuesToCloud(userId, values);
-
         values.put(gender, user.getGender());
-        setValuesToCloud(userId, values);
-
         values.put(userName, user.getUsername());
-        setValuesToCloud(userId, values);
-
         values.put(name, user.getName());
-        setValuesToCloud(userId, values);
-
         values.put(surname, user.getSurname());
-        setValuesToCloud(userId, values);
-
-        values.put(mobilePhone, user.getPhoneNum());
-        setValuesToCloud(userId, values);
-
+        values.put(mobilePhone, user.getPhoneNum().toString());
         values.put(birthday, user.getBirthdate());
-        setValuesToCloud(userId, values);
-
         values.put(profilePictureUrl, user.getProfilePicSrc());
-        setValuesToCloud(userId, values);
-
         values.put(profilePicMiniUrl, user.getMiniProfPicUrl());
-        setValuesToCloud(userId, values);
+        values.put(providerId, user.getProviderId());
+        setValuesToCloud(values);
+
+        savePhoneNumInfo(user.getPhoneNum());
     }
 
-    public static void setValuesToCloud(String userId, Map<String, String> values){
+    private static void savePhoneNumInfo(String phoneNum) {
 
-        try {
-            mDbref.child(userId).setValue(values, new DatabaseReference.CompletionListener() {
-                @Override
-                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                    Log.i("Info","databaseError:" + databaseError);
-                }
-            });
-        } catch (Exception e) {
-            Log.i("Info","  >>setValuesToCloud error:" + e.toString());
-        }
+        mDbref = FirebaseDatabase.getInstance().getReference().child(PhoneNums);
+        Map<String, Object> values = new HashMap<>();
+        values.put(phoneNum, userId);
+        mDbref.updateChildren(values);
+    }
+
+    public static void setValuesToCloud(Map<String, String> values) {
+
+        mDbref.child(userId).setValue(values, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+            }
+        });
     }
 }

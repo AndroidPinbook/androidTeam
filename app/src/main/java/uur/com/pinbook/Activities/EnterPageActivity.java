@@ -66,6 +66,7 @@ import twitter4j.conf.ConfigurationBuilder;
 import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.Adapters.CustomPagerAdapter;
 import uur.com.pinbook.Controller.EnterPageDataModel;
+import uur.com.pinbook.FirebaseAdapters.FBAddFacebookUserAdapter;
 import uur.com.pinbook.FirebaseAdapters.FirebaseUserAdapter;
 import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
@@ -328,6 +329,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
                                 saveProfPicViaSocialApp();
                                 FirebaseUserAdapter.saveUserInfo(user);
+                                FBAddFacebookUserAdapter.saveFacebookUser(user.getProviderId());
 
                                 startNextPage();
 
@@ -360,6 +362,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                             user.setEmail(object.getString("email"));
                             user.setBirthdate(object.getString("birthday"));
                             user.setGender(object.getString("gender"));
+                            user.setProviderId(object.getString("id"));
                             user.setUsername(" ");
                             user.setPhoneNum(" ");
 

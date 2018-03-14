@@ -61,11 +61,15 @@
     <string name="addNewGroup">Yeni Grup</string>
     <string name="addPersonToGroup">Katilimci Ekle</string>
 
+    <string name="search">Search&#8230;</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
     <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit.  Etiam eget ligula eu lectus lobortis condimentum.</string>
+    <string name="title_activity_dynamic_link">DynamicLinkActivity</string>
+    <string name="countries">Countries</string>
 
 
 </resources>

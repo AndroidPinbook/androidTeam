@@ -26,6 +26,10 @@ public class FirebaseConstant {
     public static final String Groups = "Groups";
     public static final String UserGroups = "UserGroups";
     public static final String Feeds = "Feeds";
+    public static final String FacebookUsers = "FacebookUsers";
+    public static final String InviteOutbound = "InviteOutbound";
+    public static final String InviteInbound = "InviteInbound";
+    public static final String PhoneNums = "PhoneNums";
 
     //Firebase Group constants
     public static final String Admin = "Admin";
@@ -92,6 +96,9 @@ public class FirebaseConstant {
     public static final String property = "Property";
     public static final String toWhom = "ToWhom";
 
+    //Firebase FacebookUSers childs
+    public static final String fbUserId = "fbUserId";
+
     //Pin properties
     public static final String propFriends = "Friends";
     public static final String propPersons = "Persons";
@@ -105,4 +112,17 @@ public class FirebaseConstant {
     //Pin notify Flags
     public static final String notifyYes = "Y";
     public static final String notifyNo  = "N";
+
+    //Inbound-Outbound invite constants
+    public static final String Yes  = "Y";
+    public static final String No  = "N";
+    public static final String OutbndWaiting  = "W";
+    public static final String InbndWaiting  = "I";
+
+    //Dynamic Link constants
+    public static final String dynamicLinkDomain = "g2wx4.app.goo.gl";
+    public static final String appShareLink = "https://play.google.com/store/apps/details?id=com.supercell.clashofclans";
+    public static final String appShareTitle = "Share This App";
+
+
 }

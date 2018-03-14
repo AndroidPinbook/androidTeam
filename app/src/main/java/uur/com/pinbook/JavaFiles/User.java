@@ -14,6 +14,16 @@ public class User implements Serializable{
     String miniProfPicUrl;
     String birthdate;
     String phoneNum;
+    String providerId;
+
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
 
     public String getMiniProfPicUrl() {
         return miniProfPicUrl;

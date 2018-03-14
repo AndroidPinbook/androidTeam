@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    android:layout_marginTop="5dp"
+    app:cardCornerRadius="5dp"
+    android:id="@+id/groupRootCardView">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/white"
+        android:id="@+id/specialListLinearLayout"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/specialPictureImgView"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/img_border_blue"
+            android:src="@drawable/gallery_icon80" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/itemIdTextView"
+            android:visibility="gone"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/adminIDTextView"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/specialNameTextView"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="30dp"
+            android:text="Ugur Gogebakan"
+            android:textStyle="bold|italic" />
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:id="@+id/sendInviteButton"
+            android:text="Istek Gonder"
+            android:textSize="10dp"
+            android:textAllCaps="false"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:layout_gravity="center"
+            android:background="#2E9AFE"
+            android:textColor="@color/white"
+            android:visibility="gone"/>
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:id="@+id/invSendedButton"
+            android:text="Istek Gonderildi"
+            android:textSize="10dp"
+            android:textAllCaps="false"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:enabled="false"
+            android:visibility="gone"/>
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:id="@+id/approveInvitationBtn"
+            android:text="Kabul Et"
+            android:textSize="10dp"
+            android:textAllCaps="false"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:layout_gravity="center"
+            android:background="#2E9AFE"
+            android:textColor="@color/white"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

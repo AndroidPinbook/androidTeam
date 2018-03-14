@@ -71,7 +71,7 @@ public class ImageLoader {
         } else {
             queuePhoto(url, imageView, displayType);
 
-            if (url != null && fileChild == groupsCacheDirectory)
+            if (url != null)
                 new DownloadImageTask(imageView, displayType).execute(url);
 
         }

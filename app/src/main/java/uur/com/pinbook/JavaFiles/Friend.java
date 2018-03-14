@@ -13,6 +13,24 @@ public class Friend implements Serializable{
     String userID;
     String nameSurname;
     String profilePicSrc;
+    String providerId;
+    String friendStatus;
+
+    public String getFriendStatus() {
+        return friendStatus;
+    }
+
+    public void setFriendStatus(String friendStatus) {
+        this.friendStatus = friendStatus;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
 
     public String getUserID() {
         return userID;
