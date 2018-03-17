@@ -60,6 +60,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
+                    android:id="@+id/changePhotoTv"
                     android:text="Fotoğrafı Değiştir"
                     android:textColor="@color/text_blue_ccolor"
                     android:gravity="center_vertical"
@@ -155,7 +156,8 @@
             <Spinner
                 android:id="@+id/genderSpinner"
                 android:layout_width="match_parent"
-                android:layout_height="50dp">
+                android:layout_height="50dp"
+                android:layout_marginStart="-5dp">
             </Spinner>
 
             <LinearLayout

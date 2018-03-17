@@ -51,4 +51,9 @@ public class StringConstant {
     public static final String contactType = "contact";
     public static final String facebookType = "facebook";
 
+    //Gender Types
+    public static final String genderMale = "male";
+    public static final String genderFemale = "female";
+    public static final String genderUnknown = "Belirtilmedi";
+
 }

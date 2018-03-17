@@ -477,7 +477,7 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         ObjectAnimator objectAnimator;
 
         if(genderType == R.id.maleImageView){
-            gender = (String) getString(R.string.male_text);
+            gender = genderMale;
 
             objectAnimator = ObjectAnimator.ofFloat(femaleImageView, "alpha", 1.0f, 0.3f);
             objectAnimator.setDuration(300);
@@ -490,7 +490,7 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
             }
 
         }else{
-            gender = (String) getString(R.string.female_text);
+            gender = genderFemale;
 
             objectAnimator = ObjectAnimator.ofFloat(maleImageView, "alpha", 1.0f, 0.3f);
             objectAnimator.setDuration(300);

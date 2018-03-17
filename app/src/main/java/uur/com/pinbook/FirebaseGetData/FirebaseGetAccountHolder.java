@@ -74,10 +74,9 @@ public class FirebaseGetAccountHolder {
 
     private void getUserFromFirebase() {
 
-        final FirebaseDatabase db = FirebaseDatabase.getInstance();
-        DatabaseReference databaseReference = db.getReference(Users).child(userID);
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference(Users).child(userID);
 
-        ValueEventListener valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
