@@ -27,6 +27,7 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -127,7 +128,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
 
-        FacebookSdk.sdkInitialize(getApplicationContext());
+        //FacebookSdk.sdkInitialize(getApplicationContext());
 
         // Configure Twitter SDK
         TwitterAuthConfig authConfig = new TwitterAuthConfig(
@@ -156,8 +157,6 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
 
             mAuth = FirebaseAuth.getInstance();
 
-            FirebaseUser fbUser = mAuth.getCurrentUser();
-
             ViewPager enterViewPager = (ViewPager) findViewById(R.id.enterViewPager);
             dotsLayout = (LinearLayout) findViewById(R.id.layoutDots);
 
@@ -180,7 +179,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
             // Initialize Facebook Login button
             mCallbackManager = CallbackManager.Factory.create();
 
-            LoginButton loginButton = findViewById(R.id.facebookLoginButton);
+            final LoginButton loginButton = (LoginButton) findViewById(R.id.facebookLoginButton);
 
             loginButton.setReadPermissions(Arrays.asList(
                     "public_profile",
@@ -192,11 +191,11 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                 @Override
                 public void onSuccess(LoginResult loginResult) {
 
-                    Log.i("Info", "facebook:onSucces:" + loginResult);
+                    Log.i("Info", "facebook:onSucces:" + loginResult.getAccessToken());
 
                     getFacebookuserInfo(loginResult);
 
-                    handleFacebookAccessToken(loginResult.getAccessToken());
+                   // handleFacebookAccessToken(loginResult.getAccessToken());
                 }
 
                 @Override
@@ -348,7 +347,7 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
-    public void getFacebookuserInfo(LoginResult loginResult) {
+    public void getFacebookuserInfo(final LoginResult loginResult) {
 
         GraphRequest graphRequest = GraphRequest.newMeRequest(loginResult.getAccessToken(),
                 new GraphRequest.GraphJSONObjectCallback() {
@@ -387,6 +386,8 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                             Log.i("FBLogin", "  >>gender    :" + user.getGender());
                             Log.i("FBLogin", "  >>name      :" + user.getName());
                             Log.i("FBLogin", "  >>surname   :" + user.getSurname());
+
+                            handleFacebookAccessToken(loginResult.getAccessToken());
 
                         } catch (JSONException e) {
                             Log.i("Info", "  >>JSONException error:" + e.toString());

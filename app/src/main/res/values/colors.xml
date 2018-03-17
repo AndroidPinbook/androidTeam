@@ -65,5 +65,6 @@
     <color name="background_color">#3481c1</color>
     <color name="horizontal_image_background">#F8E81C</color>
     <color name="name_text_color">#333333</color>
+    <color name="text_blue_ccolor">#33B5FF</color>
 
 </resources>

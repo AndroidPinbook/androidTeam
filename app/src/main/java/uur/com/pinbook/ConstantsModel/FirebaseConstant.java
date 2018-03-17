@@ -27,8 +27,10 @@ public class FirebaseConstant {
     public static final String UserGroups = "UserGroups";
     public static final String Feeds = "Feeds";
     public static final String FacebookUsers = "FacebookUsers";
-    public static final String InviteOutbound = "InviteOutbound";
-    public static final String InviteInbound = "InviteInbound";
+    public static final String InviteFacebookOutbound = "InviteFacebookOutbound";
+    public static final String InviteFacebookInbound = "InviteFacebookInbound";
+    public static final String InviteContactOutbound = "InviteContactOutbound";
+    public static final String InviteContactInbound = "InviteContactInbound";
     public static final String PhoneNums = "PhoneNums";
 
     //Firebase Group constants

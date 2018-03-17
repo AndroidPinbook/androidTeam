@@ -3,20 +3,16 @@ package uur.com.pinbook.ListAdapters;
 import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -26,7 +22,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import uur.com.pinbook.DefaultModels.SelectedFriendList;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.LazyList.ImageLoader;
@@ -35,70 +30,25 @@ import uur.com.pinbook.R;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
-public class InviteOutboundVerListAdapter extends RecyclerView.Adapter<InviteOutboundVerListAdapter.MyViewHolder> implements Filterable{
+public class InviteContactFriendListAdapter extends RecyclerView.Adapter<InviteContactFriendListAdapter.MyViewHolder>{
 
     private ArrayList<Friend> data;
-    private ArrayList<Friend> dataCopy = new ArrayList<Friend>();
     public ImageLoader imageLoader;
     View view;
     private ImageView specialProfileImgView;
 
     LayoutInflater layoutInflater;
-    String searchText;
 
     Context context;
     Activity activity;
 
-    public InviteOutboundVerListAdapter(Context context, ArrayList<Friend> friendList, String searchText) {
+    public InviteContactFriendListAdapter(Context context, ArrayList<Friend> friendList) {
         layoutInflater = LayoutInflater.from(context);
         data=friendList;
-        dataCopy.addAll(data);
         Collections.sort(data, new CustomComparator());
         this.context = context;
-        this.searchText = searchText;
         activity = (Activity) context;
         imageLoader=new ImageLoader(context.getApplicationContext(), friendsCacheDirectory);
-
-        if(searchText != null) {
-            if (!searchText.isEmpty())
-                getFilter().filter(searchText);
-        }
-    }
-
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence charSequence) {
-
-                String searchString = charSequence.toString();
-
-                if (searchString.isEmpty()) {
-
-                    dataCopy = data;
-                } else {
-                    ArrayList<Friend> tempFilteredList = new ArrayList<>();
-
-                    for (Friend friend : data) {
-
-                        if (friend.getNameSurname().toLowerCase().contains(searchString.toLowerCase())) {
-                            tempFilteredList.add(friend);
-                        }
-                    }
-                    dataCopy = tempFilteredList;
-                }
-
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = dataCopy;
-                return filterResults;
-            }
-
-            @Override
-            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                dataCopy = (ArrayList<Friend>) filterResults.values;
-                notifyDataSetChanged();
-            }
-        };
     }
 
     public class CustomComparator implements Comparator<Friend> {
@@ -108,15 +58,11 @@ public class InviteOutboundVerListAdapter extends RecyclerView.Adapter<InviteOut
         }
     }
 
-    public Object getItem(int position) {
-        return position;
-    }
-
     @Override
-    public InviteOutboundVerListAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public InviteContactFriendListAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         view = layoutInflater.inflate(R.layout.invite_outbnd_ver_list_item, parent, false);
-        final InviteOutboundVerListAdapter.MyViewHolder holder = new InviteOutboundVerListAdapter.MyViewHolder(view);
+        final InviteContactFriendListAdapter.MyViewHolder holder = new InviteContactFriendListAdapter.MyViewHolder(view);
         return holder;
     }
 
@@ -145,16 +91,16 @@ public class InviteOutboundVerListAdapter extends RecyclerView.Adapter<InviteOut
                     approveInvitationBtn.setVisibility(View.GONE);
                     invSendedButton.setVisibility(View.VISIBLE);
 
-                    DatabaseReference mdbRef = FirebaseDatabase.getInstance().getReference(InviteOutbound).child(
+                    //InviteOutbound update children
+                    DatabaseReference mdbRef = FirebaseDatabase.getInstance().getReference(InviteContactOutbound).child(
                             FirebaseGetAccountHolder.getUserID());
-
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put(selectedFriend.getUserID(), " ");
                     mdbRef.updateChildren(map);
 
-                    DatabaseReference mdbRef2 = FirebaseDatabase.getInstance().getReference(InviteInbound).child(
+                    //InviteInbound update children
+                    DatabaseReference mdbRef2 = FirebaseDatabase.getInstance().getReference(InviteContactInbound).child(
                             selectedFriend.getUserID());
-
                     Map<String, Object> map2 = new HashMap<String, Object>();
                     map2.put(FirebaseGetAccountHolder.getUserID(), " ");
                     mdbRef2.updateChildren(map2);
@@ -176,12 +122,12 @@ public class InviteOutboundVerListAdapter extends RecyclerView.Adapter<InviteOut
                     mdbRef.updateChildren(map);
 
                     //Remove from inviteInbound
-                    DatabaseReference mdbRef2 = FirebaseDatabase.getInstance().getReference(InviteInbound).child(
+                    DatabaseReference mdbRef2 = FirebaseDatabase.getInstance().getReference(InviteContactInbound).child(
                             FirebaseGetAccountHolder.getUserID()).child(selectedFriend.getUserID());
                     mdbRef2.removeValue();
 
                     //Remove from inviteOutbound
-                    DatabaseReference mdbRef3 = FirebaseDatabase.getInstance().getReference(InviteOutbound).
+                    DatabaseReference mdbRef3 = FirebaseDatabase.getInstance().getReference(InviteContactOutbound).
                             child(selectedFriend.getUserID()).child(FirebaseGetAccountHolder.getUserID());
                     mdbRef3.removeValue();
 
@@ -233,14 +179,9 @@ public class InviteOutboundVerListAdapter extends RecyclerView.Adapter<InviteOut
     }
 
     @Override
-    public void onBindViewHolder(InviteOutboundVerListAdapter.MyViewHolder holder, int position) {
-        Friend selectedFriend = dataCopy.get(position);
+    public void onBindViewHolder(InviteContactFriendListAdapter.MyViewHolder holder, int position) {
+        Friend selectedFriend = data.get(position);
         holder.setData(selectedFriend, position);
-    }
-
-    public void hideKeyBoard(View view){
-        InputMethodManager inputMethodManager =(InputMethodManager)context.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     public long getItemId(int position) {
@@ -249,6 +190,6 @@ public class InviteOutboundVerListAdapter extends RecyclerView.Adapter<InviteOut
 
     @Override
     public int getItemCount() {
-        return  dataCopy.size();
+        return  data.size();
     }
 }

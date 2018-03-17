@@ -11,51 +11,32 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
-public class FBGetInviteInbounds {
+public class FBGetInviteContactInbounds {
 
-    //String userId;
     static ValueEventListener valueEventListenerForInboundList;
 
-    private static FBGetInviteInbounds FBGetInviteInboundsInstance = null;
+    private static FBGetInviteContactInbounds FBGetInviteContactInboundsIns = null;
 
     ArrayList<String> inboundList;
 
-    public static FBGetInviteInbounds getInstance(String userId){
+    public static FBGetInviteContactInbounds getInstance(){
 
-        if(FBGetInviteInboundsInstance == null)
-            FBGetInviteInboundsInstance = new FBGetInviteInbounds(userId);
+        if(FBGetInviteContactInboundsIns == null)
+            FBGetInviteContactInboundsIns = new FBGetInviteContactInbounds();
 
-        return FBGetInviteInboundsInstance;
+        return FBGetInviteContactInboundsIns;
     }
 
-    public static FBGetInviteInbounds getFBGetInviteInboundsInstance() {
-        return FBGetInviteInboundsInstance;
-    }
-
-    public static void setFBGetinboundsInstance(FBGetInviteInbounds FBGetInviteInboundsInstance) {
-        FBGetInviteInbounds.FBGetInviteInboundsInstance = FBGetInviteInboundsInstance;
-    }
-
-    public static void setInstance(FBGetInviteInbounds instance) {
-        FBGetInviteInboundsInstance = instance;
+    public static void setInstance(FBGetInviteContactInbounds instance) {
+        FBGetInviteContactInboundsIns = instance;
     }
 
     public ArrayList<String> getInboundList() {
         return inboundList;
     }
 
-    public void setInboundList(ArrayList<String> inboundList) {
-        this.inboundList = inboundList;
-    }
-
-    public FBGetInviteInbounds(String userID){
-
-        //this.userId = userID;
+    public FBGetInviteContactInbounds(){
         fillInboundList();
-    }
-
-    public int getListSize(){
-        return  inboundList.size();
     }
 
     public void addFriendIdToList(String id){
@@ -76,21 +57,18 @@ public class FBGetInviteInbounds {
 
     private void fillInboundList() {
 
-        inboundList = new ArrayList<String>();
+        inboundList = new ArrayList<>();
 
-        DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(InviteInbound).
+        DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(InviteContactInbound).
                 child(FirebaseGetAccountHolder.getUserID());
 
         valueEventListenerForInboundList = mDbrefFriendList.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                if(inboundList != null) inboundList.clear();
-
                 for(DataSnapshot inboundSnapshot: dataSnapshot.getChildren()){
 
                     if(inboundSnapshot.getValue() != null) {
-
                         String friendId = inboundSnapshot.getKey();
                         addFriendIdToList(friendId);
                     }
@@ -99,7 +77,7 @@ public class FBGetInviteInbounds {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.i("Info", "onCancelled2 error:" + databaseError.toString());
+
             }
         });
     }

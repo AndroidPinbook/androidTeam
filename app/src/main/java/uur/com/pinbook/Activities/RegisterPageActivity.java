@@ -3,7 +3,6 @@ package uur.com.pinbook.Activities;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -14,7 +13,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -25,9 +23,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.RelativeLayout;
-import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -42,11 +38,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.google.i18n.phonenumbers.Phonenumber;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -57,31 +49,15 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
 
-import twitter4j.HttpClient;
-import twitter4j.HttpResponse;
 import uur.com.pinbook.Adapters.CustomDialogAdapter;
 import uur.com.pinbook.Adapters.ErrorMessageAdapter;
 import uur.com.pinbook.Adapters.ValidationAdapter;
-import uur.com.pinbook.ConstantsModel.StringConstant;
 import uur.com.pinbook.Controller.HttpHandler;
-import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.User;
-import uur.com.pinbook.ListAdapters.InviteOutboundVerListAdapter;
 import uur.com.pinbook.R;
 
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.PhoneNums;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Users;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.birthday;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.email;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.gender;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.mobilePhone;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.name;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.profilePictureUrl;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.providerId;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.surname;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.userName;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
 public class RegisterPageActivity extends AppCompatActivity implements View.OnClickListener,

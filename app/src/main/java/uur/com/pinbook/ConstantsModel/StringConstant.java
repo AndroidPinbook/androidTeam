@@ -48,4 +48,7 @@ public class StringConstant {
     public static final String countryNameTurkey = "Turkey";
     public static final String phoneCodeTurkey = "90";
 
+    public static final String contactType = "contact";
+    public static final String facebookType = "facebook";
+
 }

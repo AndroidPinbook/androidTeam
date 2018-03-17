@@ -1,6 +1,5 @@
 package uur.com.pinbook.FirebaseGetData;
 
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
@@ -10,10 +9,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import uur.com.pinbook.JavaFiles.Friend;
 
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
@@ -21,52 +16,32 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
  * Created by mac on 17.01.2018.
  */
 
-public class FBGetInviteOutbounds {
+public class FBGetInviteFacebookOutbounds {
 
-    //String userId;
-    static ValueEventListener valueEventListenerForDetails;
     static ValueEventListener valueEventListenerForOutboundList;
 
-    private static FBGetInviteOutbounds FBGetInviteOutboundsInstance = null;
+    private static FBGetInviteFacebookOutbounds FBGetInviteFacebookOutboundsIns = null;
 
     ArrayList<String> outboundList;
 
-    public static FBGetInviteOutbounds getInstance(String userId){
+    public static FBGetInviteFacebookOutbounds getInstance(){
 
-        if(FBGetInviteOutboundsInstance == null)
-            FBGetInviteOutboundsInstance = new FBGetInviteOutbounds(userId);
+        if(FBGetInviteFacebookOutboundsIns == null)
+            FBGetInviteFacebookOutboundsIns = new FBGetInviteFacebookOutbounds();
 
-        return FBGetInviteOutboundsInstance;
+        return FBGetInviteFacebookOutboundsIns;
     }
 
-    public static FBGetInviteOutbounds getFBGetInviteOutboundsInstance() {
-        return FBGetInviteOutboundsInstance;
-    }
-
-    public static void setFBGetOutboundsInstance(FBGetInviteOutbounds FBGetInviteOutboundsInstance) {
-        FBGetInviteOutbounds.FBGetInviteOutboundsInstance = FBGetInviteOutboundsInstance;
-    }
-
-    public static void setInstance(FBGetInviteOutbounds instance) {
-        FBGetInviteOutboundsInstance = instance;
+    public static void setInstance(FBGetInviteFacebookOutbounds instance) {
+        FBGetInviteFacebookOutboundsIns = instance;
     }
 
     public ArrayList<String> getOutboundList() {
         return outboundList;
     }
 
-    public void setOutboundList(ArrayList<String> outboundList) {
-        this.outboundList = outboundList;
-    }
-
-    public FBGetInviteOutbounds(String userID){
-
-        //this.userId = userID;
+    public FBGetInviteFacebookOutbounds(){
         fillOutboundList();
-    }
-
-    public int getListSize(){
-        return  outboundList.size();
     }
 
     public void addFriendIdToList(String id){
@@ -83,25 +58,21 @@ public class FBGetInviteOutbounds {
 
         if(!idCheck)
             outboundList.add(id);
-
     }
 
     private void fillOutboundList() {
 
-        outboundList = new ArrayList<String>();
+        outboundList = new ArrayList<>();
 
-        DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(InviteOutbound).child(FirebaseGetAccountHolder.getUserID());
+        DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(InviteFacebookOutbound).child(FirebaseGetAccountHolder.getUserID());
 
         valueEventListenerForOutboundList = mDbrefFriendList.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                if(outboundList != null) outboundList.clear();
-
                 for(DataSnapshot outboundSnapshot: dataSnapshot.getChildren()){
 
                     if(outboundSnapshot.getValue() != null) {
-
                         String friendId = outboundSnapshot.getKey();
                         addFriendIdToList(friendId);
                     }

@@ -203,7 +203,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
             getSupportFragmentManager().popBackStack();
         }
 
-        Fragment inviteContactFriendFrg = getSupportFragmentManager().findFragmentByTag(inviteFacebookFriendFragment);
+        Fragment inviteContactFriendFrg = getSupportFragmentManager().findFragmentByTag(inviteContactFriendFragment);
         if (inviteContactFriendFrg != null) {
             getSupportFragmentManager().beginTransaction().remove(inviteContactFriendFrg).commit();
             getSupportFragmentManager().popBackStack();
@@ -339,6 +339,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
         if (item.getItemId() == R.id.logOut) {
 
+            firebaseAuth.signOut();
             LoginManager.getInstance().logOut();
             TwitterCore.getInstance().getSessionManager().clearActiveSession();
             ClearSingletonClasses.clearAllClasses();

@@ -2,18 +2,18 @@ package uur.com.pinbook.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import uur.com.pinbook.Activities.ProfilePageActivity;
-import uur.com.pinbook.FirebaseGetData.FBGetInviteInbounds;
-import uur.com.pinbook.FirebaseGetData.FBGetInviteOutbounds;
+import uur.com.pinbook.FirebaseGetData.FBGetInviteContactInbounds;
+import uur.com.pinbook.FirebaseGetData.FBGetInviteContactOutbounds;
+import uur.com.pinbook.FirebaseGetData.FBGetInviteFacebookInbounds;
+import uur.com.pinbook.FirebaseGetData.FBGetInviteFacebookOutbounds;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.OtherFragments.ProfileDetailFragment;
 import uur.com.pinbook.R;
@@ -45,8 +45,10 @@ public class ProfileFragment extends BaseFragment implements View.OnClickListene
 
         profileMainLayout = (FrameLayout)mView.findViewById(R.id.profileMainLayout);
 
-        FBGetInviteInbounds.getInstance(FirebaseGetAccountHolder.getUserID());
-        FBGetInviteOutbounds.getInstance(FirebaseGetAccountHolder.getUserID());
+        FBGetInviteFacebookInbounds.getInstance();
+        FBGetInviteFacebookOutbounds.getInstance();
+        FBGetInviteContactInbounds.getInstance();
+        FBGetInviteContactOutbounds.getInstance();
 
         return mView;
     }

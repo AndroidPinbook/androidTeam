@@ -41,26 +41,18 @@ import static uur.com.pinbook.ConstantsModel.StringConstant.verticalShown;
 @SuppressLint("ValidFragment")
 public class InviteFacebookFriendFragment extends Fragment {
 
-    RecyclerView groupRecyclerView;
-
     private View mView;
-    String FBuserID;
     ViewGroup mContainer;
     LayoutInflater mLayoutInflater;
 
     private ViewPager viewPager;
-    private TabLayout tabLayout;
     SpecialSelectTabAdapter adapter;
 
-    LinearLayoutManager linearLayoutManager;
-
     private Context context;
-    private String searchText;
 
     @SuppressLint("ValidFragment")
     public InviteFacebookFriendFragment(Context context) {
         this.context = context;
-        this.FBuserID = FirebaseGetAccountHolder.getUserID();
     }
 
     @Override
@@ -94,18 +86,12 @@ public class InviteFacebookFriendFragment extends Fragment {
 
         viewPager = (ViewPager) mView.findViewById(R.id.viewpager);
         setupViewPager(viewPager);
-
-        //tabLayout = (TabLayout) mView.findViewById(R.id.tabs);
-        //tabLayout.setupWithViewPager(viewPager);
     }
 
     private void setupViewPager(final ViewPager viewPager) {
 
         adapter = new SpecialSelectTabAdapter(getFragmentManager());
-        //adapter.addFragment(new PersonFragment(FBuserID, verticalShown, null,
-        //        null, null, getActivity()),"Facebook");
         adapter.addFragment(new FindFacebookFriendsFragment(getActivity(), verticalShown), "Facebook");
-        //adapter.addFragment(new GroupFragment(FBuserID, getActivity(), null), "Contact");
         viewPager.setAdapter(adapter);
     }
 }

@@ -42,10 +42,12 @@ public class FirebaseUserAdapter {
 
     private static void savePhoneNumInfo(String phoneNum) {
 
+        if(phoneNum.trim().isEmpty()) return;
+
         mDbref = FirebaseDatabase.getInstance().getReference().child(PhoneNums);
         Map<String, Object> values = new HashMap<>();
-        values.put(phoneNum, userId);
-        mDbref.updateChildren(values);
+        values.put(fbUserId, userId);
+        mDbref.child(phoneNum).setValue(values);
     }
 
     public static void setValuesToCloud(Map<String, String> values) {

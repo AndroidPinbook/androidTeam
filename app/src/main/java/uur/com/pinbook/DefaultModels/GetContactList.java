@@ -38,13 +38,8 @@ public class GetContactList extends Activity{
         return contactList;
     }
 
-    public void setContactList(ArrayList<User> contactList) {
-        this.contactList = contactList;
-    }
-
     public GetContactList(Context context){
         this.context = context;
-
         checkPermissionForContact();
     }
 
@@ -80,9 +75,22 @@ public class GetContactList extends Activity{
             String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
             //Toast.makeText(getApplicationContext(),name, Toast.LENGTH_LONG).show();
             user.setName(name);
-            user.setPhoneNum(phoneNumber);
-            Log.i("Info", "name       :" + name);
-            Log.i("Info", "phoneNumber:" + phoneNumber);
+
+            String clearPhoneNum ="";
+
+            for (int i = 0; i < phoneNumber.length(); i++) {
+
+                char ch = phoneNumber.charAt(i);
+                if (Character.isDigit(ch)) {
+                    clearPhoneNum += ch;
+                }
+            }
+
+            user.setPhoneNum(clearPhoneNum);
+
+            Log.i("Info", "name         :" + name);
+            Log.i("Info", "phoneNumber  :" + phoneNumber);
+            Log.i("Info", "clearPhoneNum:" + clearPhoneNum);
             contactList.add(user);
 
         }

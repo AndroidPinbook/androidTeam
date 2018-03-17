@@ -16,10 +16,10 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 
 public class FirebaseGetAccountHolder {
 
-    private static String userID = "";
-    private static User user;
+    private String userID = "";
+    private User user;
 
-    private static FirebaseGetAccountHolder instance = null;
+    private static FirebaseGetAccountHolder instance;
 
     public static FirebaseGetAccountHolder getInstance(String userID) {
 
@@ -31,7 +31,7 @@ public class FirebaseGetAccountHolder {
 
     public FirebaseGetAccountHolder(String userID) {
         user = new User();
-        instance.userID = userID;
+        this.userID = userID;
         getUserFromFirebase();
     }
 
@@ -44,6 +44,15 @@ public class FirebaseGetAccountHolder {
     }
 
     public static String getUserID() {
+
+        if(instance == null){
+            FirebaseAuth firebaseAuth;
+            firebaseAuth = FirebaseAuth.getInstance();
+            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+            instance = new FirebaseGetAccountHolder(currentUser.getUid());
+            return currentUser.getUid();
+        }
+
         if(!instance.userID.isEmpty())
             return instance.userID;
         else{
@@ -55,16 +64,12 @@ public class FirebaseGetAccountHolder {
         }
     }
 
-    public static void setUserID(String userID) {
-        FirebaseGetAccountHolder.userID = userID;
-    }
-
     public User getUser() {
-        return instance.user;
+        return this.user;
     }
 
     public void setUser(User user) {
-        instance.user = user;
+        this.user = user;
     }
 
     private void getUserFromFirebase() {
@@ -79,16 +84,16 @@ public class FirebaseGetAccountHolder {
                 Map<String , Object> map = new HashMap<String, Object>();
                 map = (Map) dataSnapshot.getValue();
 
-                instance.user.setEmail((String) map.get(email));
-                instance.user.setBirthdate((String) map.get(birthday));
-                instance.user.setGender((String) map.get(gender));
-                instance.user.setPhoneNum((String) map.get(mobilePhone));
-                instance.user.setName((String) map.get(name));
-                instance.user.setSurname((String) map.get(surname));
-                instance.user.setProfilePicSrc((String) map.get(profilePictureUrl));
-                instance.user.setUsername((String) map.get(userName));
-                instance.user.setProviderId((String) map.get(providerId));
-                instance.user.setUserId(userID);
+                user.setEmail((String) map.get(email));
+                user.setBirthdate((String) map.get(birthday));
+                user.setGender((String) map.get(gender));
+                user.setPhoneNum((String) map.get(mobilePhone));
+                user.setName((String) map.get(name));
+                user.setSurname((String) map.get(surname));
+                user.setProfilePicSrc((String) map.get(profilePictureUrl));
+                user.setUsername((String) map.get(userName));
+                user.setProviderId((String) map.get(providerId));
+                user.setUserId(userID);
             }
 
             @Override
