@@ -52,8 +52,8 @@ public class StringConstant {
     public static final String facebookType = "facebook";
 
     //Gender Types
-    public static final String genderMale = "male";
-    public static final String genderFemale = "female";
+    public static final String genderMale = "Erkek";
+    public static final String genderFemale = "Kadın";
     public static final String genderUnknown = "Belirtilmedi";
 
 }

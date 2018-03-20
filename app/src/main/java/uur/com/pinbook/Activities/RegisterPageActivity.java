@@ -275,6 +275,7 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         user.setGender(gender);
         user.setBirthdate(birthdateEditText.getText().toString());
         user.setPhoneNum(clearPhoneNum);
+        user.setPassword(passwordEditText.getText().toString());
     }
 
     @Override

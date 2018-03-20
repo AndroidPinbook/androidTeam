@@ -1,9 +1,11 @@
 package uur.com.pinbook.SpecialFragments;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -60,6 +62,8 @@ public class FindContactFriendFragment extends Fragment{
     FirebaseGetFriends firebaseGetFriendsInstance;
     InviteContactFriendListAdapter inviteContactFriendListAdapter;
 
+    ProgressDialog mProgressDialog;
+
     @SuppressLint("ValidFragment")
     public FindContactFriendFragment(Context context) {
         this.context = context;
@@ -90,6 +94,7 @@ public class FindContactFriendFragment extends Fragment{
 
         personRecyclerView =  mView.findViewById(R.id.specialRecyclerView);
         // ContactFriendList.setInstance(null);
+        mProgressDialog = new ProgressDialog(getActivity());
 
         GetContactList.getInstance(context);
 
@@ -105,6 +110,15 @@ public class FindContactFriendFragment extends Fragment{
         firebaseGetFriendsInstance = FirebaseGetFriends.getFBGetFriendsInstance();
 
         fillContactFriendList();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //do your work here after 60 second
+                if(mProgressDialog.isShowing())
+                    mProgressDialog.dismiss();
+            }
+        }, 3000);
     }
 
     private void fillContactFriendList() {
@@ -115,6 +129,9 @@ public class FindContactFriendFragment extends Fragment{
                 //inviteContactFriendListAdapter.notifyDataSetChanged();
                 return;
             }
+
+            mProgressDialog.setMessage("Yükleniyor.....");
+            mProgressDialog.show();
 
             for (User user : GetContactList.getInstance(context).getContactList()) {
 
@@ -198,6 +215,7 @@ public class FindContactFriendFragment extends Fragment{
             personRecyclerView.scrollToPosition(ContactFriendList.getInstance().getContactFriendList().size() - 1);
             //inviteContactFriendListAdapter.notifyDataSetChanged();
             inviteContactFriendListAdapter.notifyItemInserted(ContactFriendList.getInstance().getContactFriendList().size() - 1);
+            mProgressDialog.dismiss();
         }
     }
 

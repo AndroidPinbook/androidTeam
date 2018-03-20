@@ -24,7 +24,6 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 public class FirebaseGetFriends {
 
     String userId;
-    static ValueEventListener valueEventListenerForDetails;
     static ValueEventListener valueEventListenerForFriendList;
 
     private static FirebaseGetFriends FBGetFriendsInstance = null;
@@ -41,10 +40,6 @@ public class FirebaseGetFriends {
 
     public static FirebaseGetFriends getFBGetFriendsInstance() {
         return FBGetFriendsInstance;
-    }
-
-    public static void setFBGetFriendsInstance(FirebaseGetFriends FBGetFriendsInstance) {
-        FirebaseGetFriends.FBGetFriendsInstance = FBGetFriendsInstance;
     }
 
     public static void setInstance(FirebaseGetFriends instance) {
@@ -71,7 +66,7 @@ public class FirebaseGetFriends {
 
     private void fillFriendList() {
 
-        friendList = new ArrayList<Friend>();
+        friendList = new ArrayList<>();
 
         DatabaseReference mDbrefFriendList = FirebaseDatabase.getInstance().getReference(Friends).child(userId);
 
@@ -90,11 +85,8 @@ public class FirebaseGetFriends {
                         String friendUserID = friendsSnapshot.getKey();
                         friend.setUserID(friendUserID);
 
-                        Map<String, Object> userList = new HashMap<String, Object>();
-                        userList = (Map) dataSnapshot.getValue();
-
-                        Map<String, Object> users = new HashMap<String, Object>();
-                        users = (Map<String, Object>) userList.get(friendUserID);
+                        Map<String, Object> userList = (Map) dataSnapshot.getValue();
+                        Map<String, Object> users = (Map<String, Object>) userList.get(friendUserID);
 
                         friend.setNameSurname((String) users.get(nameSurname));
                         friend.setProfilePicSrc((String) users.get(profilePictureUrl));

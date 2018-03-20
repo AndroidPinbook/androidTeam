@@ -2,6 +2,7 @@ package uur.com.pinbook.OtherFragments;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,11 +24,13 @@ import android.widget.LinearLayout;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.appinvite.FirebaseAppInvite;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -37,6 +40,7 @@ import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.dynamiclinks.ShortDynamicLink;
+import com.twitter.sdk.android.core.TwitterCore;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,10 +51,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.ButterKnife;
+import uur.com.pinbook.Activities.ChangePasswordActivity;
 import uur.com.pinbook.Activities.EditProfileActivity;
+import uur.com.pinbook.Activities.EnterPageActivity;
+import uur.com.pinbook.Activities.ProblemNotifyActivity;
+import uur.com.pinbook.Controller.ClearSingletonClasses;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.JavaFiles.Friend;
+import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
 
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
@@ -63,11 +72,7 @@ public class ProfileDetailFragment extends Fragment {
     String FBuserID;
     ViewGroup mContainer;
     LayoutInflater mLayoutInflater;
-
-    DatabaseReference mDbrefFriendList;
-
-    FirebaseGetFriends firebaseGetFriendsInstance = null;
-    ArrayList<Friend> invitableFriends = new ArrayList<>();
+    ProgressDialog mProgressDialog;
 
     private Context context;
 
@@ -101,6 +106,12 @@ public class ProfileDetailFragment extends Fragment {
         LinearLayout inviteForInstallLayout = mView.findViewById(R.id.inviteForInstallLayout);
         LinearLayout addFromContactLayout = mView.findViewById(R.id.addFromContactLayout);
         LinearLayout editProfileLayout = mView.findViewById(R.id.editProfileLayout);
+        LinearLayout changePasswordLayout = mView.findViewById(R.id.changePasswordLayout);
+        LinearLayout helpCenterLayout = mView.findViewById(R.id.helpCenterLayout);
+        LinearLayout logoutLayout = mView.findViewById(R.id.logoutLayout);
+        LinearLayout problemInformLayout = mView.findViewById(R.id.problemInformLayout);
+
+        mProgressDialog = new ProgressDialog(getActivity());
 
         addFromFacebookLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -131,13 +142,66 @@ public class ProfileDetailFragment extends Fragment {
             }
         });
 
+        //Profili Duzenle
         editProfileLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getActivity(), EditProfileActivity.class));
             }
         });
+
+        //Sifre degistir
+        changePasswordLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getActivity(), ChangePasswordActivity.class));
+            }
+        });
+
+        //Yardim merkezi
+        helpCenterLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.google.com"));
+                startActivity(browserIntent);
+            }
+        });
+
+        //Sorun bildir
+        problemInformLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mProgressDialog.setMessage("Görüş Bildirimi Oluşturuluyor...");
+                if(!mProgressDialog.isShowing()) mProgressDialog.show();
+                problemInformthread.start();
+            }
+        });
+
+        logoutLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                LoginManager.getInstance().logOut();
+                TwitterCore.getInstance().getSessionManager().clearActiveSession();
+                ClearSingletonClasses.clearAllClasses();
+                getActivity().finish();
+                startActivity(new Intent(getActivity(), EnterPageActivity.class));
+            }
+        });
     }
+
+    Thread problemInformthread = new Thread(){
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(2000);
+                if(mProgressDialog.isShowing()) mProgressDialog.dismiss();
+                startActivity(new Intent(getActivity(), ProblemNotifyActivity.class));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     public void sendInvitation() {
 

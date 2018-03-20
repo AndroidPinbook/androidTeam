@@ -15,7 +15,15 @@ public class User implements Serializable{
     String birthdate;
     String phoneNum;
     String providerId;
+    String password;
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public String getProviderId() {
         return providerId;
