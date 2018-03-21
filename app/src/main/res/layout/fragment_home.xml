@@ -20,12 +20,21 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/vertical_recycler_view"
+    <com.baoyz.widget.PullRefreshLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/pull_to_refresh">
 
-    </android.support.v7.widget.RecyclerView>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/vertical_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </android.support.v7.widget.RecyclerView>
+
+    </com.baoyz.widget.PullRefreshLayout>
+
+
 
 </RelativeLayout>
 

@@ -5,46 +5,38 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 
-import com.facebook.FacebookSdk;
-import com.facebook.login.LoginManager;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
+import com.baoyz.widget.PullRefreshLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.twitter.sdk.android.core.TwitterCore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import uur.com.pinbook.Activities.EnterPageActivity;
-import uur.com.pinbook.Activities.ProfilePageActivity;
+import uur.com.pinbook.Activities.FeedDetailActivity;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.JavaFiles.Feed;
 import uur.com.pinbook.JavaFiles.LocationDb;
 import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import uur.com.pinbook.RecyclerView.Adapter.FeedAllItemAdapter;
 import uur.com.pinbook.RecyclerView.HelperClasses.NetworkCheckingClass;
@@ -57,7 +49,6 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Locations;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Users;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.feedLimit;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.nextItemCount;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.owner;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.picture;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.pictureURL;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.profilePictureUrl;
@@ -108,11 +99,12 @@ public class HomeFragment extends BaseFragment {
     private int lastVisibleItem, totalItemCount;
     private LinearLayoutManager lm;
 
-    private int mPostsPerPage = 5;
+    private int mPostsPerPage = 15;
     Map<String, Long> mapTemp;
     Long ts;
     private boolean loading = true;
-
+    List<String> locList = new ArrayList<String>();
+    PullRefreshLayout layout;
 
     public static HomeFragment newInstance(int instance) {
         Bundle args = new Bundle();
@@ -133,13 +125,13 @@ public class HomeFragment extends BaseFragment {
 
         setHasOptionsMenu(true);
 
-}
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        if(view == null){
+        if (view == null) {
             view = inflater.inflate(R.layout.fragment_home, container, false);
             if (NetworkCheckingClass.isNetworkAvailable(getActivity())) {
 
@@ -172,7 +164,6 @@ public class HomeFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
 
 
-
     }
 
 
@@ -182,20 +173,66 @@ public class HomeFragment extends BaseFragment {
 
     private void init() {
 
+
+        layout = (PullRefreshLayout) view.findViewById(R.id.pull_to_refresh);
         relativeLayout = (RelativeLayout) view.findViewById(R.id.activity_main);
         recyclerViewVertical = (RecyclerView) view.findViewById(R.id.vertical_recycler_view);
+
 
         lm = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
         recyclerViewVertical.setLayoutManager(lm);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+
+
 
         mDbref = FirebaseDatabase.getInstance().getReference(Feeds).child(getUserID());
         mapFeed = new HashMap<String, String>();
         mapUser = new HashMap<String, String>();
         startKey = null;
 
-        feedAllItemAdapter = new FeedAllItemAdapter(getContext());
+
+
+
+
+
+        FeedAllItemAdapter.RecyclerViewClickListener listener = new FeedAllItemAdapter.RecyclerViewClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                Toast.makeText(getContext(), "PositionCard " + position, Toast.LENGTH_SHORT).show();
+            }
+        };
+
+
+        FeedAllItemAdapter.InnerRecyclerViewClickListener innerRecyclerViewClickListener = new FeedAllItemAdapter.InnerRecyclerViewClickListener() {
+            @Override
+            public void onClick(View view, FeedPinItem singleItem) {
+                //Toast.makeText(getContext(), singleItem.getName(), Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(getContext(), FeedDetailActivity.class);
+                intent.putExtra("singleItem", singleItem);
+
+                startActivity(intent);
+
+            }
+        };
+
+        feedAllItemAdapter = new FeedAllItemAdapter(getContext(), listener, innerRecyclerViewClickListener);
         recyclerViewVertical.setAdapter(feedAllItemAdapter);
+        DividerItemDecoration itemDecor = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
+        recyclerViewVertical.addItemDecoration(itemDecor);
+
+        // listen refresh event
+        layout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // start refresh
+                feedAllItemAdapter.clear();
+                getUsers(null);
+            }
+        });
+
+        layout.setRefreshing(false);
+
 
 
 
@@ -206,20 +243,18 @@ public class HomeFragment extends BaseFragment {
 
                 int pastVisiblesItems, visibleItemCount, totalItemCount;
 
-                if(dy > 0) //check for scroll down
+                if (dy > 0) //check for scroll down
                 {
                     visibleItemCount = lm.getChildCount();
                     totalItemCount = lm.getItemCount();
                     pastVisiblesItems = lm.findFirstVisibleItemPosition();
 
-                    if(loading){
+                    if (loading) {
 
-                        if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
-                        {
+                        if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
                             loading = false;
                             Log.v("...", "Last Item Wow !");
                             //Do pagination.. i.e. fetch new data
-                            progressBar.setVisibility(View.VISIBLE);
                             Long nodeId = ts;
                             getUsers(nodeId);
 
@@ -229,7 +264,6 @@ public class HomeFragment extends BaseFragment {
 
 
                 }
-
 
 
             }
@@ -245,27 +279,58 @@ public class HomeFragment extends BaseFragment {
             query = FirebaseDatabase.getInstance().getReference(Feeds)
                     .child(getUserID())
                     .orderByChild(timestamp)
-                    .limitToFirst(mPostsPerPage);
+                    .limitToLast(mPostsPerPage);
         else
             query = FirebaseDatabase.getInstance().getReference(Feeds)
                     .child(getUserID())
                     .orderByChild(timestamp)
-                    .startAt(nodeId)
-                    .limitToFirst(mPostsPerPage);
+                    .endAt(nodeId)
+                    .limitToLast(mPostsPerPage);
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                long cnt = dataSnapshot.getChildrenCount();
+                int i = 0;
 
                 for (DataSnapshot locationSnapshot : dataSnapshot.getChildren()) {
 
                     Log.i("====== locationSnapshot", locationSnapshot.toString());
 
                     String locId = locationSnapshot.getKey();
-                    getLocationDetails(locId);
+
+
+                    locList.add(locId);
+
+
+
 
                     mapTemp = ((Map) locationSnapshot.getValue());
-                    ts = mapTemp.get("timestamp");
+
+                    if(i==0){
+                        ts = mapTemp.get("timestamp");
+                    }
+
+
+                    i++;
+                    if(i == cnt){
+
+                        int f=locList.size();
+
+                        while(f>0){
+
+                            getLocationDetails(locList.get(f-1));
+
+
+                            f--;
+                        }
+
+                        locList.clear();
+                        // refresh complete
+                        layout.setRefreshing(false);
+
+                    }
+
 
 
                 }
@@ -280,16 +345,13 @@ public class HomeFragment extends BaseFragment {
     }
 
 
-
-
-
     private void setLocations() {
 
         Log.i("", "=======================================>> xx start ");
 
         Query query = mDbref.orderByChild("timestamp");
 
-        if(startKey == null){
+        if (startKey == null) {
             mDbRefListener = query.limitToFirst(feedLimit).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -310,7 +372,7 @@ public class HomeFragment extends BaseFragment {
 
                 }
             });
-        }else{
+        } else {
 
             DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference(Feeds).child(getUserID());
             Query query2 = ref2.orderByChild("timestamp");
@@ -380,7 +442,7 @@ public class HomeFragment extends BaseFragment {
 
                     User user1 = setUser();
 
-                    feedAllItem1.setOwnerName(user1.getName() + " " + user1.getSurname()+ "/" + loc);
+                    feedAllItem1.setOwnerName(user1.getName() + " " + user1.getSurname() + "/" + loc);
                     feedAllItem1.setOwnerPictureUrl(user1.getProfilePicSrc());
 
                     insertIntoRecyclerView(feedAllItem1);
@@ -483,11 +545,12 @@ public class HomeFragment extends BaseFragment {
     }
 
     private boolean mIsLoading = false;
+
     private void insertIntoRecyclerView(FeedAllItem feedAllItem1) {
 
         relativeLayout.setBackgroundColor(Color.parseColor("#ffffb3"));
         progressBar.setVisibility(View.GONE);
-
+        //dismiss kullanabilirsin...
 
         Log.i("", "========================  " + locationId + " ======================");
         //Log.i("imgUrl   ", tempPinData.getPinImageUri().toString());
@@ -501,7 +564,7 @@ public class HomeFragment extends BaseFragment {
         String x = feedAllItem1.getLocationId();
         String y = feedAllItemAdapter.getLastItemId();
 
-        if(!x.equals(y))
+        if (!x.equals(y))
             feedAllItemAdapter.addAll(feedAllItem1);
 
         //feedAllItemAdapter.addAll(feedAllItemList);
@@ -515,4 +578,6 @@ public class HomeFragment extends BaseFragment {
     public void onDestroyView() {
         super.onDestroyView();
     }
+
+
 }

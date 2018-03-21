@@ -47,11 +47,11 @@
         </activity>
         <activity
             android:name=".Activities.LoginPageActivity"
-            android:theme="@style/Toolbar"></activity>
+            android:theme="@style/Toolbar" />
         <activity
             android:name=".Activities.RegisterPageActivity"
             android:exported="true"
-            android:theme="@style/Toolbar"></activity>
+            android:theme="@style/Toolbar" />
         <activity
             android:name=".Activities.ProfilePageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -84,7 +84,7 @@
         </activity>
         <activity
             android:name=".Activities.ProfilePhotoActivity"
-            android:theme="@style/Toolbar"></activity>
+            android:theme="@style/Toolbar" />
         <activity
             android:name=".Activities.EmailVerifyPageActivity"
             android:theme="@style/Toolbar" />
@@ -117,7 +117,10 @@
             android:name=".Activities.DisplayGroupDetail"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".Activities.DetailActivity" />
-        <activity android:name=".Activities.TabActivity"
+        <activity
+            android:name=".Activities.TabActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Activities.FeedDetailActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
