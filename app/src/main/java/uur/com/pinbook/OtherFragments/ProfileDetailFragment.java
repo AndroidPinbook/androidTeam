@@ -172,7 +172,8 @@ public class ProfileDetailFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 mProgressDialog.setMessage("Görüş Bildirimi Oluşturuluyor...");
-                if(!mProgressDialog.isShowing()) mProgressDialog.show();
+                if (!mProgressDialog.isShowing()) mProgressDialog.show();
+
                 problemInformthread.start();
             }
         });
@@ -190,12 +191,13 @@ public class ProfileDetailFragment extends Fragment {
         });
     }
 
-    Thread problemInformthread = new Thread(){
+    Thread problemInformthread = new Thread() {
         @Override
         public void run() {
             try {
-                Thread.sleep(2000);
-                if(mProgressDialog.isShowing()) mProgressDialog.dismiss();
+                Thread.sleep(1000);
+                if (mProgressDialog.isShowing()) mProgressDialog.dismiss();
+                problemInformthread.interrupt();
                 startActivity(new Intent(getActivity(), ProblemNotifyActivity.class));
             } catch (InterruptedException e) {
                 e.printStackTrace();

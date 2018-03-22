@@ -32,6 +32,8 @@ public class FirebaseConstant {
     public static final String InviteContactOutbound = "InviteContactOutbound";
     public static final String InviteContactInbound = "InviteContactInbound";
     public static final String PhoneNums = "PhoneNums";
+    public static final String ErrNotifies = "ErrNotifies";
+    public static final String UserErrorNotifs = "UserErrorNotifs";
 
     //Firebase Group constants
     public static final String Admin = "Admin";

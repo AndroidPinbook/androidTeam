@@ -67,6 +67,7 @@
     <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit.  Etiam eget ligula eu lectus lobortis condimentum.</string>
     <string name="title_activity_dynamic_link">DynamicLinkActivity</string>
     <string name="countries">Countries</string>
+    <string name="errNotifText">Lütfen sadece pinbook ve özelliklerimiz hakkında görüş bırak. Kötüye kullanım, spam veya fikri mülkiyet ihlalleri gibi Topluluk Kurallarımızı ihlal eden Pinbook'da paylaşılan içerikleri...</string>
 
 
 </resources>
