@@ -60,6 +60,7 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.userID;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.userName;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.video;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.videoImageURL;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.videoURL;
 
 public class HomeFragment extends BaseFragment {
 
@@ -184,34 +185,43 @@ public class HomeFragment extends BaseFragment {
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
 
 
-
         mDbref = FirebaseDatabase.getInstance().getReference(Feeds).child(getUserID());
         mapFeed = new HashMap<String, String>();
         mapUser = new HashMap<String, String>();
         startKey = null;
 
 
-
-
-
-
         FeedAllItemAdapter.RecyclerViewClickListener listener = new FeedAllItemAdapter.RecyclerViewClickListener() {
             @Override
-            public void onClick(View view, int position) {
-                Toast.makeText(getContext(), "PositionCard " + position, Toast.LENGTH_SHORT).show();
+            public void onClick(View view, FeedAllItem feedAllItem) {
+                Toast.makeText(getContext(), "PositionCard " + feedAllItem.getLocationId(), Toast.LENGTH_SHORT).show();
             }
         };
 
 
         FeedAllItemAdapter.InnerRecyclerViewClickListener innerRecyclerViewClickListener = new FeedAllItemAdapter.InnerRecyclerViewClickListener() {
             @Override
-            public void onClick(View view, FeedPinItem singleItem) {
+            public void onClick(View view, FeedPinItem singleItem, FeedAllItem feedAllItem) {
                 //Toast.makeText(getContext(), singleItem.getName(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Şunu tıkladın : " +feedAllItem.getLocationId(), Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(getContext(), FeedDetailActivity.class);
-                intent.putExtra("singleItem", singleItem);
 
-                startActivity(intent);
+                FeedPinItem fp;
+                int clickedItem = -1;
+                for(int k=0 ; k< feedAllItem.getFeedPinItems().size(); k++){
+                    fp = feedAllItem.getFeedPinItems().get(k);
+                    if(fp.getItemTag().equals(singleItem.getItemTag())){
+                        clickedItem = k;
+                    }
+                }
+                if(clickedItem != -1){
+                    Intent intent = new Intent(getContext(), FeedDetailActivity.class);
+                    intent.putExtra("feedAllItem", feedAllItem);
+                    intent.putExtra("feedPinItem", clickedItem);
+                    startActivity(intent);
+                }
+
+
 
             }
         };
@@ -232,8 +242,6 @@ public class HomeFragment extends BaseFragment {
         });
 
         layout.setRefreshing(false);
-
-
 
 
         recyclerViewVertical.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -303,23 +311,21 @@ public class HomeFragment extends BaseFragment {
                     locList.add(locId);
 
 
-
-
                     mapTemp = ((Map) locationSnapshot.getValue());
 
-                    if(i==0){
+                    if (i == 0) {
                         ts = mapTemp.get("timestamp");
                     }
 
 
                     i++;
-                    if(i == cnt){
+                    if (i == cnt) {
 
-                        int f=locList.size();
+                        int f = locList.size();
 
-                        while(f>0){
+                        while (f > 0) {
 
-                            getLocationDetails(locList.get(f-1));
+                            getLocationDetails(locList.get(f - 1));
 
 
                             f--;
@@ -330,7 +336,6 @@ public class HomeFragment extends BaseFragment {
                         layout.setRefreshing(false);
 
                     }
-
 
 
                 }
@@ -480,17 +485,21 @@ public class HomeFragment extends BaseFragment {
                     break;
 
                 case pictureURL:
-                    tempFeedPinItem = setFeedPinItem(picture, entry.getValue());
+                    tempFeedPinItem = setFeedPinItem(picture, entry.getValue(), null, null);
                     tempFeedPinItemList.add(tempFeedPinItem);
                     break;
 
                 case videoImageURL:
-                    tempFeedPinItem = setFeedPinItem(video, entry.getValue());
+                    tempFeedPinItem = setFeedPinItem(video, entry.getValue(), mapFeed.get(videoURL), null);
                     tempFeedPinItemList.add(tempFeedPinItem);
                     break;
 
                 case textURL:
-                    tempFeedPinItem = setFeedPinItem(text, entry.getValue());
+                    String desc=null;
+                    if(mapFeed.get(text) != null ) {
+                        desc = mapFeed.get(text);
+                    }
+                    tempFeedPinItem = setFeedPinItem(text, entry.getValue(), null, desc);
                     tempFeedPinItemList.add(tempFeedPinItem);
                     break;
 
@@ -535,11 +544,17 @@ public class HomeFragment extends BaseFragment {
         return tempUser;
     }
 
-    private FeedPinItem setFeedPinItem(String name, String url) {
+    private FeedPinItem setFeedPinItem(String itemTag, String url, String detailUrl, String description) {
 
         FeedPinItem feedPinItem = new FeedPinItem();
-        feedPinItem.setName(name);
-        feedPinItem.setUrl(url);
+        feedPinItem.setItemTag(itemTag);
+        feedPinItem.setItemImageUrl(url);
+        if (detailUrl != null) {
+            feedPinItem.setItemDetailUrl(detailUrl);
+        }
+        if(description!=null){
+            feedPinItem.setDescription(description);
+        }
 
         return feedPinItem;
     }

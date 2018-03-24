@@ -65,7 +65,7 @@ public class FeedAllItemAdapter extends RecyclerView.Adapter<FeedAllItemAdapter.
 
 
         Log.i("--> position ", (Integer.toString(position)));
-        FeedAllItem feed = feedList.get(position);
+        final FeedAllItem feed = feedList.get(position);
 
         /*
         Picasso.with(context)
@@ -93,7 +93,7 @@ public class FeedAllItemAdapter extends RecyclerView.Adapter<FeedAllItemAdapter.
             public void onClick(View view, FeedPinItem singleItem) {
                 //Toast.makeText(context, "Position " + position, Toast.LENGTH_SHORT).show();
 
-                mListener2.onClick(view, singleItem);
+                mListener2.onClick(view, singleItem, feed);
             }
         };
 
@@ -164,13 +164,13 @@ public class FeedAllItemAdapter extends RecyclerView.Adapter<FeedAllItemAdapter.
 
         @Override
         public void onClick(View v) {
-            //int clickedPosition = getAdapterPosition();
+            int clickedPosition = getAdapterPosition();
             //Toast.makeText(context, feedList.get(clickedPosition).getOwnerName(), Toast.LENGTH_LONG).show();
-
+            //feedList.get(clickedPosition)
             Toast.makeText(context, "Ana method", Toast.LENGTH_LONG).show();
 
             //Log.i("info", "All card clicked..");
-            mListener.onClick(v, getAdapterPosition());
+            mListener.onClick(v, feedList.get(clickedPosition));
 
 
         }
@@ -178,13 +178,13 @@ public class FeedAllItemAdapter extends RecyclerView.Adapter<FeedAllItemAdapter.
 
     public interface RecyclerViewClickListener {
 
-        void onClick(View view, int position);
+        void onClick(View view, FeedAllItem feedAllItem);
     }
 
 
     public interface InnerRecyclerViewClickListener {
 
-        void onClick(View view, FeedPinItem singleItem);
+        void onClick(View view, FeedPinItem singleItem, FeedAllItem feedAllItem);
     }
 
 

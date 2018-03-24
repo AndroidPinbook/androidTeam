@@ -46,11 +46,11 @@ public class FeedPinItemAdapter extends RecyclerView.Adapter<FeedPinItemAdapter.
 
         FeedPinItem singleItem = itemsList.get(i);
 
-        holder.tvTitle.setText(singleItem.getName());
+        holder.tvTitle.setText(singleItem.getItemTag());
 
-        //feed porfile picture
+        //feed profile picture
         Picasso.with(mContext)
-                .load(singleItem.getUrl())
+                .load(singleItem.getItemImageUrl())
                 .into(holder.itemImage);
 
        /* Glide.with(mContext)
@@ -86,8 +86,8 @@ public class FeedPinItemAdapter extends RecyclerView.Adapter<FeedPinItemAdapter.
 
                     int clickedPosition = getAdapterPosition();
                     FeedPinItem singleItem = itemsList.get(clickedPosition);
-                    //Log.i("Clicked_image_url :", singleItem.getUrl());
-                    //Toast.makeText(v.getContext(), singleItem.getUrl(), Toast.LENGTH_SHORT).show();
+                    //Log.i("Clicked_image_url :", singleItem.getItem_image_url());
+                    //Toast.makeText(v.getContext(), singleItem.getItem_image_url(), Toast.LENGTH_SHORT).show();
 
                     mListener.onClick(v, singleItem);
 

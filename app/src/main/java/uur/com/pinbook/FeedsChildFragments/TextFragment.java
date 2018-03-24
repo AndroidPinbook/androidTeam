@@ -6,10 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
-
-import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -17,21 +15,21 @@ import uur.com.pinbook.R;
 import uur.com.pinbook.RecyclerView.Model.FeedPinItem;
 
 
-public class ImageFragment extends Fragment {
+public class TextFragment extends Fragment {
 
-    @BindView(R.id.feedImage)
-    ImageView feedImageView;
+    @BindView(R.id.feedTextText)
+    TextView feedItemText;
 
     FeedPinItem singeItem;
 
-    public ImageFragment() {
+    public TextFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_feed_item_image, container, false);
+        View view = inflater.inflate(R.layout.fragment_feed_item_text, container, false);
 
         ButterKnife.bind(this, view);
 
@@ -39,12 +37,16 @@ public class ImageFragment extends Fragment {
         FeedPinItem f = (FeedPinItem) bundle.getSerializable("singleItem");
 
         Toast.makeText(getContext(), f.getItemTag(), Toast.LENGTH_SHORT).show();
-        Log.i("neredeyiz--->", "ImageFragment");
+        Log.i("neredeyiz--->", "TextFragment");
 
-        //feed Image
-        Picasso.with(getContext())
-                .load(f.getItemImageUrl())
-                .into(feedImageView);
+        //feed text
+        if(f.getDescription() != null){
+            feedItemText.setText(f.getDescription());
+        }else{
+            String s = "Text boş..";
+            feedItemText.setText(s);
+        }
+
 
         return view;
     }
@@ -55,13 +57,4 @@ public class ImageFragment extends Fragment {
         //((FeedDetailActivity) getActivity()).disableNavigationIcon();
         //((FeedDetailActivity) getActivity()).setToolbarTitle(12);
     }
-
-
-
-
-
-
 }
-
-
-

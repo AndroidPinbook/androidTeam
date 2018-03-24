@@ -1,12 +1,13 @@
 package uur.com.pinbook.RecyclerView.Model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by ASUS on 17.2.2018.
  */
 
-public class FeedAllItem {
+public class FeedAllItem implements Serializable {
 
     private String ownerId;
     private String ownerPictureUrl;

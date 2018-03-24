@@ -11,12 +11,13 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.RelativeLayout;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
 import uur.com.pinbook.FeedsChildFragments.ImageFragment;
+import uur.com.pinbook.FeedsChildFragments.TextFragment;
+import uur.com.pinbook.FeedsChildFragments.VideoFragment;
 import uur.com.pinbook.R;
-import uur.com.pinbook.RecyclerView.Adapter.FeedAllItemAdapter;
+import uur.com.pinbook.RecyclerView.Model.FeedAllItem;
 import uur.com.pinbook.RecyclerView.Model.FeedPinItem;
 
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.picture;
@@ -26,18 +27,17 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.video;
 public class FeedDetailActivity extends AppCompatActivity {
 
     Toolbar mToolBar;
-    RelativeLayout container;
-    FeedPinItem singleItem;
+    LinearLayout container;
+    FeedAllItem feedAllItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed_detail);
-
         overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
 
         mToolBar = findViewById(R.id.toolbarLayout);
-        mToolBar.setTitle("Şifreyi Değiştir");
+        mToolBar.setTitle("Feed");
         mToolBar.setNavigationIcon(R.drawable.back_arrow);
         mToolBar.setBackgroundColor(getResources().getColor(R.color.background, null));
         mToolBar.setTitleTextColor(getResources().getColor(R.color.background_white, null));
@@ -47,14 +47,19 @@ public class FeedDetailActivity extends AppCompatActivity {
         setItemsClickListeners();
 
         Intent intent = getIntent();
-        singleItem = (FeedPinItem) intent.getSerializableExtra("singleItem");
-        Log.i("itemTag", singleItem.getName());
-        if (singleItem.getName().equals(picture)) {
+        feedAllItem = (FeedAllItem) intent.getSerializableExtra("feedAllItem");
+        int clickedItem = (Integer ) intent.getSerializableExtra("feedClickedItem");
+
+        FeedPinItem feedPinItem = feedAllItem.getFeedPinItems().get(clickedItem);
+
+        Log.i("itemTag", feedPinItem.getItemTag());
+
+        if (feedPinItem.getItemTag().equals(picture)) {
             showFragment(new ImageFragment());
-        } else if (singleItem.getName() == video) {
-
-        } else if (singleItem.getName() == text) {
-
+        } else if (feedPinItem.getItemTag().equals(video)) {
+            showFragment(new VideoFragment());
+        } else if (feedPinItem.getItemTag().equals(text)) {
+            showFragment(new TextFragment());
         } else {
 
         }
@@ -93,9 +98,8 @@ public class FeedDetailActivity extends AppCompatActivity {
     public void showFragment(Fragment fragment) {
 
         Bundle bundle = new Bundle();
-        bundle.putSerializable("singleItem", singleItem);
+        bundle.putSerializable("feedAllItem", feedAllItem);
         fragment.setArguments(bundle);
-
 
 
         String TAG = fragment.getClass().getSimpleName();
