@@ -71,16 +71,7 @@ import uur.com.pinbook.FirebaseAdapters.FBAddFacebookUserAdapter;
 import uur.com.pinbook.FirebaseAdapters.FirebaseUserAdapter;
 import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
-
-//import oauth.signpost.OAuthProvider;
-//import oauth.signpost.basic.DefaultOAuthProvider;
-//import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
-//import oauth.signpost.exception.OAuthCommunicationException;
-//import oauth.signpost.exception.OAuthExpectationFailedException;
-//import oauth.signpost.exception.OAuthMessageSignerException;
-//import oauth.signpost.exception.OAuthNotAuthorizedException;
 import twitter4j.TwitterFactory;
-//import twitter4j.http.AccessToken;
 
 public class EnterPageActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -327,7 +318,12 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                                 }
 
                                 saveProfPicViaSocialApp();
-                                FirebaseUserAdapter.saveUserInfo(user);
+                                new FirebaseUserAdapter(EnterPageActivity.this, user);
+                                //firebaseUserAdapter.genAndSaveUserToDB();
+                                //firebaseUserAdapter.genAndSavePhoneNumToDB();
+
+
+                                //FirebaseUserAdapter.saveUserInfo(user);
                                 FBAddFacebookUserAdapter.saveFacebookUser(user.getProviderId());
 
                                 startNextPage();
@@ -459,7 +455,11 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                             }
 
                             saveProfPicViaSocialApp();
-                            FirebaseUserAdapter.saveUserInfo(user);
+                            //FirebaseUserAdapter.saveUserInfo(user);
+
+                            new FirebaseUserAdapter(EnterPageActivity.this, user);
+                            //firebaseUserAdapter.genAndSaveUserToDB();
+                            //firebaseUserAdapter.genAndSavePhoneNumToDB();
 
                             startNextPage();
 

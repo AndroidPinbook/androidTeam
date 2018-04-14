@@ -1,35 +1,48 @@
 package uur.com.pinbook.FirebaseAdapters;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.HttpsCallableResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
+import org.json.JSONObject;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
+import static uur.com.pinbook.ConstantsModel.FirebaseFunctionsConstant.*;
 
 public class FBAddFacebookUserAdapter {
 
     public static void saveFacebookUser(String providerID){
 
-        Map<String, String> values = new HashMap<>();
+        JSONObject faceJsonMain = null;
 
-        Log.i("Info","FirebaseGetAccountHolder.getUserID():" + FirebaseGetAccountHolder.getUserID());
+        try {
+            JSONObject faceUserDtl = new JSONObject();
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child(FacebookUsers).
-                child(providerID);
+            faceUserDtl.put(fbUserId, FirebaseGetAccountHolder.getUserID());
 
-        values.put(fbUserId, FirebaseGetAccountHolder.getUserID());
+            faceJsonMain = new JSONObject();
+            faceJsonMain.put(providerID, faceUserDtl);
 
-        databaseReference.setValue(values, new DatabaseReference.CompletionListener() {
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        FirebaseFunctions.getInstance()
+                .getHttpsCallable(addFacebookUser)
+                .call(faceJsonMain)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.i("Info", "Function call failure:" + e.toString());
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<HttpsCallableResult>() {
             @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                Log.i("Info","databaseError:" + databaseError);
+            public void onSuccess(HttpsCallableResult httpsCallableResult) {
+                Log.i("Info", "Function call is ok");
             }
         });
     }

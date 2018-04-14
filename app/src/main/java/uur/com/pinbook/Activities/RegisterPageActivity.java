@@ -49,11 +49,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 import uur.com.pinbook.Adapters.CustomDialogAdapter;
 import uur.com.pinbook.Adapters.ErrorMessageAdapter;
 import uur.com.pinbook.Adapters.ValidationAdapter;
 import uur.com.pinbook.Controller.HttpHandler;
+import uur.com.pinbook.FirebaseAdapters.FirebaseUserAdapter;
 import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.R;
 
@@ -61,7 +63,7 @@ import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
 public class RegisterPageActivity extends AppCompatActivity implements View.OnClickListener,
-        FirebaseAuth.AuthStateListener, AdapterView.OnItemSelectedListener{
+        FirebaseAuth.AuthStateListener, AdapterView.OnItemSelectedListener {
 
     //Set the radius of the Blur. Supported range 0 < radius <= 25
     private static final float BLUR_RADIUS = 10f;
@@ -148,6 +150,9 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         countrySpinner.setOnItemSelectedListener((AdapterView.OnItemSelectedListener) this);
         backGrounRelLayout.setOnClickListener(this);
 
+        //FirebaseUserAdapter.generateUserJson(null);
+
+
         new GetCountryNameList().execute();
         new GetPhoneCodeList().execute();
 
@@ -160,11 +165,11 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                 selectedCountryName = countrySpinner.getSelectedItem().toString();
 
                 findCountryCode(selectedCountryName);
-                Log.i("Info","selectedCountryName:" + selectedCountryName);
-                Log.i("Info","position:" + position);
-                Log.i("Info","selectedCountryCode:" + selectedCountryCode);
+                Log.i("Info", "selectedCountryName:" + selectedCountryName);
+                Log.i("Info", "position:" + position);
+                Log.i("Info", "selectedCountryCode:" + selectedCountryCode);
                 selectedPhoneNum = countryPhoneList.get(selectedCountryCode);
-                Log.i("Info","selectedPhoneNum:" + selectedPhoneNum);
+                Log.i("Info", "selectedPhoneNum:" + selectedPhoneNum);
             }
 
             @Override
@@ -177,16 +182,16 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
 
                 month = month + 1;
-                String date =  dayOfMonth + "/"  + month + "/" + year;
+                String date = dayOfMonth + "/" + month + "/" + year;
                 birthdateEditText.setText(date);
             }
         };
     }
 
-    public void findCountryCode(String countryName){
+    public void findCountryCode(String countryName) {
 
-        for ( String key : countryNameList.keySet() ) {
-            if(countryNameList.get(key).equals(countryName)){
+        for (String key : countryNameList.keySet()) {
+            if (countryNameList.get(key).equals(countryName)) {
                 selectedCountryCode = key;
                 break;
             }
@@ -201,7 +206,7 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
     public void onNothingSelected(AdapterView<?> parent) {
     }
 
-    public void getCalender(){
+    public void getCalender() {
 
         Calendar cal = Calendar.getInstance();
         int year = cal.get(Calendar.YEAR);
@@ -217,20 +222,20 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         dialog.show();
     }
 
-    private void createAccount(String email, String password){
+    private void createAccount(String email, String password) {
 
-        Log.i("Info","createAccount method=====");
+        Log.i("Info", "createAccount method=====");
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
 
-                        Log.i("TaskExp","TaskExp:" + task.getException());
+                        Log.i("TaskExp", "TaskExp:" + task.getException());
 
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.i("Info","CreateUserEmail:Success");
+                            Log.i("Info", "CreateUserEmail:Success");
 
                             FirebaseUser user = mAuth.getCurrentUser();
 
@@ -243,13 +248,13 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                             onCreateOk = true;
 
                         } else {
-                            Log.i("Info","CreateUserEmail:Failed:" + task.getException());
+                            Log.i("Info", "CreateUserEmail:Failed:" + task.getException());
 
                             try {
                                 throw task.getException();
-                            } catch(FirebaseAuthUserCollisionException e) {
+                            } catch (FirebaseAuthUserCollisionException e) {
                                 CustomDialogAdapter.showDialogError(RegisterPageActivity.this, ErrorMessageAdapter.COLLISION_EXCEPTION.getText());
-                            } catch(Exception e) {
+                            } catch (Exception e) {
                                 CustomDialogAdapter.showDialogError(RegisterPageActivity.this, ErrorMessageAdapter.UNKNOW_ERROR.getText());
                                 Log.i("error ", e.toString());
                             }
@@ -258,14 +263,14 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                 });
     }
 
-    public void startProfilePhotoPage(){
+    public void startProfilePhotoPage() {
 
         Intent intent = new Intent(getApplicationContext(), ProfilePhotoActivity.class);
         intent.putExtra("User", user);
         startActivity(intent);
     }
 
-    public void saveUserInfo(FirebaseUser currentUser){
+    public void saveUserInfo(FirebaseUser currentUser) {
 
         user.setUserId(currentUser.getUid());
         user.setEmail(currentUser.getEmail());
@@ -283,12 +288,12 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
 
         int i = v.getId();
 
-        Log.i("Info","onClick works!");
+        Log.i("Info", "onClick works!");
 
-        switch (i){
+        switch (i) {
             case R.id.registerButton:
                 clearPhoneNum = "";
-                if(!validateForm()){
+                if (!validateForm()) {
                     return;
                 }
 
@@ -324,6 +329,8 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
 
     private void checkPhoneNumExistance(final String uMail, final String uPassword) {
 
+
+
         final FirebaseDatabase db = FirebaseDatabase.getInstance();
         databaseReference = db.getReference(PhoneNums).child(clearPhoneNum);
 
@@ -331,7 +338,7 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                if(dataSnapshot.getValue() != null)
+                if (dataSnapshot.getValue() != null)
                     CustomDialogAdapter.showDialogWarning(RegisterPageActivity.this,
                             "Telefon Bilgisi Sistemde Kayitli");
                 else
@@ -341,15 +348,17 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+                Toast.makeText(RegisterPageActivity.this, "Teknik Hata:" + databaseError.toString(),
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    public void hideKeyBoard(){
+    public void hideKeyBoard() {
 
         Log.i("Info", "hideKeyBoard");
 
-        InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         //inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 
         if (getCurrentFocus() != null) {
@@ -370,17 +379,17 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         String birthdate = birthdateEditText.getText().toString();
 
         //Email - password check
-        if(TextUtils.isEmpty(email) || TextUtils.isEmpty((password))){
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty((password))) {
             Log.i("i", "1");
             if (TextUtils.isEmpty(email)) {
                 emailEditText.setError("Required");
                 valid = false;
             } else {
-                if(!ValidationAdapter.isValidEmail(email)){
+                if (!ValidationAdapter.isValidEmail(email)) {
                     emailEditText.setError("Email is not valid");
                     valid = false;
 
-                }else{
+                } else {
                     emailEditText.setError(null);
                 }
             }
@@ -391,30 +400,30 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                 valid = false;
             } else {
                 Log.i("i", "3");
-                if(!ValidationAdapter.isValidPassword(password)){
+                if (!ValidationAdapter.isValidPassword(password)) {
                     Log.i("i", "4");
                     passwordEditText.setError("Password min length is 6");
                     valid = false;
 
-                }else{
+                } else {
                     Log.i("i", "5");
                     passwordEditText.setError(null);
                 }
             }
 
-        }else{
-            if(!ValidationAdapter.isValidEmail(email)){
+        } else {
+            if (!ValidationAdapter.isValidEmail(email)) {
                 emailEditText.setError("Email is not valid");
                 valid = false;
 
-            }else{
+            } else {
                 emailEditText.setError(null);
             }
 
-            if(!ValidationAdapter.isValidPassword(password)){
+            if (!ValidationAdapter.isValidPassword(password)) {
                 passwordEditText.setError("Password min length is 6");
                 valid = false;
-            }else{
+            } else {
                 passwordEditText.setError(null);
             }
 
@@ -451,7 +460,7 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             phoneEditText.setText(PhoneNumberUtils.formatNumber(phoneEditText.getText().toString(), Locale.getDefault().getCountry()));
-            Log.i("Info","standart phone num:" + phoneEditText.getText().toString());
+            Log.i("Info", "standart phone num:" + phoneEditText.getText().toString());
         } else {
             phoneEditText.setText(PhoneNumberUtils.formatNumber(phoneEditText.getText().toString())); //Deprecated method
         }
@@ -461,43 +470,43 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
         return valid;
     }
 
-    public void getClearPhoneNum(String complexPhoneNum){
+    public void getClearPhoneNum(String complexPhoneNum) {
 
-        for(int i=0; i < complexPhoneNum.length(); i++){
+        for (int i = 0; i < complexPhoneNum.length(); i++) {
             char ch = complexPhoneNum.charAt(i);
-            if(Character.isDigit(ch)){
+            if (Character.isDigit(ch)) {
                 clearPhoneNum += ch;
             }
         }
     }
 
-    public void scaleAnimation(int genderType){
+    public void scaleAnimation(int genderType) {
 
-        Log.i("Info","scaleMaleAnimation");
+        Log.i("Info", "scaleMaleAnimation");
 
         ObjectAnimator objectAnimator;
 
-        if(genderType == R.id.maleImageView){
+        if (genderType == R.id.maleImageView) {
             gender = genderMale;
 
             objectAnimator = ObjectAnimator.ofFloat(femaleImageView, "alpha", 1.0f, 0.3f);
             objectAnimator.setDuration(300);
             objectAnimator.start();
 
-            if(genderSelected) {
+            if (genderSelected) {
                 objectAnimator = ObjectAnimator.ofFloat(maleImageView, "alpha", 0.3f, 1.0f);
                 objectAnimator.setDuration(300);
                 objectAnimator.start();
             }
 
-        }else{
+        } else {
             gender = genderFemale;
 
             objectAnimator = ObjectAnimator.ofFloat(maleImageView, "alpha", 1.0f, 0.3f);
             objectAnimator.setDuration(300);
             objectAnimator.start();
 
-            if(genderSelected) {
+            if (genderSelected) {
                 objectAnimator = ObjectAnimator.ofFloat(femaleImageView, "alpha", 0.3f, 1.0f);
                 objectAnimator.setDuration(300);
                 objectAnimator.start();
@@ -538,14 +547,13 @@ public class RegisterPageActivity extends AppCompatActivity implements View.OnCl
                         String k = key.next().toString();
                         countryNameList.put(k, jsonObj.getString(k));
                         countryNameArray.add(jsonObj.getString(k));
-                        Log.i("Info", "countryNameArray:");
+                        //Log.i("Info", "countryNameArray:");
                     }
 
                     Collections.sort(countryNameArray, new Comparator<String>() {
                         @Override
-                        public int compare(String name1, String name2)
-                        {
-                            return  name1.compareTo(name2);
+                        public int compare(String name1, String name2) {
+                            return name1.compareTo(name2);
                         }
                     });
 

@@ -24,32 +24,22 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.HttpsCallableResult;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-
-import retrofit2.http.Url;
-import uur.com.pinbook.Adapters.UriAdapter;
-import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
-import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
-import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.R;
 
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.ErrNotifies;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Friends;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.InviteContactOutbound;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Locations;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.UserErrorNotifs;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.fbUserId;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.nameSurname;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.profilePictureUrl;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.text;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
+import static uur.com.pinbook.ConstantsModel.FirebaseFunctionsConstant.*;
 
 public class ProblemNotifyActivity extends AppCompatActivity {
 
@@ -167,20 +157,20 @@ public class ProblemNotifyActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                if(!checkInformData()) return;
+                if (!checkInformData()) return;
 
                 mProgressDialog = new ProgressDialog(ProblemNotifyActivity.this);
                 mProgressDialog.setMessage("Gönderiliyor.....");
                 mProgressDialog.show();
-                new SaveErrDetails().execute((Void) null);
+                new SaveErrDetails().execute(" ");
                 problemInformTh.start();
             }
         });
     }
 
-    public boolean checkInformData(){
+    public boolean checkInformData() {
 
-        if(uriForImage1 == null & uriForImage2 == null && uriForImage3 == null && noteTextEditText.getText().toString().isEmpty()) {
+        if (uriForImage1 == null & uriForImage2 == null && uriForImage3 == null && noteTextEditText.getText().toString().isEmpty()) {
             Snackbar.make(findViewById(R.id.container), "Lütfen açıklama veya resim ekleyin.", Snackbar.LENGTH_LONG)
                     .show();
             return false;
@@ -189,12 +179,12 @@ public class ProblemNotifyActivity extends AppCompatActivity {
         return true;
     }
 
-    Thread problemInformTh = new Thread(){
+    Thread problemInformTh = new Thread() {
         @Override
         public void run() {
             try {
                 Thread.sleep(1000);
-                if(mProgressDialog.isShowing()) mProgressDialog.dismiss();
+                if (mProgressDialog.isShowing()) mProgressDialog.dismiss();
                 finish();
                 problemInformTh.interrupt();
             } catch (InterruptedException e) {
@@ -218,10 +208,34 @@ public class ProblemNotifyActivity extends AppCompatActivity {
 
                         Uri downloadUrl = taskSnapshot.getDownloadUrl();
 
-                        DatabaseReference mdbRef = FirebaseDatabase.getInstance().getReference(ErrNotifies).child(key);
-                        Map<String, Object> map = new HashMap<String, Object>();
-                        map.put(errImageId, downloadUrl.toString());
-                        mdbRef.updateChildren(map);
+                        JSONObject imageJsonMain = null;
+                        try {
+                            JSONObject imageJsonDtl = new JSONObject();
+                            imageJsonDtl.put(errImageId, downloadUrl.toString());
+
+                            imageJsonMain = new JSONObject();
+                            imageJsonMain.put(key, imageJsonDtl);
+                        } catch (JSONException e) {
+                            Snackbar.make(findViewById(R.id.container), "Teknik Hata:" + e.toString(), Snackbar.LENGTH_LONG)
+                                    .show();
+                            e.printStackTrace();
+                            return;
+                        }
+
+                        FirebaseFunctions.getInstance()
+                                .getHttpsCallable(addErrNotifies)
+                                .call(imageJsonMain)
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.i("Info", "Function call failure:" + e.toString());
+                                    }
+                                }).addOnSuccessListener(new OnSuccessListener<HttpsCallableResult>() {
+                            @Override
+                            public void onSuccess(HttpsCallableResult httpsCallableResult) {
+                                Log.i("Info", "Function call is ok");
+                            }
+                        });
 
                         saveErrInfoDetails();
                     }
@@ -234,7 +248,7 @@ public class ProblemNotifyActivity extends AppCompatActivity {
                 });
     }
 
-    public class SaveErrDetails extends AsyncTask<Void, Void, Void> {
+    public class SaveErrDetails extends AsyncTask<String, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -242,9 +256,9 @@ public class ProblemNotifyActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(String... params) {
 
-            if(uriForImage1 == null && uriForImage2 == null && uriForImage3 == null){
+            if (uriForImage1 == null && uriForImage2 == null && uriForImage3 == null) {
                 saveErrInfoDetails();
                 return null;
             }
@@ -272,24 +286,69 @@ public class ProblemNotifyActivity extends AppCompatActivity {
         }
     }
 
-    public void saveErrInfoDetails(){
+    public void saveErrInfoDetails() {
 
-        if(!userTextInserted){
-            DatabaseReference mdbRef = FirebaseDatabase.getInstance().getReference(ErrNotifies).child(key);
+        if (!userTextInserted) {
 
-            Map<String, Object> mapExt = new HashMap<String, Object>();
-            mapExt.put(fbUserId, FirebaseGetAccountHolder.getUserID());
+            JSONObject textJsonMain = null;
+            try {
+                JSONObject textJsonDtl = new JSONObject();
+                textJsonDtl.put(fbUserId, FirebaseGetAccountHolder.getUserID());
+                textJsonDtl.put(text, noteTextEditText.getText().toString());
 
-            if(!noteTextEditText.getText().toString().isEmpty())
-                mapExt.put(text, noteTextEditText.getText().toString());
+                textJsonMain = new JSONObject();
+                textJsonMain.put(key, textJsonDtl);
+            } catch (JSONException e) {
+                Snackbar.make(findViewById(R.id.container), "Teknik Hata:" + e.toString(), Snackbar.LENGTH_LONG)
+                        .show();
+                e.printStackTrace();
+                return;
+            }
 
-            mdbRef.updateChildren(mapExt);
+            FirebaseFunctions.getInstance()
+                    .getHttpsCallable(addErrNotifies)
+                    .call(textJsonMain)
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.i("Info", "Function call failure:" + e.toString());
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<HttpsCallableResult>() {
+                @Override
+                public void onSuccess(HttpsCallableResult httpsCallableResult) {
+                    Log.i("Info", "Function call is ok");
+                }
+            });
+
+
             userTextInserted = true;
 
-            mapExt.clear();
-            mdbRef = FirebaseDatabase.getInstance().getReference(UserErrorNotifs).child(FirebaseGetAccountHolder.getUserID());
-            mapExt.put(key, " ");
-            mdbRef.updateChildren(mapExt);
+            JSONObject userErrMainJson = null;
+            try {
+                userErrMainJson = new JSONObject();
+                userErrMainJson.put(errorId, key);
+                userErrMainJson.put(fbUserId,FirebaseGetAccountHolder.getUserID() );
+            } catch (JSONException e) {
+                Snackbar.make(findViewById(R.id.container), "Teknik Hata:" + e.toString(), Snackbar.LENGTH_LONG)
+                        .show();
+                e.printStackTrace();
+                return;
+            }
+
+            FirebaseFunctions.getInstance()
+                    .getHttpsCallable(addUserErrorNotif)
+                    .call(userErrMainJson)
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.i("Info", "Function call failure:" + e.toString());
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<HttpsCallableResult>() {
+                @Override
+                public void onSuccess(HttpsCallableResult httpsCallableResult) {
+                    Log.i("Info", "Function call is ok");
+                }
+            });
         }
     }
 
@@ -363,4 +422,5 @@ public class ProblemNotifyActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }

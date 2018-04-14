@@ -128,5 +128,7 @@ public class FirebaseConstant {
     public static final String appShareLink = "https://play.google.com/store/apps/details?id=com.supercell.clashofclans";
     public static final String appShareTitle = "Share This App";
 
+    public static final String errorId = "errId";
+
 
 }

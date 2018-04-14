@@ -26,7 +26,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -41,24 +40,25 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.HttpsCallableResult;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import uur.com.pinbook.Adapters.CustomDialogAdapter;
 import uur.com.pinbook.Adapters.UriAdapter;
 import uur.com.pinbook.Controller.BitmapConversion;
-import uur.com.pinbook.Controller.ClearSingletonClasses;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.JavaFiles.Friend;
@@ -66,23 +66,9 @@ import uur.com.pinbook.JavaFiles.User;
 import uur.com.pinbook.LazyList.ImageLoader;
 import uur.com.pinbook.R;
 
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Friends;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.GroupPictureUrl;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Groups;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.Users;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.birthday;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.gender;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.mobilePhone;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.name;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.nameSurname;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.profilePictureUrl;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.surname;
-import static uur.com.pinbook.ConstantsModel.FirebaseConstant.userName;
-import static uur.com.pinbook.ConstantsModel.StringConstant.displayRounded;
-import static uur.com.pinbook.ConstantsModel.StringConstant.friendsCacheDirectory;
-import static uur.com.pinbook.ConstantsModel.StringConstant.genderFemale;
-import static uur.com.pinbook.ConstantsModel.StringConstant.genderMale;
-import static uur.com.pinbook.ConstantsModel.StringConstant.genderUnknown;
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.*;
+import static uur.com.pinbook.ConstantsModel.FirebaseFunctionsConstant.*;
+import static uur.com.pinbook.ConstantsModel.StringConstant.*;
 
 public class EditProfileActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -223,7 +209,12 @@ public class EditProfileActivity extends AppCompatActivity implements AdapterVie
                 progressDialog.setMessage("Güncelleniyor...");
                 progressDialog.show();
                 setUserCurrentInfo();
-                updateUserInfo();
+
+                try {
+                    updateUserInfo();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -458,52 +449,67 @@ public class EditProfileActivity extends AppCompatActivity implements AdapterVie
         userCurr.setGender(selectedGender);
     }
 
-    public void updateUserInfo() {
+    public void updateUserInfo() throws JSONException{
 
-        DatabaseReference mDbref = FirebaseDatabase.getInstance().getReference().child(Users).child(userBef.getUserId());
-
-        Map<String, Object> values = new HashMap<>();
+        JSONObject userJson = new JSONObject();
+        JSONObject userDtlJson = new JSONObject();
 
         if (!userCurr.getName().toString().equals(userBef.getName().toString())) {
             FirebaseGetAccountHolder.getInstance().getUser().setName(userCurr.getName().toString());
-            values.put(name, userCurr.getName().toString());
+            userDtlJson.put(name, userCurr.getName().toString());
             userInfoChanged = true;
             nameOrSurnameChanged = true;
         }
 
         if (!userCurr.getSurname().toString().equals(userBef.getSurname().toString())) {
             FirebaseGetAccountHolder.getInstance().getUser().setSurname(userCurr.getSurname().toString());
-            values.put(surname, userCurr.getSurname().toString());
+            userDtlJson.put(surname, userCurr.getSurname().toString());
             userInfoChanged = true;
             nameOrSurnameChanged = true;
         }
 
         if (!userCurr.getUsername().toString().equals(userBef.getUsername().toString())) {
             FirebaseGetAccountHolder.getInstance().getUser().setUsername(userCurr.getUsername().toString());
-            values.put(userName, userCurr.getUsername().toString());
+            userDtlJson.put(userName, userCurr.getUsername().toString());
             userInfoChanged = true;
         }
 
         if (!userCurr.getBirthdate().toString().equals(userBef.getBirthdate().toString())) {
             FirebaseGetAccountHolder.getInstance().getUser().setBirthdate(userCurr.getBirthdate().toString());
-            values.put(birthday, userCurr.getBirthdate().toString());
+            userDtlJson.put(birthday, userCurr.getBirthdate().toString());
             userInfoChanged = true;
         }
 
         if (!userCurr.getPhoneNum().toString().equals(userBef.getPhoneNum().toString())) {
             FirebaseGetAccountHolder.getInstance().getUser().setPhoneNum(userCurr.getPhoneNum().toString());
-            values.put(mobilePhone, userCurr.getPhoneNum().toString());
+            userDtlJson.put(mobilePhone, userCurr.getPhoneNum().toString());
             userInfoChanged = true;
         }
 
         if (!userCurr.getGender().toString().equals(userBef.getGender().toString())) {
             FirebaseGetAccountHolder.getInstance().getUser().setGender(userCurr.getGender().toString());
-            values.put(gender, userCurr.getGender().toString());
+            userDtlJson.put(gender, userCurr.getGender().toString());
             userInfoChanged = true;
         }
 
-        if (userInfoChanged)
-            mDbref.updateChildren(values);
+        if (userInfoChanged) {
+            userJson.put(userBef.getUserId(), userDtlJson);
+
+            FirebaseFunctions.getInstance()
+                    .getHttpsCallable(addFirebaseUser)
+                    .call(userJson)
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.i("Info", "Function call failure:" + e.toString());
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<HttpsCallableResult>() {
+                @Override
+                public void onSuccess(HttpsCallableResult httpsCallableResult) {
+                    Log.i("Info", "Function call is ok");
+                }
+            });
+        }
 
         if(tempUri != null)
             saveProfPicViaEmailVerify();
@@ -533,11 +539,30 @@ public class EditProfileActivity extends AppCompatActivity implements AdapterVie
 
                         FirebaseGetAccountHolder.getInstance().getUser().setProfilePicSrc(downloadUrl.toString());
 
-                        Map<String, Object> values = new HashMap<>();
+                        JSONObject userJson = new JSONObject();
+                        JSONObject userDtlJson = new JSONObject();
 
-                        DatabaseReference mDbref = FirebaseDatabase.getInstance().getReference().child(Users).child(userBef.getUserId());
-                        values.put(profilePictureUrl, downloadUrl.toString());
-                        mDbref.updateChildren(values);
+                        try {
+                            userDtlJson.put(profilePictureUrl, downloadUrl.toString());
+                            userJson.put(userBef.getUserId(), userDtlJson);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        FirebaseFunctions.getInstance()
+                                .getHttpsCallable(addFirebaseUser)
+                                .call(userJson)
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.i("Info", "Function call failure:" + e.toString());
+                                    }
+                                }).addOnSuccessListener(new OnSuccessListener<HttpsCallableResult>() {
+                            @Override
+                            public void onSuccess(HttpsCallableResult httpsCallableResult) {
+                                Log.i("Info", "Function call is ok");
+                            }
+                        });
 
                         new UpdateFBChild().execute((Void) null);
 
@@ -571,6 +596,9 @@ public class EditProfileActivity extends AppCompatActivity implements AdapterVie
             for(Friend friend: FirebaseGetFriends.getFBGetFriendsInstance().getFriendList()){
                 DatabaseReference mDbref = FirebaseDatabase.getInstance().getReference().child(Friends).
                         child(friend.getUserID()).child(userBef.getUserId());
+
+                JSONObject friendJson = new JSONObject();
+                JSONObject friendDtlJson = new JSONObject();
 
                 Map<String, Object> values = new HashMap<>();
 
@@ -612,4 +640,5 @@ public class EditProfileActivity extends AppCompatActivity implements AdapterVie
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
+
 }

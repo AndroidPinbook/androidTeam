@@ -34,8 +34,11 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.json.JSONException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.concurrent.ExecutionException;
 
 import uur.com.pinbook.Controller.BitmapConversion;
 import uur.com.pinbook.FirebaseAdapters.FirebaseUserAdapter;
@@ -353,7 +356,15 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
 
         switch (i){
             case R.id.continueWithEmailVerifButton:
-                startEmailVerifyActivity();
+                try {
+                    startEmailVerifyActivity();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 break;
 
             case R.id.chooseProfilePicTextView:
@@ -415,9 +426,15 @@ public class ProfilePhotoActivity extends AppCompatActivity implements View.OnCl
         startActivityForResult(Intent.createChooser(intent, "Select Picture"),MY_PERMISSION_ACTION_GET_CONTENT);
     }
 
-    public void startEmailVerifyActivity(){
+    public void startEmailVerifyActivity() throws InterruptedException, ExecutionException, JSONException {
 
-        FirebaseUserAdapter.saveUserInfo(user);
+        //FirebaseUserAdapter.saveUserInfo(user);
+
+        new FirebaseUserAdapter(ProfilePhotoActivity.this, user);
+        //firebaseUserAdapter.genAndSaveUserToDB();
+        //firebaseUserAdapter.genAndSavePhoneNumToDB();
+
+        //FirebaseUserAdapter.generateUserJson(user);
 
         Intent intent = new Intent(ProfilePhotoActivity.this, EmailVerifyPageActivity.class);
         startActivity(intent);

@@ -72,7 +72,7 @@ public class ProfileDetailFragment extends Fragment {
     String FBuserID;
     ViewGroup mContainer;
     LayoutInflater mLayoutInflater;
-    ProgressDialog mProgressDialog;
+    //ProgressDialog mProgressDialog;
 
     private Context context;
 
@@ -111,7 +111,7 @@ public class ProfileDetailFragment extends Fragment {
         LinearLayout logoutLayout = mView.findViewById(R.id.logoutLayout);
         LinearLayout problemInformLayout = mView.findViewById(R.id.problemInformLayout);
 
-        mProgressDialog = new ProgressDialog(getActivity());
+        //mProgressDialog = new ProgressDialog(getActivity());
 
         addFromFacebookLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -171,10 +171,13 @@ public class ProfileDetailFragment extends Fragment {
         problemInformLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mProgressDialog.setMessage("Görüş Bildirimi Oluşturuluyor...");
-                if (!mProgressDialog.isShowing()) mProgressDialog.show();
+                //mProgressDialog.setMessage("Görüş Bildirimi Oluşturuluyor...");
+                //if (!mProgressDialog.isShowing()) mProgressDialog.show();
 
-                problemInformthread.start();
+                //if(!problemInformthread.isAlive())
+                  //  problemInformthread.start();
+                startActivity(new Intent(getActivity(), ProblemNotifyActivity.class));
+
             }
         });
 
@@ -191,7 +194,7 @@ public class ProfileDetailFragment extends Fragment {
         });
     }
 
-    Thread problemInformthread = new Thread() {
+    /*Thread problemInformthread = new Thread() {
         @Override
         public void run() {
             try {
@@ -203,7 +206,7 @@ public class ProfileDetailFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-    };
+    };*/
 
     public void sendInvitation() {
 
