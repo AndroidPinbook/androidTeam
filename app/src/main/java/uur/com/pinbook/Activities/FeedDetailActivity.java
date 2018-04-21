@@ -29,6 +29,7 @@ public class FeedDetailActivity extends AppCompatActivity {
     Toolbar mToolBar;
     LinearLayout container;
     FeedAllItem feedAllItem;
+    int clickedItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +49,7 @@ public class FeedDetailActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         feedAllItem = (FeedAllItem) intent.getSerializableExtra("feedAllItem");
-        int clickedItem = (Integer ) intent.getSerializableExtra("feedClickedItem");
+        clickedItem = (Integer ) intent.getSerializableExtra("clickedItem");
 
         FeedPinItem feedPinItem = feedAllItem.getFeedPinItems().get(clickedItem);
 
@@ -99,6 +100,7 @@ public class FeedDetailActivity extends AppCompatActivity {
 
         Bundle bundle = new Bundle();
         bundle.putSerializable("feedAllItem", feedAllItem);
+        bundle.putSerializable("clickedItem", clickedItem);
         fragment.setArguments(bundle);
 
 

@@ -12,6 +12,7 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import uur.com.pinbook.R;
+import uur.com.pinbook.RecyclerView.Model.FeedAllItem;
 import uur.com.pinbook.RecyclerView.Model.FeedPinItem;
 
 
@@ -19,8 +20,9 @@ public class TextFragment extends Fragment {
 
     @BindView(R.id.feedTextText)
     TextView feedItemText;
-
-    FeedPinItem singeItem;
+    FeedAllItem feedAllItem;
+    FeedPinItem feedPinItem;
+    int clickedItem;;
 
     public TextFragment() {
     }
@@ -34,14 +36,17 @@ public class TextFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         Bundle bundle=getArguments();
-        FeedPinItem f = (FeedPinItem) bundle.getSerializable("singleItem");
+        feedAllItem = (FeedAllItem) bundle.getSerializable("feedAllItem");
+        clickedItem = (Integer) bundle.getSerializable("clickedItem");
 
-        Toast.makeText(getContext(), f.getItemTag(), Toast.LENGTH_SHORT).show();
+        feedPinItem = feedAllItem.getFeedPinItems().get(clickedItem);
+
+        Toast.makeText(getContext(), feedPinItem.getItemTag(), Toast.LENGTH_SHORT).show();
         Log.i("neredeyiz--->", "TextFragment");
 
         //feed text
-        if(f.getDescription() != null){
-            feedItemText.setText(f.getDescription());
+        if(feedPinItem.getDescription() != null){
+            feedItemText.setText(feedPinItem.getDescription());
         }else{
             String s = "Text boş..";
             feedItemText.setText(s);

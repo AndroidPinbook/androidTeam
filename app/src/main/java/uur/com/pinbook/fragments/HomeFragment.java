@@ -217,7 +217,7 @@ public class HomeFragment extends BaseFragment {
                 if(clickedItem != -1){
                     Intent intent = new Intent(getContext(), FeedDetailActivity.class);
                     intent.putExtra("feedAllItem", feedAllItem);
-                    intent.putExtra("feedPinItem", clickedItem);
+                    intent.putExtra("clickedItem", clickedItem);
                     startActivity(intent);
                 }
 

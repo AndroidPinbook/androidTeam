@@ -15,13 +15,16 @@ import android.widget.VideoView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import uur.com.pinbook.R;
+import uur.com.pinbook.RecyclerView.Model.FeedAllItem;
 import uur.com.pinbook.RecyclerView.Model.FeedPinItem;
 
 public class VideoFragment extends Fragment {
 
     @BindView(R.id.videoView)
     VideoView feedVideoView;
-
+    FeedAllItem feedAllItem;
+    FeedPinItem feedPinItem;
+    int clickedItem;
 
     //////////////////////////////////////////////////////
 
@@ -44,14 +47,17 @@ public class VideoFragment extends Fragment {
 
         //exoPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.feedVideo);
 
-        Bundle bundle = getArguments();
-        FeedPinItem f = (FeedPinItem) bundle.getSerializable("singleItem");
+        Bundle bundle=getArguments();
+        feedAllItem = (FeedAllItem) bundle.getSerializable("feedAllItem");
+        clickedItem = (Integer) bundle.getSerializable("clickedItem");
 
-        Toast.makeText(getContext(), f.getItemTag(), Toast.LENGTH_SHORT).show();
+        feedPinItem = feedAllItem.getFeedPinItems().get(clickedItem);
+
+        Toast.makeText(getContext(), feedPinItem.getItemTag(), Toast.LENGTH_SHORT).show();
         Log.i("neredeyiz--->", "VideoFragment");
-        Log.i("video detay Url", f.getItemDetailUrl());
+        Log.i("video detay Url", feedPinItem.getItemDetailUrl());
 
-        Uri videoURI = Uri.parse(f.getItemDetailUrl());
+        Uri videoURI = Uri.parse(feedPinItem.getItemDetailUrl());
 
         feedVideoView = (VideoView) view.findViewById(R.id.videoView);
         mediaController = new MediaController(getContext());

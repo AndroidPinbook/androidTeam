@@ -257,7 +257,9 @@ public class LoginPageActivity extends AppCompatActivity implements View.OnClick
 
         progressDialog.setMessage("Registering User..");
         progressDialog.show();
-
+        Log.i("email ",email);
+        Log.i("password :", password);
+        Log.i("firebaseAuth :", firebaseAuth.toString());
         firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
 

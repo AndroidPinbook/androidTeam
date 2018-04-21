@@ -14,6 +14,7 @@ import com.squareup.picasso.Picasso;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import uur.com.pinbook.R;
+import uur.com.pinbook.RecyclerView.Model.FeedAllItem;
 import uur.com.pinbook.RecyclerView.Model.FeedPinItem;
 
 
@@ -21,8 +22,10 @@ public class ImageFragment extends Fragment {
 
     @BindView(R.id.feedImage)
     ImageView feedImageView;
+    FeedAllItem feedAllItem;
+    FeedPinItem feedPinItem;
+    int clickedItem;
 
-    FeedPinItem singeItem;
 
     public ImageFragment() {
     }
@@ -36,14 +39,17 @@ public class ImageFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         Bundle bundle=getArguments();
-        FeedPinItem f = (FeedPinItem) bundle.getSerializable("singleItem");
+        feedAllItem = (FeedAllItem) bundle.getSerializable("feedAllItem");
+        clickedItem = (Integer) bundle.getSerializable("clickedItem");
 
-        Toast.makeText(getContext(), f.getItemTag(), Toast.LENGTH_SHORT).show();
+        feedPinItem = feedAllItem.getFeedPinItems().get(clickedItem);
+
+        Toast.makeText(getContext(), feedPinItem.getItemTag(), Toast.LENGTH_SHORT).show();
         Log.i("neredeyiz--->", "ImageFragment");
 
         //feed Image
         Picasso.with(getContext())
-                .load(f.getItemImageUrl())
+                .load(feedPinItem.getItemImageUrl())
                 .into(feedImageView);
 
         return view;
