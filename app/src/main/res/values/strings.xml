@@ -68,6 +68,7 @@
     <string name="title_activity_dynamic_link">DynamicLinkActivity</string>
     <string name="countries">Countries</string>
     <string name="errNotifText">Lütfen sadece pinbook ve özelliklerimiz hakkında görüş bırak. Kötüye kullanım, spam veya fikri mülkiyet ihlalleri gibi Topluluk Kurallarımızı ihlal eden Pinbook'da paylaşılan içerikleri...</string>
+    <string name="title_activity_maps">Map</string>
 
 
 </resources>

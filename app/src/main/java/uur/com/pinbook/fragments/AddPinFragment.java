@@ -53,6 +53,7 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.arsy.maps_library.MapRipple;
+import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -68,6 +69,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -139,6 +141,7 @@ public class AddPinFragment extends BaseFragment implements
     private UriAdapter uriAdapter;
 
     private SensorManager mSensorMgr;
+    GeoFire geoFire;
 
     // Test iconlari
     private int[] tabIcons = {android.R.drawable.ic_menu_camera,
@@ -248,7 +251,7 @@ public class AddPinFragment extends BaseFragment implements
     public String bestProvider;
 
     private FirebaseAuth mAuth;
-    private DatabaseReference mDbref;
+    DatabaseReference ref;
 
     LatLng latLng;
     //private CircleOptions circleOptions;
@@ -349,6 +352,9 @@ public class AddPinFragment extends BaseFragment implements
             pinFriendsImgv.setOnClickListener(this);
             pinOnlymeImgv.setOnClickListener(this);
             pinSpecialImgv.setOnClickListener(this);
+
+            ref = FirebaseDatabase.getInstance().getReference("GeoFireModel");
+            geoFire = new GeoFire(ref);
 
         } catch (Exception e) {
             Log.i("Info", "     >>onCreate try error:" + e.toString());
@@ -1746,6 +1752,12 @@ public class AddPinFragment extends BaseFragment implements
         saveRegionBasedLocation();
         savePinItems();
         savePinModel();
+        saveGeoFireModel();
+    }
+
+    private void saveGeoFireModel() {
+
+
     }
 
 
