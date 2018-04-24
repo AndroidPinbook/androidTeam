@@ -4,6 +4,9 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -55,6 +58,8 @@ import android.widget.ViewFlipper;
 import com.arsy.maps_library.MapRipple;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -68,6 +73,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -76,8 +82,11 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
 
 import uur.com.pinbook.Activities.PlayVideoActivity;
 import uur.com.pinbook.Activities.ProfilePageActivity;
@@ -95,6 +104,7 @@ import uur.com.pinbook.FirebaseAdapters.FirebasePinItemsAdapter;
 import uur.com.pinbook.FirebaseAdapters.FirebasePinModelAdapter;
 import uur.com.pinbook.Adapters.LocationTrackerAdapter;
 import uur.com.pinbook.Adapters.UriAdapter;
+import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.JavaFiles.PinData;
 import uur.com.pinbook.JavaFiles.PinModels;
 import uur.com.pinbook.JavaFiles.RegionBasedLocation;
@@ -142,6 +152,7 @@ public class AddPinFragment extends BaseFragment implements
 
     private SensorManager mSensorMgr;
     GeoFire geoFire;
+    GeoFire geoFireF;
 
     // Test iconlari
     private int[] tabIcons = {android.R.drawable.ic_menu_camera,
@@ -1755,10 +1766,6 @@ public class AddPinFragment extends BaseFragment implements
         saveGeoFireModel();
     }
 
-    private void saveGeoFireModel() {
-
-
-    }
 
 
     /* Marker's detail information saved to firebase database(locations root) **********************/
@@ -1920,5 +1927,96 @@ public class AddPinFragment extends BaseFragment implements
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
+
+    private void saveGeoFireModel() {
+
+        /*geoFire.setLocation(FirebaseGetAccountHolder.getUserID(), new GeoLocation(markerLatlng.latitude, markerLatlng.longitude),
+                new GeoFire.CompletionListener() {
+                    @Override
+                    public void onComplete(String key, DatabaseError error) {
+
+                    }
+                });*/
+
+
+        for(Friend friend: pinModels.getFriendList())
+        {
+            ref = FirebaseDatabase.getInstance().getReference("GeoFireModel").child(friend.getUserID());
+
+            geoFire = new GeoFire(ref);
+
+            geoFire.setLocation(firebaseLocationAdapter.getLocationId(), new GeoLocation(markerLatlng.latitude, markerLatlng.longitude),
+                    new GeoFire.CompletionListener() {
+                        @Override
+                        public void onComplete(String key, DatabaseError error) {
+
+                        }
+                    });
+
+            Map<String, Object> values = new HashMap<>();
+            values.put("notifSend", "N");
+            values.put("pinOwner", FirebaseGetAccountHolder.getUserID());
+            ref.child(firebaseLocationAdapter.getLocationId()).updateChildren(values);
+
+
+
+        }
+
+        //geoFireF = new GeoFire(ref.child(FirebaseGetAccountHolder.getUserID()));
+
+        //0.5f = 0.5 km = 500 m
+        /*GeoQuery geoQuery = geoFire
+                .queryAtLocation(new GeoLocation(markerLatlng.latitude, markerLatlng.longitude), 0.5f);
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                Log.i("key", "key:" + key);
+                sendNotification("ugur", String.format("%s entered the dangerous area", key));
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                Log.i("key", "key:" + key);
+                sendNotification("ugur", String.format("%s is no longer in the dangerous area", key));
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+                Log.i("key", "key:" + key);
+                Log.i("MOVE", String.format("%s moved within the dangerous area[%f / %f ]", key, location.latitude, location.longitude));
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+                Log.i("Error", " " + error.toString());
+            }
+        });*/
+
+    }
+
+    private void sendNotification(String title, String content) {
+
+        Notification.Builder builder = new Notification.Builder(context)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setContentTitle(title)
+                .setContentText(content);
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Intent intent = new Intent(context, ProfilePageActivity.class);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        builder.setContentIntent(pendingIntent);
+        Notification notification = builder.build();
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        notification.defaults |= Notification.DEFAULT_SOUND;
+
+        notificationManager.notify(new Random().nextInt(), notification);
+    }
+
 
 }

@@ -48,12 +48,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.twitter.sdk.android.core.TwitterCore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import butterknife.BindArray;
@@ -63,6 +67,7 @@ import uur.com.pinbook.DefaultModels.GetContactList;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetGroups;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
+import uur.com.pinbook.JavaFiles.Friend;
 import uur.com.pinbook.R;
 import butterknife.ButterKnife;
 import uur.com.pinbook.FragmentControllers.FragNavController;
@@ -75,6 +80,7 @@ import uur.com.pinbook.fragments.AddPinFragment;
 import uur.com.pinbook.utils.FragmentHistory;
 import uur.com.pinbook.utils.Utils;
 
+import static uur.com.pinbook.ConstantsModel.FirebaseConstant.nameSurname;
 import static uur.com.pinbook.ConstantsModel.NumericConstant.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 import static uur.com.pinbook.ConstantsModel.NumericConstant.PERMISSION_REQUEST_READ_CONTACTS;
 import static uur.com.pinbook.ConstantsModel.StringConstant.*;
@@ -86,7 +92,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
         LocationListener,
         GeoFire.CompletionListener,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener{
+        GoogleApiClient.OnConnectionFailedListener {
 
 
     private FirebaseAuth firebaseAuth;
@@ -156,12 +162,17 @@ public class ProfilePageActivity extends AppCompatActivity implements
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         FBuserId = currentUser.getUid();
 
+        locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+
         ButterKnife.bind(this);
 
         context = this;
 
-        ref = FirebaseDatabase.getInstance().getReference("MyLocation");
+        ref = FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID());
         geoFire = new GeoFire(ref);
+
+        Intent intent = new Intent(ProfilePageActivity.this, uur.com.pinbook.Controller.NotifyService.class);
+        ProfilePageActivity.this.startService(intent);
 
         setUpLocation();
 
@@ -429,7 +440,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
                     if (checkPlayServices()) {
                         buildGoogleApiClient();
                         createLocationRequest();
-                        displayLocation();
+                        //displayLocation();
                     }
                 }
                 break;
@@ -462,7 +473,105 @@ public class ProfilePageActivity extends AppCompatActivity implements
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;
-        displayLocation();
+        //displayLocation();
+        checkFriendLocations();
+    }
+
+    private void checkFriendLocations() {
+
+        if(mLastLocation == null)
+            return;
+
+        //0.5f = 0.5 km = 500 m
+        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 0.5f);
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(final String key, GeoLocation location) {
+                Log.i("key", "key:" + key);
+
+                    /*for(Friend friend : FirebaseGetFriends.getInstance(FirebaseGetAccountHolder.getUserID()).getFriendList()){
+
+                        if(key.equals(friend.getUserID())){
+                            sendNotification("notif", String.format("%s burada pin birakmisti :)", friend.getNameSurname()));
+                        }
+                    }*/
+
+
+                FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID())
+                        .child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+
+                            if (dataSnapshot1.getValue() != null) {
+                                Map<String, Object> map = (Map) dataSnapshot.getValue();
+
+                                String notifSendParam = (String) map.get("notifSend");
+                                final String pinOwner = (String) map.get("pinOwner");
+
+                                if (notifSendParam.equals("N")) {
+
+                                    for (Friend friend : FirebaseGetFriends.getInstance(FirebaseGetAccountHolder.getUserID()).getFriendList())
+                                    {
+                                        if (pinOwner.equals(friend.getUserID())) {
+                                            sendNotification("notif", String.format("%s burada pin birakmisti :)", friend.getNameSurname()));
+
+                                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID())
+                                                    .child(key);
+                                            Map<String, Object> values = new HashMap<>();
+                                            values.put("notifSend", "Y");
+                                            ref.updateChildren(values);
+
+                                            break;
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                Log.i("key", "key:" + key);
+
+                for (Friend friend : FirebaseGetFriends.getInstance(FirebaseGetAccountHolder.getUserID()).getFriendList()) {
+
+                    if (key.equals(friend.getUserID())) {
+                        // sendNotification("notif", String.format("%s is no longer in the dangerous area", friend.getNameSurname()));
+                    }
+                }
+
+                //sendNotification("ugur", String.format("%s is no longer in the dangerous area", key));
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+                Log.i("key", "key:" + key);
+                Log.i("MOVE", String.format("%s moved within the dangerous area[%f / %f ]", key, location.latitude, location.longitude));
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+                Log.i("Error", " " + error.toString());
+            }
+        });
     }
 
     @Override
@@ -493,56 +602,14 @@ public class ProfilePageActivity extends AppCompatActivity implements
             return;
         }
 
-        mLastLocation = getLastKnownLocation();
+        //mLastLocation = getLastKnownLocation();
 
-        if(mLastLocation != null)
-        {
+        if (mLastLocation != null) {
             final double latitude = mLastLocation.getLatitude();
             final double longitude = mLastLocation.getLongitude();
 
-            geoFire.setLocation(FBuserId, new GeoLocation(latitude, longitude),
-                    new GeoFire.CompletionListener() {
-                        @Override
-                        public void onComplete(String key, DatabaseError error) {
-
-                        }
-                    });
-
-            //0.5f = 0.5 km = 500 m
-            GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(latitude, longitude), 0.5f);
-            geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-                @Override
-                public void onKeyEntered(String key, GeoLocation location) {
-                    Log.i("key", "key:" + key);
-                    sendNotification("ugur", String.format("%s entered the dangerous area", key));
-                }
-
-                @Override
-                public void onKeyExited(String key) {
-                    Log.i("key", "key:" + key);
-                    sendNotification("ugur", String.format("%s is no longer in the dangerous area", key));
-                }
-
-                @Override
-                public void onKeyMoved(String key, GeoLocation location) {
-                    Log.i("key", "key:" + key);
-                    Log.i("MOVE", String.format("%s moved within the dangerous area[%f / %f ]", key, location.latitude, location.longitude));
-                }
-
-                @Override
-                public void onGeoQueryReady() {
-
-                }
-
-                @Override
-                public void onGeoQueryError(DatabaseError error) {
-                    Log.i("Error", " " + error.toString());
-                }
-            });
-
-
             Log.i("Info", String.format("Your location was changed: %f / %f", latitude, longitude));
-        }else
+        } else
             Log.i("Info", "Can not get your location!!!");
     }
 
@@ -570,7 +637,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
         Log.i("Info", "getLastKnownLocation starts");
 
-        locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+        //locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
         List<String> providers = locationManager.getProviders(true);
         Location bestLocation = null;
 
@@ -579,11 +646,9 @@ public class ProfilePageActivity extends AppCompatActivity implements
             Location location = null;
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-            {
+                    ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 location = locationManager.getLastKnownLocation(provider);
-            }
-            else
+            } else
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
 
@@ -601,12 +666,10 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 
-        if(resultCode != ConnectionResult.SUCCESS)
-        {
-            if(GooglePlayServicesUtil.isUserRecoverableError(resultCode))
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode))
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
-            else
-            {
+            else {
                 Toast.makeText(this, "This device is not supported!", Toast.LENGTH_SHORT).show();
                 finish();
             }
@@ -628,7 +691,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        displayLocation();
+        //displayLocation();
         startLocationUpdates();
     }
 
@@ -675,12 +738,11 @@ public class ProfilePageActivity extends AppCompatActivity implements
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     Manifest.permission.ACCESS_FINE_LOCATION
             }, MY_PERMISSION_REQUEST_CODE);
-        }else{
-            if(checkPlayServices())
-            {
+        } else {
+            if (checkPlayServices()) {
                 buildGoogleApiClient();
                 createLocationRequest();
-                displayLocation();
+                //displayLocation();
             }
         }
     }

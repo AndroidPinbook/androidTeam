@@ -25,6 +25,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+
+
         <activity
             android:name=".Activities.WelcomePageActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -58,6 +61,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+                <action android:name="your.app.domain.NotificationService" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -70,6 +74,8 @@
                     android:host="play.google.com/store/apps/details?id=com.supercell.clashofclans"
                     android:scheme="http" />
             </intent-filter>
+
+
         </activity>
         <activity
             android:name=".Activities.PlayVideoActivity"
@@ -164,6 +170,9 @@
         <activity
             android:name=".Activities.ProblemNotifyActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <service android:name=".Controller.NotifyService"/>
+
     </application>
 
 </manifest>

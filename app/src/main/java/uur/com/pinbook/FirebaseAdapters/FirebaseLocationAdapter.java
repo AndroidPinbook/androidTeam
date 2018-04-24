@@ -21,10 +21,10 @@ public class FirebaseLocationAdapter {
 
     public static String locationId;
 
-    public FirebaseOptions locationsOptions;
-    public FirebaseOptions userLocationsOptions;
+    //public FirebaseOptions locationsOptions;
+    //public FirebaseOptions userLocationsOptions;
 
-    public FirebaseOptions getLocationsOptions() {
+    /*public FirebaseOptions getLocationsOptions() {
 
         locationsOptions = new FirebaseOptions.Builder().
                 setApplicationId(FB_APPLICATION_ID).setDatabaseUrl(GEO_FIRE_DB_LOCATIONS).build();
@@ -36,7 +36,7 @@ public class FirebaseLocationAdapter {
         userLocationsOptions = new FirebaseOptions.Builder().
                 setApplicationId(FB_APPLICATION_ID).setDatabaseUrl(GEO_FIRE_DB_USER_LOCATIONS).build();
         return userLocationsOptions;
-    }
+    }*/
 
     public static String getLocationId() {
         return locationId;
