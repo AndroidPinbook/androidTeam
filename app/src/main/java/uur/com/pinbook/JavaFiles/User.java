@@ -33,6 +33,9 @@ public class User implements Serializable{
         this.providerId = providerId;
     }
 
+    public User() {
+    }
+
     public String getMiniProfPicUrl() {
         return miniProfPicUrl;
     }

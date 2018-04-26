@@ -11,11 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+
 
 import uur.com.pinbook.R;
 import uur.com.pinbook.RecyclerView.Model.FeedPinItem;
@@ -25,16 +25,19 @@ public class FeedPinItemAdapter extends RecyclerView.Adapter<FeedPinItemAdapter.
 
     private ArrayList<FeedPinItem> itemsList;
     private Context mContext;
+    private RecyclerViewClickListener2 mListener;
 
-    public FeedPinItemAdapter(Context context, ArrayList<FeedPinItem> itemsList) {
+    public FeedPinItemAdapter(Context context, ArrayList<FeedPinItem> itemsList, RecyclerViewClickListener2 listener) {
         this.itemsList = itemsList;
         this.mContext = context;
+        this.mListener = listener;
+
     }
 
     @Override
     public SingleItemRowHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.feed_inner_item, null);
-        SingleItemRowHolder mh = new SingleItemRowHolder(v);
+        SingleItemRowHolder mh = new SingleItemRowHolder(v, mListener);
         return mh;
     }
 
@@ -43,11 +46,11 @@ public class FeedPinItemAdapter extends RecyclerView.Adapter<FeedPinItemAdapter.
 
         FeedPinItem singleItem = itemsList.get(i);
 
-        holder.tvTitle.setText(singleItem.getName());
+        holder.tvTitle.setText(singleItem.getItemTag());
 
-        //feed porfile picture
+        //feed profile picture
         Picasso.with(mContext)
-                .load(singleItem.getUrl())
+                .load(singleItem.getItemImageUrl())
                 .into(holder.itemImage);
 
        /* Glide.with(mContext)
@@ -68,20 +71,25 @@ public class FeedPinItemAdapter extends RecyclerView.Adapter<FeedPinItemAdapter.
         protected TextView tvTitle;
 
         protected ImageView itemImage;
+        private RecyclerViewClickListener2 mListener;
 
-
-        public SingleItemRowHolder(View view) {
+        public SingleItemRowHolder(View view, RecyclerViewClickListener2 listener) {
             super(view);
 
             this.tvTitle = (TextView) view.findViewById(R.id.tvTitle);
             this.itemImage = (ImageView) view.findViewById(R.id.itemImage);
-
+            mListener = listener;
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    Toast.makeText(v.getContext(), tvTitle.getText(), Toast.LENGTH_SHORT).show();
+                    int clickedPosition = getAdapterPosition();
+                    FeedPinItem singleItem = itemsList.get(clickedPosition);
+                    //Log.i("Clicked_image_url :", singleItem.getItem_image_url());
+                    //Toast.makeText(v.getContext(), singleItem.getItem_image_url(), Toast.LENGTH_SHORT).show();
+
+                    mListener.onClick(v, singleItem);
 
                 }
             });
@@ -89,6 +97,11 @@ public class FeedPinItemAdapter extends RecyclerView.Adapter<FeedPinItemAdapter.
 
         }
 
+    }
+
+    public interface RecyclerViewClickListener2 {
+
+        void onClick(View view, FeedPinItem singleItem);
     }
 
 }

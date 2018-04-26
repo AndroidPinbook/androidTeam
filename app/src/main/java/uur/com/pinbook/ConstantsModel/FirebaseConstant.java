@@ -84,7 +84,7 @@ public class FirebaseConstant {
     public static final String text = "text";
     public static final String video = "video";
     public static final String picture = "picture";
-    public static final String videoImageURL = "videoImageURL";
+    public static final String videoImageURL = "videoPictureURL";
 
 
     public static final String pinVideo = "pinVideo";
@@ -116,6 +116,10 @@ public class FirebaseConstant {
     //Pin notify Flags
     public static final String notifyYes = "Y";
     public static final String notifyNo  = "N";
+
+    //Firebase Feed Listener
+    public static final int feedLimit = 7;
+    public static final int nextItemCount = 5;
 
     //Inbound-Outbound invite constants
     public static final String Yes  = "Y";

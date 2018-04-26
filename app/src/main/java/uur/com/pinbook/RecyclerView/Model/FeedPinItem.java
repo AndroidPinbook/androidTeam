@@ -1,32 +1,36 @@
 package uur.com.pinbook.RecyclerView.Model;
 
+import java.io.Serializable;
+
 /**
  * Created by ASUS on 17.2.2018.
  */
 
-public class FeedPinItem {
+public class FeedPinItem implements Serializable {
 
-    private String name;
-    private String url;
+    private String itemTag;
+    private String itemImageUrl;
     private String description;
+    private String itemDetailUrl;
+
 
     public FeedPinItem() {
     }
 
-    public String getName() {
-        return name;
+    public String getItemTag() {
+        return itemTag;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setItemTag(String itemTag) {
+        this.itemTag = itemTag;
     }
 
-    public String getUrl() {
-        return url;
+    public void setItemImageUrl(String itemImageUrl) {
+        this.itemImageUrl = itemImageUrl;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public String getItemImageUrl() {
+        return itemImageUrl;
     }
 
     public String getDescription() {
@@ -36,4 +40,13 @@ public class FeedPinItem {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public String getItemDetailUrl() {
+        return itemDetailUrl;
+    }
+
+    public void setItemDetailUrl(String itemDetailUrl) {
+        this.itemDetailUrl = itemDetailUrl;
+    }
+
 }

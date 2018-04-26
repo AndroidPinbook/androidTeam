@@ -173,6 +173,13 @@
 
         <service android:name=".Controller.NotifyService"/>
 
+        <activity
+            android:name=".Activities.TabActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Activities.FeedDetailActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Activities.PrototypeActivity"></activity>
     </application>
 
 </manifest>
