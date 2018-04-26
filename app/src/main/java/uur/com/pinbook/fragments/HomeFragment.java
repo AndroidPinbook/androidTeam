@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import uur.com.pinbook.Activities.FeedDetailActivity;
+import uur.com.pinbook.Activities.PrototypeActivity;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetAccountHolder;
 import uur.com.pinbook.JavaFiles.Feed;
 import uur.com.pinbook.JavaFiles.LocationDb;
@@ -106,6 +108,7 @@ public class HomeFragment extends BaseFragment {
     private boolean loading = true;
     List<String> locList = new ArrayList<String>();
     PullRefreshLayout layout;
+    Button prototypeButton;
 
     public static HomeFragment newInstance(int instance) {
         Bundle args = new Bundle();
@@ -173,6 +176,18 @@ public class HomeFragment extends BaseFragment {
     }
 
     private void init() {
+
+        prototypeButton = (Button) view.findViewById(R.id.btnPrototype);
+        prototypeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), PrototypeActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+
 
 
         layout = (PullRefreshLayout) view.findViewById(R.id.pull_to_refresh);
@@ -283,23 +298,31 @@ public class HomeFragment extends BaseFragment {
 
         Query query;
 
-        if (nodeId == null)
+        if (nodeId == null) {
             query = FirebaseDatabase.getInstance().getReference(Feeds)
                     .child(getUserID())
                     .orderByChild(timestamp)
                     .limitToLast(mPostsPerPage);
-        else
+        }
+        else {
             query = FirebaseDatabase.getInstance().getReference(Feeds)
                     .child(getUserID())
                     .orderByChild(timestamp)
                     .endAt(nodeId)
                     .limitToLast(mPostsPerPage);
+        }
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 long cnt = dataSnapshot.getChildrenCount();
                 int i = 0;
+
+                if(cnt == 0){
+                    progressBar.setVisibility(View.GONE);
+                    layout.setRefreshing(false);
+                    Toast.makeText(getActivity(), "No feeds Available for this user", Toast.LENGTH_LONG).show();
+                }
 
                 for (DataSnapshot locationSnapshot : dataSnapshot.getChildren()) {
 

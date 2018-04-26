@@ -12,6 +12,12 @@
 
     </android.support.v7.widget.RecyclerView-->
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnPrototype"
+        android:text="Go Prototype"/>
+
     <ProgressBar
         android:id="@+id/progressBar"
         style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
