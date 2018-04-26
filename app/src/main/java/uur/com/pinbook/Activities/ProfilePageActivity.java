@@ -5,8 +5,10 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -62,6 +64,7 @@ import java.util.Random;
 
 import butterknife.BindArray;
 import butterknife.BindView;
+import uur.com.pinbook.Controller.BroadcastReceiverControl;
 import uur.com.pinbook.Controller.ClearSingletonClasses;
 import uur.com.pinbook.DefaultModels.GetContactList;
 import uur.com.pinbook.FirebaseGetData.FirebaseGetFriends;
@@ -97,6 +100,8 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
     private FirebaseAuth firebaseAuth;
     private String FBuserId;
+
+    private BroadcastReceiverControl mBroadcastReceiver;
 
     DatabaseReference ref;
     GeoFire geoFire;
@@ -158,6 +163,14 @@ public class ProfilePageActivity extends AppCompatActivity implements
             //finish();
             startActivity(new Intent(this, EnterPageActivity.class));
         }
+
+        //mBroadcastReceiver = new BroadcastReceiverControl();
+        //IntentFilter intentFilter = new IntentFilter();
+        //intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+        //intentFilter.addAction("do_something");
+        //registerReceiver(mBroadcastReceiver, intentFilter);
+
+
 
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         FBuserId = currentUser.getUid();
@@ -474,12 +487,12 @@ public class ProfilePageActivity extends AppCompatActivity implements
     public void onLocationChanged(Location location) {
         mLastLocation = location;
         //displayLocation();
-        checkFriendLocations();
+        //checkFriendLocations();
     }
 
     private void checkFriendLocations() {
 
-        if(mLastLocation == null)
+        if (mLastLocation == null)
             return;
 
         //0.5f = 0.5 km = 500 m
@@ -505,28 +518,32 @@ public class ProfilePageActivity extends AppCompatActivity implements
                         for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
 
                             if (dataSnapshot1.getValue() != null) {
-                                Map<String, Object> map = (Map) dataSnapshot.getValue();
 
-                                String notifSendParam = (String) map.get("notifSend");
-                                final String pinOwner = (String) map.get("pinOwner");
 
-                                if (notifSendParam.equals("N")) {
+                                if(dataSnapshot1.getKey().equals("notifSend") && dataSnapshot1.getValue().equals("N")) {
 
-                                    for (Friend friend : FirebaseGetFriends.getInstance(FirebaseGetAccountHolder.getUserID()).getFriendList())
-                                    {
-                                        if (pinOwner.equals(friend.getUserID())) {
-                                            sendNotification("notif", String.format("%s burada pin birakmisti :)", friend.getNameSurname()));
+                                    Map<String, Object> map = (Map) dataSnapshot.getValue();
 
-                                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID())
-                                                    .child(key);
-                                            Map<String, Object> values = new HashMap<>();
-                                            values.put("notifSend", "Y");
-                                            ref.updateChildren(values);
 
-                                            break;
+                                    String notifSendParam = (String) map.get("notifSend");
+                                    final String pinOwner = (String) map.get("pinOwner");
+
+                                    if (notifSendParam.equals("N")) {
+
+                                        for (Friend friend : FirebaseGetFriends.getInstance(FirebaseGetAccountHolder.getUserID()).getFriendList()) {
+                                            if (pinOwner.equals(friend.getUserID())) {
+                                                sendNotification("notif", String.format("%s burada pin birakmisti :)", friend.getNameSurname()));
+
+                                                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID())
+                                                        .child(key);
+                                                Map<String, Object> values = new HashMap<>();
+                                                values.put("notifSend", "Y");
+                                                ref.updateChildren(values);
+
+                                                break;
+                                            }
                                         }
                                     }
-
                                 }
                             }
                         }
@@ -746,4 +763,6 @@ public class ProfilePageActivity extends AppCompatActivity implements
             }
         }
     }
+
+
 }

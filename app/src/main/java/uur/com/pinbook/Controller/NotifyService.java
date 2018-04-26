@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -57,27 +58,18 @@ import uur.com.pinbook.R;
 import static uur.com.pinbook.ConstantsModel.NumericConstant.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
 import static uur.com.pinbook.ConstantsModel.NumericConstant.PERMISSION_REQUEST_READ_CONTACTS;
 
-public class NotifyService extends Service implements LocationListener,
+public class NotifyService extends Service implements
+        LocationListener,
         GeoFire.CompletionListener,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener{
+        GoogleApiClient.OnConnectionFailedListener {
 
     final static String ACTION = "NotifyServiceAction";
-    final static String STOP_SERVICE = "";
     final static int RQS_STOP_SERVICE = 1;
 
     NotifyServiceReceiver notifyServiceReceiver;
 
-    Timer timer;
-    TimerTask timerTask;
-    String TAG = "Timers";
-    int Your_X_SECS = 5;
-
     private Context context;
-
-    private static final int MY_PERMISSION_REQUEST_CODE = 1;
-    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 2;
-    private static final int PERMISSIONS_REQUESTLOCUPDATES = 3;
 
     private Location mLastLocation;
     LocationManager locationManager;
@@ -92,18 +84,15 @@ public class NotifyService extends Service implements LocationListener,
     DatabaseReference ref;
     GeoFire geoFire;
 
-    //final Handler handler = new Handler();
-
     @Override
     public void onCreate() {
-        //context = getActivity();
+        context = this;
 
         ref = FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID());
         geoFire = new GeoFire(ref);
 
         locationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
 
-        //startTimer();
         setUpLocation();
         notifyServiceReceiver = new NotifyServiceReceiver();
 
@@ -113,36 +102,6 @@ public class NotifyService extends Service implements LocationListener,
 
         super.onCreate();
     }
-
-    /*public void startTimer() {
-
-        timer = new Timer();
-        initializeTimerTask();
-
-        //schedule the timer, after the first 5000ms the TimerTask will run every 10000ms
-        timer.schedule(timerTask, 5000, Your_X_SECS * 1000); //
-        //timer.schedule(timerTask, 5000,1000); //
-    }*/
-
-   /* public void initializeTimerTask() {
-
-        timerTask = new TimerTask() {
-            public void run() {
-
-                handler.post(new Runnable() {
-                    public void run() {
-
-                        IntentFilter intentFilter = new IntentFilter();
-                        intentFilter.addAction(ACTION);
-                        registerReceiver(notifyServiceReceiver, intentFilter);
-
-                        //sendNotification("xxxxx", "hiyartolar sizi");
-
-                    }
-                });
-            }
-        };
-    }*/
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -158,7 +117,7 @@ public class NotifyService extends Service implements LocationListener,
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void sendNotification(String title, String content) {
+    private void sendNotification(String title, String content, String locId) {
 
         Notification.Builder builder = new Notification.Builder(this)
                 .setSmallIcon(R.mipmap.ic_launcher_round)
@@ -167,10 +126,14 @@ public class NotifyService extends Service implements LocationListener,
 
         NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         Intent intent = new Intent(this, ProfilePageActivity.class);
+        //Intent intent = new Intent("do_something");
+        //intent.putExtra("locationId", locId);
+
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
         builder.setContentIntent(pendingIntent);
         Notification notification = builder.build();
+        notification.contentIntent = pendingIntent;
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         notification.defaults |= Notification.DEFAULT_SOUND;
 
@@ -194,7 +157,7 @@ public class NotifyService extends Service implements LocationListener,
         //displayLocation();
         checkFriendLocations();
         Log.i("info", "location Changed++++++++++++++++++++++");
-        Toast.makeText(this, "locationChanged", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "locationChanged", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -244,13 +207,13 @@ public class NotifyService extends Service implements LocationListener,
 
     }
 
-    public class NotifyServiceReceiver extends BroadcastReceiver{
+    public class NotifyServiceReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context arg0, Intent arg1) {
 
             int rqs = arg1.getIntExtra("RQS", 0);
-            if (rqs == RQS_STOP_SERVICE){
+            if (rqs == RQS_STOP_SERVICE) {
                 stopSelf();
             }
         }
@@ -279,7 +242,7 @@ public class NotifyService extends Service implements LocationListener,
 
     private void checkFriendLocations() {
 
-        if(mLastLocation == null)
+        if (mLastLocation == null)
             return;
 
         //0.5f = 0.5 km = 500 m
@@ -289,14 +252,6 @@ public class NotifyService extends Service implements LocationListener,
             public void onKeyEntered(final String key, GeoLocation location) {
                 Log.i("key", "key:" + key);
 
-                    /*for(Friend friend : FirebaseGetFriends.getInstance(FirebaseGetAccountHolder.getUserID()).getFriendList()){
-
-                        if(key.equals(friend.getUserID())){
-                            sendNotification("notif", String.format("%s burada pin birakmisti :)", friend.getNameSurname()));
-                        }
-                    }*/
-
-
                 FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID())
                         .child(key).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -305,17 +260,21 @@ public class NotifyService extends Service implements LocationListener,
                         for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
 
                             if (dataSnapshot1.getValue() != null) {
-                                Map<String, Object> map = (Map) dataSnapshot.getValue();
 
-                                String notifSendParam = (String) map.get("notifSend");
-                                final String pinOwner = (String) map.get("pinOwner");
+                                if (dataSnapshot1.getKey().equals("notifSend") && dataSnapshot1.getValue().equals("N")) {
 
-                                if (notifSendParam.equals("N")) {
+                                    Map<String, Object> map = (Map) dataSnapshot.getValue();
 
-                                    for (Friend friend : FirebaseGetFriends.getInstance(FirebaseGetAccountHolder.getUserID()).getFriendList())
-                                    {
+                                    //String notifSendParam = (String) map.get("notifSend");
+                                    final String pinOwner = (String) map.get("pinOwner");
+
+
+                                    for (Friend friend : FirebaseGetFriends.getInstance(FirebaseGetAccountHolder.getUserID()).getFriendList()) {
                                         if (pinOwner.equals(friend.getUserID())) {
-                                            sendNotification("notif", String.format("%s burada pin birakmisti :)", friend.getNameSurname()));
+                                            sendNotification("notif", String.format("%s burada pin birakmisti :)", friend.getNameSurname()), key);
+
+                                            //NotificationUtils notificationUtils = new NotificationUtils();
+                                            //notificationUtils.displayNotification(context);
 
                                             DatabaseReference ref = FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID())
                                                     .child(key);
@@ -327,7 +286,9 @@ public class NotifyService extends Service implements LocationListener,
                                         }
                                     }
 
+
                                 }
+
                             }
                         }
 
@@ -388,10 +349,18 @@ public class NotifyService extends Service implements LocationListener,
             Location location = null;
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            {
+                /*Criteria criteria = new Criteria();
+                criteria.setPowerRequirement(Criteria.POWER_LOW);
+                criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+                String bestprovider = locationManager.getBestProvider(criteria,false);
+                location = locationManager.getLastKnownLocation(bestprovider);*/
+
                 location = locationManager.getLastKnownLocation(provider);
+
             }//else
-                //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
 
             if (location == null) {
                 continue;
