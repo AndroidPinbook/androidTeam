@@ -44,4 +44,10 @@ public class NumericConstant {
     //Sepcial selection page item number
     public static final int persons = 0;
     public static final int groups = 1;
+
+    //special selection profile fragment
+    public static final int showShareItem = 0;
+    public static final int showFriendsItem = 1;
+    public static final int showGroupItem = 2;
+
 }

@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -15,6 +16,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import cn.refactor.lib.colordialog.ColorDialog;
@@ -22,6 +25,8 @@ import cn.refactor.lib.colordialog.PromptDialog;
 import uur.com.pinbook.Activities.LoginPageActivity;
 import uur.com.pinbook.Activities.ProfilePhotoActivity;
 import uur.com.pinbook.R;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class CustomDialogAdapter extends DialogFragment {
 
@@ -51,6 +56,33 @@ public class CustomDialogAdapter extends DialogFragment {
         Toast toast = new Toast(context);
         toast.setGravity(Gravity.CENTER_VERTICAL,0,0);
         toast.setView(view);
+        toast.show();
+    }
+
+    /*public void showNotifyToastMessage(Context context){
+
+        Toast toast = new Toast(context);
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER_VERTICAL,0,0);
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.your_custom_layout, null);
+        toast.setView(view);
+        toast.show();
+    }*/
+
+    public static void showNotifyToastMessage1(Context context, String message){
+
+        Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
+        View view = toast.getView();
+
+        //To change the Background of Toast
+        view.setBackgroundColor(Color.TRANSPARENT);
+        TextView text = (TextView) view.findViewById(android.R.id.message);
+
+        //Shadow of the Of the Text Color
+        text.setShadowLayer(0, 0, 0, Color.TRANSPARENT);
+        text.setTextColor(Color.BLACK);
         toast.show();
     }
 

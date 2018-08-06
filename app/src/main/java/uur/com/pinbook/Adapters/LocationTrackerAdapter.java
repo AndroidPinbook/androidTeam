@@ -12,11 +12,6 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.maps.model.LatLng;
-
-/**
- * Created by mac on 20.12.2017.
- */
 
 public class LocationTrackerAdapter implements LocationListener {
 
@@ -86,10 +81,11 @@ public class LocationTrackerAdapter implements LocationListener {
 
                     if (ContextCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION)
                             == PackageManager.PERMISSION_GRANTED) {
+
                         locationManager.requestLocationUpdates(
                                 LocationManager.NETWORK_PROVIDER,
                                 MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, (android.location.LocationListener) mContext);
+                                MIN_DISTANCE_CHANGE_FOR_UPDATES, (android.location.LocationListener) this);
                     }
 
 

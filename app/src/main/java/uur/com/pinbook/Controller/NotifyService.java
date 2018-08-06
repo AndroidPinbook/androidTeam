@@ -138,6 +138,7 @@ public class NotifyService extends Service implements
         notification.defaults |= Notification.DEFAULT_SOUND;
 
         notificationManager.notify(new Random().nextInt(), notification);
+
     }
 
     @Override
@@ -251,6 +252,9 @@ public class NotifyService extends Service implements
             @Override
             public void onKeyEntered(final String key, GeoLocation location) {
                 Log.i("key", "key:" + key);
+
+                if(FirebaseGetAccountHolder.getInstance() == null)
+                    return;
 
                 FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID())
                         .child(key).addListenerForSingleValueEvent(new ValueEventListener() {

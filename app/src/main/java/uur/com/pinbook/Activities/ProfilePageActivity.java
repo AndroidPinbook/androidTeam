@@ -64,6 +64,7 @@ import java.util.Random;
 
 import butterknife.BindArray;
 import butterknife.BindView;
+import uur.com.pinbook.Adapters.CustomDialogAdapter;
 import uur.com.pinbook.Controller.BroadcastReceiverControl;
 import uur.com.pinbook.Controller.ClearSingletonClasses;
 import uur.com.pinbook.DefaultModels.GetContactList;
@@ -100,6 +101,12 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
     private FirebaseAuth firebaseAuth;
     private String FBuserId;
+    private DatabaseReference geofireRef;
+    private ValueEventListener eventListener;
+
+    private int onPauseCount = 0;
+
+    private boolean onPausedInd = false;
 
     private BroadcastReceiverControl mBroadcastReceiver;
 
@@ -115,6 +122,8 @@ public class ProfilePageActivity extends AppCompatActivity implements
     private static int UPDATE_INTERVAL = 5000;
     private static int FATEST_INTERVAL = 3000;
     private static int DISPLACEMENT = 10;
+
+    Intent intent = null;
 
 
     private CallbackManager mCallbackManager;
@@ -170,6 +179,9 @@ public class ProfilePageActivity extends AppCompatActivity implements
         //intentFilter.addAction("do_something");
         //registerReceiver(mBroadcastReceiver, intentFilter);
 
+        onPausedInd = true;
+        Log.i("onPausedInd", "  >>onCreate onPausedInd:" + onPausedInd);
+
 
 
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
@@ -184,8 +196,8 @@ public class ProfilePageActivity extends AppCompatActivity implements
         ref = FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID());
         geoFire = new GeoFire(ref);
 
-        Intent intent = new Intent(ProfilePageActivity.this, uur.com.pinbook.Controller.NotifyService.class);
-        ProfilePageActivity.this.startService(intent);
+        //intent = new Intent(ProfilePageActivity.this, uur.com.pinbook.Controller.NotifyService.class);
+        //ProfilePageActivity.this.startService(intent);
 
         setUpLocation();
 
@@ -260,6 +272,9 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
     public void onStart() {
         super.onStart();
+
+        onPausedInd = false;
+        Log.i("onPausedInd", "  >>onStart onPausedInd:" + onPausedInd);
     }
 
     @Override
@@ -293,9 +308,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
             getSupportFragmentManager().beginTransaction().remove(inviteContactFriendFrg).commit();
             getSupportFragmentManager().popBackStack();
         }
-
     }
-
 
     @Override
     protected void onResume() {
@@ -306,14 +319,21 @@ public class ProfilePageActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
+
+        onPauseCount = onPauseCount + 1;
+
+        if(onPauseCount > 1) {
+            onPausedInd = true;
+            Log.i("onPausedInd", "  >>onPause  onPausedInd:" + onPausedInd);
+        }
+        //intent = new Intent(ProfilePageActivity.this, uur.com.pinbook.Controller.NotifyService.class);
+        //ProfilePageActivity.this.startService(intent);
     }
+
+
 
     @Override
     public void onBackPressed() {
-
-        Log.i("Info", "--1--:" + mNavController.getCurrentFrag());
-        Log.i("Info", "--2--:" + mNavController.getCurrentFrag().getLayoutInflater());
-
 
         if (!mNavController.isRootFragment()) {
             mNavController.popFragment();
@@ -426,8 +446,12 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
             firebaseAuth.signOut();
             LoginManager.getInstance().logOut();
+
+
+            //ProfilePageActivity.this.stopService(intent);
             TwitterCore.getInstance().getSessionManager().clearActiveSession();
             ClearSingletonClasses.clearAllClasses();
+
             finish();
             startActivity(new Intent(this, EnterPageActivity.class));
         }
@@ -487,7 +511,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
     public void onLocationChanged(Location location) {
         mLastLocation = location;
         //displayLocation();
-        //checkFriendLocations();
+        checkFriendLocations();
     }
 
     private void checkFriendLocations() {
@@ -502,16 +526,8 @@ public class ProfilePageActivity extends AppCompatActivity implements
             public void onKeyEntered(final String key, GeoLocation location) {
                 Log.i("key", "key:" + key);
 
-                    /*for(Friend friend : FirebaseGetFriends.getInstance(FirebaseGetAccountHolder.getUserID()).getFriendList()){
 
-                        if(key.equals(friend.getUserID())){
-                            sendNotification("notif", String.format("%s burada pin birakmisti :)", friend.getNameSurname()));
-                        }
-                    }*/
-
-
-                FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID())
-                        .child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                ref.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -524,24 +540,37 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
                                     Map<String, Object> map = (Map) dataSnapshot.getValue();
 
-
-                                    String notifSendParam = (String) map.get("notifSend");
+                                    //String notifSendParam = (String) map.get("notifSend");
                                     final String pinOwner = (String) map.get("pinOwner");
 
-                                    if (notifSendParam.equals("N")) {
 
-                                        for (Friend friend : FirebaseGetFriends.getInstance(FirebaseGetAccountHolder.getUserID()).getFriendList()) {
-                                            if (pinOwner.equals(friend.getUserID())) {
-                                                sendNotification("notif", String.format("%s burada pin birakmisti :)", friend.getNameSurname()));
+                                    for (Friend friend : FirebaseGetFriends.getInstance(FirebaseGetAccountHolder.getUserID()).getFriendList()) {
+                                        if (pinOwner.equals(friend.getUserID())) {
 
-                                                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID())
-                                                        .child(key);
-                                                Map<String, Object> values = new HashMap<>();
-                                                values.put("notifSend", "Y");
-                                                ref.updateChildren(values);
+                                            Log.i("onPausedInd", "  >>onPausedInd:" + onPausedInd);
 
-                                                break;
+                                            if(onPausedInd == false) {
+                                                String message = String.format("%s burada pin birakmisti :)", friend.getNameSurname());
+                                                CustomDialogAdapter.showDialogInfo(context, message);
+
+                                                Log.i("onPausedInd", "  >>NOTIF DIALOG");
+                                            }else {
+                                                sendNotification("notif", String.format("%s burada pin birakmisti :)", friend.getNameSurname()), key);
+                                                Log.i("onPausedInd", "  >>NOTIF SEND");
                                             }
+
+
+
+                                            //NotificationUtils notificationUtils = new NotificationUtils();
+                                            //notificationUtils.displayNotification(context);
+
+                                            DatabaseReference dBref = FirebaseDatabase.getInstance().getReference("GeoFireModel").child(FirebaseGetAccountHolder.getUserID())
+                                                    .child(key);
+                                            Map<String, Object> values = new HashMap<>();
+                                            values.put("notifSend", "Y");
+                                            dBref.updateChildren(values);
+
+                                            break;
                                         }
                                     }
                                 }
@@ -611,7 +640,7 @@ public class ProfilePageActivity extends AppCompatActivity implements
 
     }
 
-    private void displayLocation() {
+    /*private void displayLocation() {
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -628,9 +657,9 @@ public class ProfilePageActivity extends AppCompatActivity implements
             Log.i("Info", String.format("Your location was changed: %f / %f", latitude, longitude));
         } else
             Log.i("Info", "Can not get your location!!!");
-    }
+    }*/
 
-    private void sendNotification(String title, String content) {
+    /*private void sendNotification(String title, String content) {
 
         Notification.Builder builder = new Notification.Builder(this)
                 .setSmallIcon(R.mipmap.ic_launcher_round)
@@ -647,6 +676,30 @@ public class ProfilePageActivity extends AppCompatActivity implements
         notification.defaults |= Notification.DEFAULT_SOUND;
 
         notificationManager.notify(new Random().nextInt(), notification);
+    }*/
+
+    private void sendNotification(String title, String content, String locId) {
+
+        Notification.Builder builder = new Notification.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setContentTitle(title)
+                .setContentText(content);
+
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        Intent intent = new Intent(this, ProfilePageActivity.class);
+        //Intent intent = new Intent("do_something");
+        //intent.putExtra("locationId", locId);
+
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        builder.setContentIntent(pendingIntent);
+        Notification notification = builder.build();
+        notification.contentIntent = pendingIntent;
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        notification.defaults |= Notification.DEFAULT_SOUND;
+
+        notificationManager.notify(new Random().nextInt(), notification);
+
     }
 
     @SuppressLint("MissingPermission")

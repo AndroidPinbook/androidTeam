@@ -301,8 +301,6 @@ public class EnterPageActivity extends AppCompatActivity implements View.OnClick
                                 FirebaseUser currentUser = mAuth.getCurrentUser();
                                 user.setUserId(currentUser.getUid());
 
-                                //userIsDetected = FirebaseUserAdapter.emailIsRegistered(currentUser.getEmail());
-
                                 Log.i("Info", "  >>userIsDetected:" + userIsDetected);
 
                                 if (user.getProfilePicSrc() != null) {

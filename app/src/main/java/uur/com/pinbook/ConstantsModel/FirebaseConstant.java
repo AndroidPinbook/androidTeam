@@ -108,6 +108,7 @@ public class FirebaseConstant {
     public static final String propPersons = "Persons";
     public static final String propOnlyMe = "OnlyMe";
     public static final String propGroups = "Groups";
+    public static final String propShares = "Shares";
 
     //Pin toWhom properties
     public static final String toWhomAll = "ALL";

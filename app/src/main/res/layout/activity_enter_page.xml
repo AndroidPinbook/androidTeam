@@ -67,9 +67,9 @@
                 android:id="@+id/twitterLoginButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@drawable/rounded_special_login_btn"
                 android:paddingBottom="15dp"
-                android:paddingTop="15dp"
-                android:background = "@drawable/rounded_special_login_btn"/>
+                android:paddingTop="15dp" />
 
         </LinearLayout>
 
