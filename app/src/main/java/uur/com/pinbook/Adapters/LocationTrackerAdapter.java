@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.provider.Settings;
@@ -117,8 +118,11 @@ public class LocationTrackerAdapter implements LocationListener {
 
                         if (locationManager != null)
                         {
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                            //location = locationManager
+                              //      .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+                            Criteria criteria = new Criteria();
+                            location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
                             if (location != null) {
                                 latitude = location.getLatitude();
                                 longitude = location.getLongitude();
